@@ -30,13 +30,16 @@ namespace MindState.Editor
             QualitySettings.pixelLightCount=4; QualitySettings.shadows=ShadowQuality.All;
             QualitySettings.shadowResolution=ShadowResolution.VeryHigh; QualitySettings.shadowDistance=20;
             QualitySettings.vSyncCount=0;
+            EnsureSilkBaseline();
             MakeTextures();
             var pearl=LoadOrCreateMaterial("Pearl",Shader.Find("MindState/Radial Pearl Silk"));
-            pearl.SetColor("_Color",new Color(0.87f,0.88f,0.94f));
-            pearl.SetColor("_RootColor",new Color(0.60f,0.48f,0.70f));
-            pearl.SetFloat("_Smoothness",0.38f);
-            pearl.SetFloat("_BumpStrength",0.18f);
+            pearl.SetColor("_Color",new Color(0.88f,0.89f,0.94f));
+            pearl.SetColor("_RootColor",new Color(0.73f,0.65f,0.79f));
+            pearl.SetFloat("_Smoothness",0.30f);
+            pearl.SetFloat("_SmoothnessVariation",0.06f);
+            pearl.SetFloat("_BumpStrength",0.30f);
             pearl.SetTexture("_BumpMap",AssetDatabase.LoadAssetAtPath<Texture2D>(Root+"/Art/RadialSilkNormal.png"));
+            pearl.SetTexture("_DetailMask",AssetDatabase.LoadAssetAtPath<Texture2D>(Root+"/Art/SilkDetailMask.png"));
             pearl.EnableKeyword("_NORMALMAP");
             foreach(string asset in new[]{"Champagne.mat","GoldBarb.asset","FilamentDetail.png","FilamentNormal.png"})
                 AssetDatabase.DeleteAsset(Root+"/Art/"+asset);
@@ -91,26 +94,62 @@ namespace MindState.Editor
             light.shadows=shadows?LightShadows.Soft:LightShadows.None; light.shadowStrength=0.18f;
             light.shadowBias=0.015f; light.shadowNormalBias=0.02f;
         }
+        static void EnsureSilkBaseline()
+        {
+            const string path=Root+"/Diagnostics/Resources/";
+            if(AssetDatabase.LoadAssetAtPath<Material>(path+"SilkBaseline.mat")!=null) return;
+            ConfigureTexture(path+"SilkBaselineNormal.png",true);
+            var original=AssetDatabase.LoadAssetAtPath<Material>(Root+"/Art/Pearl.mat");
+            var baseline=new Material(original) { name="SilkBaseline",shader=Shader.Find("MindState/Diagnostics/Silk Baseline") };
+            baseline.SetTexture("_BumpMap",AssetDatabase.LoadAssetAtPath<Texture2D>(path+"SilkBaselineNormal.png"));
+            AssetDatabase.CreateAsset(baseline,path+"SilkBaseline.mat");
+        }
+        static float SilkPhase(float u,float v)
+        {
+            const float tau=Mathf.PI*2;
+            return 32*u+0.32f*Mathf.Sin(tau*3*u+v*4)*v+0.14f*Mathf.Sin(tau*7*u-v*2)*v*v+0.20f*Mathf.Sin(v*5)*v;
+        }
+        static float SilkHeight(float u,float v)
+        {
+            const float tau=Mathf.PI*2;
+            float p=SilkPhase(u,v);
+            float amplitude=0.78f+0.15f*Mathf.Sin(tau*5*u+v*3)+0.07f*Mathf.Cos(tau*11*u-v*2);
+            return amplitude*Mathf.Sin(tau*p)+0.12f*Mathf.Sin(tau*(p*3+0.08f*Mathf.Sin(tau*13*u+v)));
+        }
         static void MakeTextures()
         {
-            const int size=1024;
-            var pixels=new Color32[size*size];
+            const int size=1024; const float step=1f/size,tau=Mathf.PI*2;
+            var normals=new Color32[size*size]; var masks=new Color32[size*size];
             for(int y=0;y<size;y++) for(int x=0;x<size;x++)
             {
-                float u=(x+0.5f)/size,v=(y+0.5f)/size;
-                float phase=u*Mathf.PI*2+0.08f*Mathf.Sin(v*6.2f);
-                Vector3 n=new Vector3(-0.48f*Mathf.Cos(phase),0.012f*Mathf.Cos(v*6.2f)*Mathf.Cos(phase),1).normalized;
-                pixels[y*size+x]=new Color(n.x*0.5f+0.5f,n.y*0.5f+0.5f,n.z*0.5f+0.5f,1);
+                float u=(x+0.5f)/size,v=(y+0.5f)/size,p=SilkPhase(u,v);
+                float du=(SilkHeight(u+step,v)-SilkHeight(u-step,v))*1.5f;
+                float dv=(SilkHeight(u,v+step)-SilkHeight(u,v-step))*1.5f;
+                Vector3 n=new Vector3(-du,-dv,1).normalized;
+                normals[y*size+x]=new Color(n.x*0.5f+0.5f,n.y*0.5f+0.5f,n.z*0.5f+0.5f,1);
+                float polish=Mathf.Clamp01(0.5f+0.29f*Mathf.Sin(tau*p+0.65f)+0.14f*Mathf.Sin(tau*7*u+v*3));
+                float blush=Mathf.Clamp01(0.5f+0.26f*Mathf.Sin(tau*2*u-v*4)+0.18f*Mathf.Cos(tau*3*u+v*2));
+                float thin=Mathf.Clamp01(0.25f+0.63f*Mathf.SmoothStep(0,1,v)+0.08f*Mathf.Sin(tau*4*u+v*2));
+                float relief=Mathf.Clamp01(0.5f+0.30f*Mathf.Sin(tau*4*u+v*1.3f)+0.15f*Mathf.Cos(tau*9*u-v*3));
+                masks[y*size+x]=new Color(polish,blush,thin,relief);
             }
-            string path=Root+"/Art/RadialSilkNormal.png";
+            SaveTexture(Root+"/Art/RadialSilkNormal.png",normals,size,true);
+            SaveTexture(Root+"/Art/SilkDetailMask.png",masks,size,false);
+        }
+        static void SaveTexture(string path,Color32[] pixels,int size,bool normal)
+        {
             var texture=new Texture2D(size,size,TextureFormat.RGBA32,false,true);
             texture.SetPixels32(pixels); texture.Apply(); File.WriteAllBytes(path,texture.EncodeToPNG());
             UnityEngine.Object.DestroyImmediate(texture); AssetDatabase.ImportAsset(path);
+            ConfigureTexture(path,normal);
+        }
+        static void ConfigureTexture(string path,bool normal)
+        {
             var importer=(TextureImporter)AssetImporter.GetAtPath(path);
-            importer.textureType=TextureImporterType.NormalMap; importer.sRGBTexture=false;
-            importer.mipmapEnabled=true; importer.filterMode=FilterMode.Trilinear; importer.anisoLevel=8;
+            importer.textureType=normal?TextureImporterType.NormalMap:TextureImporterType.Default;
+            importer.sRGBTexture=false; importer.mipmapEnabled=true; importer.filterMode=FilterMode.Trilinear; importer.anisoLevel=8;
             importer.wrapModeU=TextureWrapMode.Repeat; importer.wrapModeV=TextureWrapMode.Clamp;
-            importer.maxTextureSize=size; importer.textureCompression=TextureImporterCompression.Uncompressed;
+            importer.maxTextureSize=1024; importer.textureCompression=TextureImporterCompression.Uncompressed;
             importer.SaveAndReimport();
         }
         static Cubemap CreateEnvironment()

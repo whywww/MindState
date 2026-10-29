@@ -27,6 +27,11 @@ namespace MindState
         public Mesh RuntimeMesh=>mesh;
         public double LastUpdateMilliseconds { get; private set; }
         public long LastUpdateAllocation { get; private set; }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Only the diagnostics runner selects 1.0 for the preserved A baseline.
+        internal float diagnosticPleatScale=0.8f;
+#endif
+        static readonly Unity.Profiling.ProfilerMarker UpdateMarker=new Unity.Profiling.ProfilerMarker("MindState.Petal.Update");
 
         Mesh mesh;
         MeshRenderer meshRenderer;
@@ -122,6 +127,7 @@ namespace MindState
         }
         void Update()
         {
+            using var profile=UpdateMarker.Auto();
             long started=System.Diagnostics.Stopwatch.GetTimestamp(),allocated=System.GC.GetAllocatedBytesForCurrentThread();
             float dt=Time.deltaTime; elapsed+=dt;
             if(inputMode==PetalInputMode.SimulatedBrain&&elapsed>=nextSample)
@@ -150,6 +156,11 @@ namespace MindState
         {
             float curl=Mathf.Lerp(1,CurlAmount,Mathf.SmoothStep(0,1,OpeningProgress));
             float amplitude=Mathf.Lerp(0.145f,0.075f,PleatSoftness);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            amplitude*=diagnosticPleatScale;
+#else
+            amplitude*=0.8f;
+#endif
             for(int x=0;x<Cols;x++)
             {
                 // OpeningAngle describes the resting fan. Curl gathers its ribs while

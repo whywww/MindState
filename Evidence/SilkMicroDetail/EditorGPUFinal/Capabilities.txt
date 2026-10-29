@@ -1,0 +1,13 @@
+Editor GPU area enabled=True
+profileGPU=True
+isGPUProfilerSupportedByOS=True
+isGPUProfilerSupported=True
+isGPUProfilerBuggyOnDriver=False
+Boolean get_profileGPU()
+Void set_profileGPU(Boolean)
+Void GetGpuStatisticsAvailabilityStates(Int32, UnityEditorInternal.GpuProfilingStatisticsAvailabilityStates[])
+UnityEditorInternal.GpuProfilingStatisticsAvailabilityStates GetGpuStatisticsAvailabilityState(Int32)
+Void GetGpuStatisticsAvailabilityStatesInternal(Int32, UnityEditorInternal.GpuProfilingStatisticsAvailabilityStates*, Int32)
+Boolean get_isGPUProfilerSupportedByOS()
+Boolean get_isGPUProfilerSupported()
+Boolean get_isGPUProfilerBuggyOnDriver()

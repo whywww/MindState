@@ -1,0 +1,2097 @@
+Virtual Texturing | VirtualTexturing.Context.ProcessPackedTiles | TimeNanoseconds
+Video | VideoMediaOutput.UpdateTextures | TimeNanoseconds
+Video | VideoPlayer.DecodeNextFrame | TimeNanoseconds
+Render | SpeedTreeWind.Advance | TimeNanoseconds
+Particles | ParticleSystem.TrailGeometryJob | TimeNanoseconds
+Particles | ParticleSystem.InstancedMeshJob | TimeNanoseconds
+Particles | ParticleSystem.GeometryJob | TimeNanoseconds
+Particles | ParticleSystem.ScheduleGeometryJobs | TimeNanoseconds
+Particles | ParticleSystem.WaitForPreMapping | TimeNanoseconds
+Particles | ParticleSystem.VelocityOverLifetimeModule | TimeNanoseconds
+Particles | ParticleSystem.TextureSheetModule | TimeNanoseconds
+Particles | ParticleSystem.ShapeModule | TimeNanoseconds
+Particles | ParticleSystem.NoisePreviewJob | TimeNanoseconds
+Particles | ParticleSystem.NoiseJob | TimeNanoseconds
+Particles | ParticleSystem.NoiseModule | TimeNanoseconds
+Particles | ParticleSystem.ExternalForcesModule | TimeNanoseconds
+Animation | ConstraintJob::ComputeConstraints | TimeNanoseconds
+Animation | ConstraintComponentData::ConstraintComponentData | TimeNanoseconds
+Animation | ComputeNormalizedSourceWeights | TimeNanoseconds
+Animation | GenerateMuscleClip | TimeNanoseconds
+Render | Gfx.ProcessCommand | TimeNanoseconds
+Render | GPUProfiler.EndQueries | TimeNanoseconds
+Render | GPUProfiler.BeginQueries | TimeNanoseconds
+Render | Gfx.PresentFrame | TimeNanoseconds
+Render | Gfx.SetRenderTarget | TimeNanoseconds
+Render | Gfx.DrawDynamic | TimeNanoseconds
+Render | Gfx.UpdateAsyncReadbackData | TimeNanoseconds
+Render | Gfx.RequestAsyncReadbackData | TimeNanoseconds
+Render | Gfx.InitializeBuffer | TimeNanoseconds
+Render | Gfx.UploadTexture | TimeNanoseconds
+Render | Shader.ParseMainThread | TimeNanoseconds
+Render | Shader.ParseThreaded | TimeNanoseconds
+Render | Shader.MainThreadCleanup | TimeNanoseconds
+Loading | Load Default Shaders | TimeNanoseconds
+Other | LogStringToConsole | TimeNanoseconds
+Render | TrailRenderer.Render | TimeNanoseconds
+Render | TrailRenderer.RenderGeometryJob | TimeNanoseconds
+Render | TrailRenderer.ScheduleGeometryJobs | TimeNanoseconds
+Other | QualitySettings.ApplyChanges | TimeNanoseconds
+Render | Mesh.CalcBoneBounds | TimeNanoseconds
+Render | Mesh.CreateMesh | TimeNanoseconds
+Loading | Mesh.UploadMeshData | TimeNanoseconds
+Loading | Mesh.AwakeFromLoad | TimeNanoseconds
+Other | Mesh.RecalculateNormals | TimeNanoseconds
+Render | Mesh.CopyTransformed | TimeNanoseconds
+Render | LineRenderer.Render | TimeNanoseconds
+Render | LineRenderer.RenderGeometryJob | TimeNanoseconds
+Render | LineRenderer.ScheduleGeometryJobs | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Other | Webcam.ConversionNV12 | TimeNanoseconds
+Other | Webcam.ConversionYUY2 | TimeNanoseconds
+Other | Webcam.ConversionBGR | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.MarkRequestsFinished | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.GetActiveRequestInfos | TimeNanoseconds
+Virtual Texturing | VirtualTexturing.Procedural.GetActiveRequestInfos | TimeNanoseconds
+Virtual Texturing | VirtualTexturing.Procedural.GetActiveRequests | TimeNanoseconds
+Overhead | Profiler.CollectVTStats | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.UpdateTilesetConstantBuffers | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.SetCpuCacheSizeRT | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.InvalidateRegionRT | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.RequestRegionRT | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.FindTextureStackHandle | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.PostLoadTileSetRT | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.LoadProceduralTileSetRT | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.GetActiveRequests | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.OpenProcedural | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.DecRefTextureStackHandle | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.IncRefTextureStackHandle | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.GetShaderParametersId | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.GetShaderParametersHandle | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.ProcessFeedback | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.UpdatePreloadMipsRT | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.UpdateRT | TimeNanoseconds
+Virtual Texturing | VirtualTexturingManager.Update | TimeNanoseconds
+Virtual Texturing | GraphineGfxDevice.UploadGPURectangles | TimeNanoseconds
+Virtual Texturing | GraphineGfxDevice.UploadTiledRectangles | TimeNanoseconds
+Virtual Texturing | GraphineGfxDevice.UploadDiscardRectangles | TimeNanoseconds
+Virtual Texturing | VirtualTextureResolver.FlushInternal | TimeNanoseconds
+Virtual Texturing | VirtualTextureResolver.InitInternal | TimeNanoseconds
+Virtual Texturing | VirtualTextureResolver.Process.Update | TimeNanoseconds
+Virtual Texturing | VirtualTextureResolver.Process | TimeNanoseconds
+Virtual Texturing | TranslationTableGenerator.UpsampleGPUSubmission.ConstantBufferUpdate | TimeNanoseconds
+Virtual Texturing | TranslationTableGenerator.UpsampleGPUSubmissionDispatch | TimeNanoseconds
+Virtual Texturing | TranslationTableGenerator.UpsampleGPUSubmission | TimeNanoseconds
+Virtual Texturing | TranslationTableGenerator.Upsample | TimeNanoseconds
+Virtual Texturing | TranslationTableGenerator.Replace | TimeNanoseconds
+Virtual Texturing | TranslationTableGenerator.Update | TimeNanoseconds
+Virtual Texturing | VirtualTexturingUploadStrip.Memcpy | TimeNanoseconds
+Virtual Texturing | VirtualTexturingUploadStrip.Map | TimeNanoseconds
+Virtual Texturing | VirtualTexturingBatchUploader.UploadRectangle | TimeNanoseconds
+Virtual Texturing | VirtualTexturingBatchUploader.FlushUploads | TimeNanoseconds
+Video | WindowsVideoTextureOutput.RecreateDevice | TimeNanoseconds
+Video | WindowsVideoTextureOutput.OpenSharedResource | TimeNanoseconds
+Video | WindowsVideoTextureOutput.OpenHandle | TimeNanoseconds
+Video | WindowsVideoTextureOutput.GetHandle | TimeNanoseconds
+Video | WindowsVideoTextureOutput.ReleaseNative | TimeNanoseconds
+Video | WindowsVideoTextureOutput.Blit | TimeNanoseconds
+Video | WindowsVideoTextureOutput.FlushDevice | TimeNanoseconds
+Video | WindowsVideoMedia.GetNextAudioSamples | TimeNanoseconds
+Video | WindowsVideoMedia.DecodeEnqueue | TimeNanoseconds
+Video | WindowsVideoMedia.DecodeRead | TimeNanoseconds
+Video | WindowsVideoMedia.Convert | TimeNanoseconds
+Video | WindowsVideoMedia.WriteSample | TimeNanoseconds
+Video | WindowsVideoMedia.ToBitmap | TimeNanoseconds
+Video | WindowsVideoMedia.CreateBuffer | TimeNanoseconds
+Video | WindowsVideoMedia.AddVideoFrame | TimeNanoseconds
+Video | WindowsVideoMedia.InitMediaFoundation | TimeNanoseconds
+Video | VP8VideoMedia.AddVideoFrame.EncodeYUV | TimeNanoseconds
+Video | VP8VideoMedia.AddVideoFrame.Memset | TimeNanoseconds
+Video | VP8VideoMedia.VpxEncodeFrame | TimeNanoseconds
+Video | VideoPlayer.InitTexture | TimeNanoseconds
+Video | VideoPlayer.InvokeScriptCallbacks | TimeNanoseconds
+Video | VideoPlayer.Stop | TimeNanoseconds
+Video | VideoPlayer.Render | TimeNanoseconds
+Video | VideoPlayer.Update | TimeNanoseconds
+Video | VideoPlayer.Prepare | TimeNanoseconds
+Video | VideoPlayer.DestroyPlayback | TimeNanoseconds
+Video | VideoPlayer.CleanupPlayback | TimeNanoseconds
+Video | VideoPlayer.SetupPlayback | TimeNanoseconds
+Video | VideoPlayer.OpenPlayback | TimeNanoseconds
+Video | VideoPlayer.Loop | TimeNanoseconds
+Video | VideoPlayer.Seek | TimeNanoseconds
+Physics | Dynamic WheelCollider.Create | TimeNanoseconds
+Vr | XR.BlitDepth | TimeNanoseconds
+Vr | XR.MirrorToGameView | TimeNanoseconds
+Vr | XR.DeviceSDK | TimeNanoseconds
+Vr | XR.SetRenderTarget | TimeNanoseconds
+Vr | XR.Blit | TimeNanoseconds
+Vr | XR.UpdateInput | TimeNanoseconds
+Vr | XR.CheckForDevice | TimeNanoseconds
+VSync | XR.WaitForGPU | TimeNanoseconds
+Vr | XR.AcquireFromProvider | TimeNanoseconds
+Vr | XR.CopyMeshData | TimeNanoseconds
+Vr | XR.TransformMeshData | TimeNanoseconds
+Vr | XR.ProcessMeshJob | TimeNanoseconds
+Vr | XR.ReleaseMeshData | TimeNanoseconds
+Vr | XR.AcquireMeshData | TimeNanoseconds
+Vr | XR.WriteMeshData | TimeNanoseconds
+Vr | XR.Display.UpdateLateLatchingRenderPoses | TimeNanoseconds
+Vr | XR.LateLatchPatch | TimeNanoseconds
+Vr | XR.LateLatchSetUnder | TimeNanoseconds
+Vr | XR.LateLatchSetAbove | TimeNanoseconds
+Vr | XR.LateLatchUpdate | TimeNanoseconds
+Vr | XR.Display.BlitToMirrorViewRenderTarget | TimeNanoseconds
+Vr | XR.Display.Stop | TimeNanoseconds
+Vr | XR.Display.PopulateNextFrameDesc | TimeNanoseconds
+Vr | XR.Display.SubmitCurrentFrame | TimeNanoseconds
+Vr | XR.Display.Start | TimeNanoseconds
+Vr | XR.Display.BlitMirrorViewNative | TimeNanoseconds
+Vr | XR.BlitDepth | TimeNanoseconds
+VFX | VisualEffect.Transfer | TimeNanoseconds
+VFX | VisualEffect.Simulate | TimeNanoseconds
+VFX | VisualEffect.Update | TimeNanoseconds
+VFX | VisualEffect.PrepareMaterial | TimeNanoseconds
+VFX | VFX.CopyIndirectCount | TimeNanoseconds
+VFX | VFX.SortBuffer | TimeNanoseconds
+VFX | VFX.InitializeBoundsBuffer | TimeNanoseconds
+VFX | VFX.ZeroInitializeBuffer | TimeNanoseconds
+VFX | VFX.InitializeDeadListBuffer | TimeNanoseconds
+VFX | VFX.CopyBuffer | TimeNanoseconds
+VFX | VFX.FillIndirectRenderArgs | TimeNanoseconds
+VFX | VFX.ProcessCamera | TimeNanoseconds
+VFX | VFX.CollectCullResults | TimeNanoseconds
+VFX | VFX.PrepareCamera | TimeNanoseconds
+VFX | VFX.ProcessCommandList | TimeNanoseconds
+VFX | VFX.ScheduleJobs | TimeNanoseconds
+VFX | VFX.Prepare | TimeNanoseconds
+VFX | VFX.NotifyDeletedAsset | TimeNanoseconds
+VFX | VFX.NotifyModifiedAsset | TimeNanoseconds
+VFX | VFX.Update | TimeNanoseconds
+VFX | VFX.CullJob | TimeNanoseconds
+VFX | VFX.CullJob | TimeNanoseconds
+VFX | VFX.GetBatchedEffectInfo | TimeNanoseconds
+VFX | VFXBatch.PostUpdate | TimeNanoseconds
+VFX | VFXBatch.PreUpdate | TimeNanoseconds
+VFX | VFXBatch.Update | TimeNanoseconds
+VFX | VFX.ParticleSystem.BatchUpdateStrip | TimeNanoseconds
+VFX | VFX.ParticleSystem.BatchReadbackCount | TimeNanoseconds
+VFX | VFX.ParticleSystem.BatchReadbackBounds | TimeNanoseconds
+VFX | VFX.ParticleSystem.BatchUpdate | TimeNanoseconds
+VFX | VFX.ParticleSystem.BatchInit | TimeNanoseconds
+VFX | VFX.ParticleSystem.BatchCopyDeadListCount | TimeNanoseconds
+VFX | VFX.ParticleSystem.BatchUploadStepData | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderMeshIndirect | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderMesh | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderHexahedronIndirect | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderHexahedron | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderOctagonIndirect | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderOctagon | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderQuadIndirect | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderQuad | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderTriangleIndirect | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderTriangle | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderLineIndirect | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderLine | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderPointIndirect | TimeNanoseconds
+VFX | VFX.ParticleSystem.RenderPoint | TimeNanoseconds
+VFX | VFX.MeshSystem.Render | TimeNanoseconds
+Render | UIR.DrawChain | TimeNanoseconds
+Render | UIR.DrawRanges | TimeNanoseconds
+Other | VectorAPI_StrokeCap | TimeNanoseconds
+Other | VectorAPI_StrokeJoin | TimeNanoseconds
+Other | VectorAPI_StrokeBezier | TimeNanoseconds
+Other | VectorAPI_StrokeArcTo | TimeNanoseconds
+Other | VectorAPI_StrokeArc | TimeNanoseconds
+Other | VectorAPI_StrokeLine | TimeNanoseconds
+Other | VectorAPI_Stroke | TimeNanoseconds
+Render | UIR.Job.CopyClosingMesh | TimeNanoseconds
+Render | UIR.Job.ConvertMesh | TimeNanoseconds
+Render | UIR.Job.Nudge | TimeNanoseconds
+Other | VectorAPI_FillGenerateMesh | TimeNanoseconds
+Other | VectorAPI_Tessellate_RemapNewVertices | TimeNanoseconds
+Other | VectorAPI_Tessellate_LibTess | TimeNanoseconds
+Other | VectorAPI_Tessellate | TimeNanoseconds
+Other | VectorAPI_GenerateFilledArcs | TimeNanoseconds
+Other | VectorAPI_Fill | TimeNanoseconds
+Render | CanvasRenderer.SyncClipRect | TimeNanoseconds
+Render | CanvasRenderer.SyncWorldRect | TimeNanoseconds
+Render | CanvasRenderer.SyncTransform | TimeNanoseconds
+UI Render | Canvas.BuildBatch | TimeNanoseconds
+UI Render | Canvas.RenderOverlays | TimeNanoseconds
+UI Render | Render | TimeNanoseconds
+UI Layout | Layout | TimeNanoseconds
+Render | Canvas.GeometryJob | TimeNanoseconds
+Render | Canvas.PrepareBatchesJob | TimeNanoseconds
+Render | Canvas.SortJob | TimeNanoseconds
+Render | Canvas.CombineInstructionsJob | TimeNanoseconds
+Render | Canvas.SplitInstructionsJob | TimeNanoseconds
+Render | Canvas.Sort | TimeNanoseconds
+UI Render | UGUI.Rendering.UpdateBatches | TimeNanoseconds
+UI Render | UGUI.Rendering.EmitWorldScreenspaceCameraGeometry | TimeNanoseconds
+UI Render | UGUI.Rendering.EmitGeometryForCamera | TimeNanoseconds
+UI Render | UGUI.Rendering.EmitScreenSpaceCamerasGeometryForCamera | TimeNanoseconds
+UI Render | UGUI.Rendering.RenderOverlays | TimeNanoseconds
+Render | Canvas.RenderSubBatch | TimeNanoseconds
+Render | Canvas.PrepareBatches | TimeNanoseconds
+PlayerLoop | Tilemap.GetSyncTiles() | TimeNanoseconds
+Render | TilemapRenderer.CleanupIndividualJob | TimeNanoseconds
+Render | TilemapRenderer.ExecuteIndividualJob | TimeNanoseconds
+Render | TilemapRenderer.CombineIndividualJob | TimeNanoseconds
+Render | TilemapRenderer.CountIndividualJob | TimeNanoseconds
+Render | TilemapRenderer.ScheduleIndividual | TimeNanoseconds
+Render | TilemapRenderer.Render | TimeNanoseconds
+Render | TilemapRenderer.GeometryJob | TimeNanoseconds
+Render | TilemapRenderer.DispatchJob | TimeNanoseconds
+Render | TilemapRenderer.BuildChunkJob | TimeNanoseconds
+Render | TilemapRenderer.CameraBoundsJob | TimeNanoseconds
+Physics2D | TilemapCollider2D.CompositeFinal | TimeNanoseconds
+Physics2D | TilemapCollider2D.CompositeChunkJob | TimeNanoseconds
+Render | TilemapRenderer.DistributeJobs | TimeNanoseconds
+Render | TilemapRenderer.CheckDirtyChunks | TimeNanoseconds
+Render | TilemapRenderer.ClearChunks | TimeNanoseconds
+Render | TilemapRenderer.PrepareIndividualMode | TimeNanoseconds
+Render | TilemapRenderer.PrepareChunkMode | TimeNanoseconds
+Render | TilemapRenderer.CameraBoundsCheck | TimeNanoseconds
+Render | TilemapRenderer.CalculateChunkCullingBounds | TimeNanoseconds
+Physics2D | Physics2D.TilemapColliderTileUpdate | TimeNanoseconds
+Physics2D | Physics2D.TilemapColliderPreparePaths | TimeNanoseconds
+Physics2D | Physics2D.TilemapColliderPrepareShapes | TimeNanoseconds
+PlayerLoop | Tilemap.UpdateTileAnimation() | TimeNanoseconds
+PlayerLoop | Tilemap.SendAndClearSyncTile() | TimeNanoseconds
+PlayerLoop | Tilemap.Update() | TimeNanoseconds
+Physics | Physics.TerrainCollider.ForceRebuildCollisions | TimeNanoseconds
+Render | Terrain.UpdateTreeBillboardTexture2 | TimeNanoseconds
+Other | Terrain.UpdateCompressedHolesTexture | TimeNanoseconds
+Other | Terrain.UpdateHolesTexture | TimeNanoseconds
+Other | Terrain.ReadbackHeightmap | TimeNanoseconds
+Other | Terrain.UpdateHeightmapTexture | TimeNanoseconds
+Other | Terrain.RecomputeInvalidPatches | TimeNanoseconds
+Render | DetailMesh.InstanceGenerationJob | TimeNanoseconds
+Render | DetailMesh.MeshGenerationJob | TimeNanoseconds
+Render | Tree.TickSpeedTreeWind | TimeNanoseconds
+Render | Tree.ComputeSpeedTreeWindProperties | TimeNanoseconds
+Render | Tree.ComputeWindPropertiesForAllVisible | TimeNanoseconds
+Loading | TerrainData.AwakeFromLoad | TimeNanoseconds
+Render | ComputeLocalWindVector | TimeNanoseconds
+Render | SpeedTreeWindManager.LinearSearchGlobalWinds | TimeNanoseconds
+Render | SpeedTreeWindManager.GetCachedGlobalWindVector | TimeNanoseconds
+Render | SpeedTreeWindManager.Update | TimeNanoseconds
+Render | SpeedTreeWindManager.GetWind | TimeNanoseconds
+Render | SpeedTreeWindManager.TickWind | TimeNanoseconds
+Render | SpeedTreeWindManager.PrepareWindProperties | TimeNanoseconds
+Render | SpeedTreeWindManager.FillWindProperties | TimeNanoseconds
+Render | TreeRenderer.UpdateTreeSceneNodes | TimeNanoseconds
+Render | TreeRenderer.UpdateVisibility | TimeNanoseconds
+Render | TreeRenderer.TreeUpdated | TimeNanoseconds
+Render | TreeRenderer.Render | TimeNanoseconds
+Render | TerrainManager.CullAllTerrains | TimeNanoseconds
+Render | Terrain.Trees.OnWillRender | TimeNanoseconds
+Render | Terrain.Trees.Render | TimeNanoseconds
+Render | Terrain.Details.Render | TimeNanoseconds
+Render | Terrain.Trees.RayTracingCulling | TimeNanoseconds
+Render | Terrain.Heightmap.RayTracingCullingStep3 | TimeNanoseconds
+Render | Terrain.Heightmap.RayTracingCullingStep2 | TimeNanoseconds
+Render | Terrain.Heightmap.RayTracingCullingStep1 | TimeNanoseconds
+Render | Terrain.Heightmap.RenderStep3 | TimeNanoseconds
+Render | Terrain.Heightmap.RenderStep2 | TimeNanoseconds
+Render | Terrain.Heightmap.RenderStep1 | TimeNanoseconds
+Render | Terrain.UpdateSplatMaterials | TimeNanoseconds
+Render | Terrain.UpdateSplatProperties | TimeNanoseconds
+Render | Terrain.FlushDirty | TimeNanoseconds
+Render | QuadTreeBatchNode.Render | TimeNanoseconds
+Render | Terrain.UpdateTreeBillboardTexture | TimeNanoseconds
+Render | DetailInstances.Batching | TimeNanoseconds
+Render | LODTreeInstanceRenderer.UpdateWind | TimeNanoseconds
+Render | QuadTreeNode.Render | TimeNanoseconds
+Render | DetailInstances.BuildCB | TimeNanoseconds
+Render | DetailInstances.BatchingWithCB | TimeNanoseconds
+Other | SpriteShape.BuildJob.Corners | TimeNanoseconds
+Other | SpriteShape.BuildJob.Contour | TimeNanoseconds
+Other | SpriteShape.BuildJob.Heights | TimeNanoseconds
+Other | SpriteShape.BuildJob.Edges | TimeNanoseconds
+Other | SpriteShape.Builder | TimeNanoseconds
+Render | SpriteMask.Render | TimeNanoseconds
+Physics2D | Physics2D.UpdateTriggerContactsFinalize | TimeNanoseconds
+Physics2D | Physics2D.UpdateTriggerContactsJob | TimeNanoseconds
+Physics2D | Physics2D.UpdateTriggerContactsTask | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeFixturesMove | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeFixturesCombineSortJob | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeFixturesJob | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeFixturesTask | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandIntegratePosesJob | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandBodySleepJob | TimeNanoseconds
+Physics2D | Physics2D.FindNewContactsCreate | TimeNanoseconds
+Physics2D | Physics2D.FindNewContactsCombineSortJob | TimeNanoseconds
+Physics2D | Physics2D.FindNewContactsFindJob | TimeNanoseconds
+Physics2D | Physics2D.FindNewContactsTask | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeContinuousFixturesMove | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeContinuousFixturesCombineSortJob | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeContinuousFixturesJob | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeContinuousFixturesTask | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandPostSolveJob | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandTraversalTask | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandTask | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIslandIntegratePositionsJob | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIslandIntegratePositionsTask | TimeNanoseconds
+Physics2D | Physics2D.PrepareDiscreteIslandJointIndexJob | TimeNanoseconds
+Physics2D | Physics2D.PrepareDiscreteIslandBodyIndexJob | TimeNanoseconds
+Physics2D | Physics2D.InitializeVelocityConstraintsJob | TimeNanoseconds
+Physics2D | Physics2D.WarmStartContactSolverJob | TimeNanoseconds
+Physics2D | Physics2D.StoreConstraintImpulsesJob | TimeNanoseconds
+Physics2D | Physics2D.SolveVelocityConstraintsJob | TimeNanoseconds
+Physics2D | Physics2D.SolvePositionConstraintsJob | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandWritePosesJob | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandVelocitiesJob | TimeNanoseconds
+Physics2D | Physics2D.FindMinimumContinuousContactFinalize | TimeNanoseconds
+Physics2D | Physics2D.FindMinimumContinuousContactJob | TimeNanoseconds
+Physics2D | Physics2D.FindMinimumContinuousContactTask | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousTraversalIslandTask | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIslandTask | TimeNanoseconds
+Physics2D | Physics2D.ClearContinuousBodyIslandFlagsJob | TimeNanoseconds
+Physics2D | Physics2D.ClearContinuousContactIslandFlagsJob | TimeNanoseconds
+Physics2D | Physics2D.gPhysics2D_ClearContinuousIslandFlagsTask | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandPostSolveJob | TimeNanoseconds
+Physics2D | Physics2D.PrepareDiscreteIslandContactIndexJob | TimeNanoseconds
+Physics2D | Physics2D.InitializeVelocityJointConstraintsJob | TimeNanoseconds
+Physics2D | Physics2D.InitializeContactSolverJob | TimeNanoseconds
+Physics2D | Physics2D.ContactsCollideFinalize | TimeNanoseconds
+Physics2D | Physics2D.ContactsCollideJob | TimeNanoseconds
+Physics2D | Physics2D.ContactsCollideTask | TimeNanoseconds
+Physics2D | Physics2D.ClearBodyIslandFlagsJob | TimeNanoseconds
+Physics2D | Physics2D.ClearContactIslandFlagsJob | TimeNanoseconds
+Physics2D | Physics2D.ClearIslandFlagsTask | TimeNanoseconds
+Physics2D | Physics2D.ClearBodyForcesJob | TimeNanoseconds
+Physics2D | Physics2D.ClearBodyForcesTask | TimeNanoseconds
+Physics2D | Physics2D.ClearBodyForces | TimeNanoseconds
+Physics2D | Physics2D.TriggerContactsFinalUpdate | TimeNanoseconds
+Physics2D | Physics2D.SynchronizeFixtures | TimeNanoseconds
+Physics2D | Physics2D.ClearIslandFlags | TimeNanoseconds
+Physics2D | Physics2D.FindMinimumContinuousContact | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousSynchronizeFixtures | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousTraversal | TimeNanoseconds
+Physics2D | Physics2D.ClearContinuousIslandFlags | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuous | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteTraversal | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscrete | TimeNanoseconds
+Physics2D | Physics2D.ContactsCollide | TimeNanoseconds
+Physics2D | Physics2D.Step | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIslandPostSolve | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIslandIntegratePoses | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIslandVelocityConstraints | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIslandPositionConstraints | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIslandReadBodyState | TimeNanoseconds
+Physics2D | Physics2D.SolveContinuousIsland | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandBodySleep | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandPostSolve | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandWritePoses | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandPositionConstraints | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandIntegratePoses | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandVelocityConstraints | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIslandVelocities | TimeNanoseconds
+Physics2D | Physics2D.SolveDiscreteIsland | TimeNanoseconds
+Physics2D | Physics2D.FindNewContacts | TimeNanoseconds
+Physics2D | Physics2D.Rigidbody2D.GetShapes | TimeNanoseconds
+Physics2D | Physics2D.Rigidbody2D.RecalculateContacts | TimeNanoseconds
+Physics2D | Physics2D.Rigidbody2D.LayerChanged | TimeNanoseconds
+Physics2D | Physics2D.JointBreakLimits | TimeNanoseconds
+Physics2D | Physics2D.EffectorFixedUpdate | TimeNanoseconds
+Physics2D | Physics2D.EdgeColliderPrepareShapes | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.ClearCustomShapes | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.DeleteCustomShapes | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.SetCustomShapesNative | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.SetCustomShapes | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.SetCustomShapesAll | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.SetCustomShapesAllNative | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.GetCustomShapesAllNative | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.GetCustomShapes | TimeNanoseconds
+Physics2D | Physics2D.CustomCollider2D.PrepareShapes | TimeNanoseconds
+Physics2D | Physics2D.CompositeColliderRemoveFromComposite | TimeNanoseconds
+Physics2D | Physics2D.CompositeColliderCleanupCompositePaths | TimeNanoseconds
+Physics2D | Physics2D.CompositeColliderAddToComposite | TimeNanoseconds
+Physics2D | Physics2D.CompositeColliderPrepareShapesDecomposition | TimeNanoseconds
+Physics2D | Physics2D.CompositeColliderPrepareShapesOutline | TimeNanoseconds
+Physics2D | Physics2D.CompositeColliderPrepareShapes | TimeNanoseconds
+Physics2D | Physics2D.CapsuleColliderPrepareShapes | TimeNanoseconds
+Physics2D | Physics2D.BoxColliderPrepareShapes | TimeNanoseconds
+Physics2D | Physics2D.PolygonColliderPrepareShapesDecomposition | TimeNanoseconds
+Physics2D | Physics2D.PolygonColliderPrepareCompositePaths | TimeNanoseconds
+Physics2D | Physics2D.PolygonColliderPrepareShapes | TimeNanoseconds
+Physics2D | Physics2D.DestroyContacts | TimeNanoseconds
+Physics2D | Physics2D.FlagContactsForExit | TimeNanoseconds
+Physics2D | Physics2D.FlagContactsForRecreation | TimeNanoseconds
+Physics2D | Physics2D.SendCollisionContactCallbacks | TimeNanoseconds
+Physics2D | Physics2D.SendTriggerContactCallbacks | TimeNanoseconds
+Physics2D | Physics2D.SendContactCallbacks | TimeNanoseconds
+Physics2D | Physics2D.CompileContactCallbacksJob | TimeNanoseconds
+Physics2D | Physics2D.CompileContactCallbacks | TimeNanoseconds
+Physics2D | Physics2D.EndContact | TimeNanoseconds
+Physics2D | Physics2D.PostSolveContact | TimeNanoseconds
+Physics2D | Physics2D.PreSolveContact | TimeNanoseconds
+Physics2D | Physics2D.BeginContact | TimeNanoseconds
+Physics2D | Physics2D.Collider2D.GetShapes | TimeNanoseconds
+Physics2D | Physics2D.Collider2D.RecalculateContacts | TimeNanoseconds
+Physics2D | Physics2D.Collider2D.LayerChanged | TimeNanoseconds
+Physics2D | Physics2D.Collider2D.TransformParentChanged | TimeNanoseconds
+Physics2D | Physics2D.Collider2D.TransformChanged | TimeNanoseconds
+Physics2D | Physics2D.Collider2D.DestroyShapes | TimeNanoseconds
+Physics2D | Physics2D.Colldier2D.CreateShapes | TimeNanoseconds
+Physics2D | Physics2D.CircleColliderPrepareShapes | TimeNanoseconds
+Physics2D | Physics2D.CollectProfileInfo | TimeNanoseconds
+Physics2D | Physics2D.ApplyParticleForces | TimeNanoseconds
+Physics2D | Physics2D.SyncColliderTransformChanges | TimeNanoseconds
+Physics2D | Physics2D.SyncRigidbodyTransformChanges | TimeNanoseconds
+Physics2D | Physics2D.SyncTransformChanges | TimeNanoseconds
+Physics2D | Physics2D.ConvertCollision2DForScript | TimeNanoseconds
+Physics2D | Physics2D.UpdateTransforms | TimeNanoseconds
+Physics2D | Physics2D.Simulate | TimeNanoseconds
+Physics2D | Physics2D.InterpolationPosesJob | TimeNanoseconds
+Physics2D | Physics2D.InterpolationPosesTask | TimeNanoseconds
+Physics2D | Physics2D.InterpolatePoses | TimeNanoseconds
+Physics2D | Physics2D.SetupMovementStatesJob | TimeNanoseconds
+Physics2D | Physics2D.SetupMovementStatesTask | TimeNanoseconds
+Physics2D | Physics2D.ConvertContactPoint2DForScript | TimeNanoseconds
+Physics2D | Physics2D.GetRigidbodyContacts | TimeNanoseconds
+Physics2D | Physics2D.GetColliderContacts | TimeNanoseconds
+Physics2D | Physics2D.IsTouchingLayers | TimeNanoseconds
+Physics2D | Physics2D.IsTouching | TimeNanoseconds
+Physics2D | Physics2D.ClosestPoint | TimeNanoseconds
+Physics2D | Physics2D.ColliderDistance | TimeNanoseconds
+Physics2D | Physics2D.FindParticleOverlaps | TimeNanoseconds
+Physics2D | Physics2D.FindParticleIntersections | TimeNanoseconds
+Physics2D | Physics2D.GetRayIntersectionAll | TimeNanoseconds
+Physics2D | Physics2D.GetRayIntersection | TimeNanoseconds
+Physics2D | Physics2D.OverlapCollider | TimeNanoseconds
+Physics2D | Physics2D.OverlapBoxAll | TimeNanoseconds
+Physics2D | Physics2D.OverlapBox | TimeNanoseconds
+Physics2D | Physics2D.OverlapCircleAll | TimeNanoseconds
+Physics2D | Physics2D.OverlapCircle | TimeNanoseconds
+Physics2D | Physics2D.OverlapPointAll | TimeNanoseconds
+Physics2D | Physics2D.OverlapPoint | TimeNanoseconds
+Physics2D | Physics2D.ColliderCastAll | TimeNanoseconds
+Physics2D | Physics2D.ColliderCast | TimeNanoseconds
+Physics2D | Physics2D.CapsuleCastAll | TimeNanoseconds
+Physics2D | Physics2D.CapsuleCast | TimeNanoseconds
+Physics2D | Physics2D.BoxCastAll | TimeNanoseconds
+Physics2D | Physics2D.BoxCast | TimeNanoseconds
+Physics2D | Physics2D.CircleCastAll | TimeNanoseconds
+Physics2D | Physics2D.CircleCast | TimeNanoseconds
+Physics2D | Physics2D.RaycastAll | TimeNanoseconds
+Physics2D | Physics2D.Raycast | TimeNanoseconds
+Physics2D | Physics2D.LinecastAll | TimeNanoseconds
+Physics2D | Physics2D.Linecast | TimeNanoseconds
+Other | PerformanceReporting.Initialize | TimeNanoseconds
+Particles | ParticleSystem.WaitForPreviousRenderingToFinish | TimeNanoseconds
+Particles | ParticleSystem.UpdateJob | TimeNanoseconds
+Particles | ParticleSystem.EndUpdateAll | TimeNanoseconds
+Particles | ParticleSystem.Update2 | TimeNanoseconds
+Particles | ParticleSystem.Simulate | TimeNanoseconds
+Particles | ParticleSystem.Update | TimeNanoseconds
+Render | ParticleSystem.Draw | TimeNanoseconds
+Render | ParticleSystem.DrawSystem | TimeNanoseconds
+Particles | ParticleSystem.Sort | TimeNanoseconds
+Particles | ParticleSystem.LightsModule | TimeNanoseconds
+Particles | ParticleSystem.ColorByVelocityModule | TimeNanoseconds
+Particles | ParticleSystem.TriggerModule | TimeNanoseconds
+Particles | ParticleSystem.TrailModule | TimeNanoseconds
+Particles | ParticleSystem.InheritVelocityModule | TimeNanoseconds
+Particles | ParticleSystem.SizeOverLifetimeModule | TimeNanoseconds
+Particles | ParticleSystem.LifetimeByEmitterSpeedModule | TimeNanoseconds
+Particles | ParticleSystem.CustomDataModule | TimeNanoseconds
+Particles | ParticleSystem.RotationOverLifetimeModule | TimeNanoseconds
+Particles | ParticleSystem.CollisionModule | TimeNanoseconds
+Particles | ParticleSystem.ClampVelocityModule | TimeNanoseconds
+Particles | ParticleSystem.SizeOverVelocityModule | TimeNanoseconds
+Particles | ParticleSystem.ForceModule | TimeNanoseconds
+Particles | ParticleSystem.ColorOverLifetimeModule | TimeNanoseconds
+Particles | ParticleSystem.RotationByVelocityModule | TimeNanoseconds
+Gui | GUI.ProcessEvents | TimeNanoseconds
+Gui | GUI.Repaint | TimeNanoseconds
+UI Render | FontEngine.GetOpenTypeLayoutTables | TimeNanoseconds
+UI Render | FontEngine.Get_GSUB_Scripts | TimeNanoseconds
+UI Render | FontEngine.Get_GSUB_Features | TimeNanoseconds
+UI Render | FontEngine.Get_GSUB_Lookups | TimeNanoseconds
+UI Render | FontEngine.Get_GSUB_Table | TimeNanoseconds
+UI Render | FontEngine.Get_GPOS_Scripts | TimeNanoseconds
+UI Render | FontEngine.Get_GPOS_Features | TimeNanoseconds
+UI Render | FontEngine.Get_GPOS_Lookups | TimeNanoseconds
+UI Render | FontEngine.Get_GPOS_Table | TimeNanoseconds
+Render | FontEngine.GlyphRasterizer.Calculate3x3AAEDT | TimeNanoseconds
+UI Render | FontEngine.GetMarkToMarkFeatures | TimeNanoseconds
+UI Render | FontEngine.GetMarkToBaseFeatures | TimeNanoseconds
+UI Render | FontEngine.GetPairAdjustmentRecords | TimeNanoseconds
+UI Render | FontEngine.GetChainingContextualSubstitutionRecords | TimeNanoseconds
+UI Render | FontEngine.GetContextualSubstitutionRecords | TimeNanoseconds
+UI Render | FontEngine.GetLigatureSubstitutionRecords | TimeNanoseconds
+UI Render | FontEngine.GetAlternateSubstitutionRecords | TimeNanoseconds
+UI Render | FontEngine.GetMultipleSubstitutionRecords | TimeNanoseconds
+UI Render | FontEngine.GetSingleSubstitutionRecords | TimeNanoseconds
+UI Render | FontEngine.GetSingleAdjustmentRecords | TimeNanoseconds
+UI Render | FontEngine.OpenTypeValidation | TimeNanoseconds
+UI Render | FontEngine.GetOpenTypeFontFeatures | TimeNanoseconds
+UI Render | FontEngine.LoadFontFace_From_Cache | TimeNanoseconds
+UI Render | FontEngine.LoadFontFace_From_Memory | TimeNanoseconds
+UI Render | FontEngine.LoadFontFace_From_File | TimeNanoseconds
+UI Render | FontEngine.LoadFontFace | TimeNanoseconds
+Render | FontEngine.RenderGlyphJob | TimeNanoseconds
+Scripts | Monobehaviour.OnMouse_ | TimeNanoseconds
+Render | TextRendering.Cleanup | TimeNanoseconds
+Gui | TextRendering.Render | TimeNanoseconds
+Render | Font.CacheFontForText | TimeNanoseconds
+Audio Job | DSPGraph.JobBatchSubmit | TimeNanoseconds
+Audio | DSPGraph.EndMix | TimeNanoseconds
+Audio | DSPGraph.BeginMix | TimeNanoseconds
+Audio Update Job | DSPGraph.UpdateJob | TimeNanoseconds
+Audio Job | DSPGraph.RootProcess | TimeNanoseconds
+Audio Job | DSPGraph.Cleanup | TimeNanoseconds
+Audio Job | DSPGraph.ClearUnusedMixInputs | TimeNanoseconds
+Audio Job | DSPGraph.AddMixInput | TimeNanoseconds
+Audio Job | DSPGraph.AddInterpolateMixInput | TimeNanoseconds
+Audio Job | DSPGraph.MixInputs | TimeNanoseconds
+Audio Job | DSPGraph.SetupSampleProviders | TimeNanoseconds
+Audio Job | DSPGraph.SetupPortsReuse | TimeNanoseconds
+Audio Job | DSPGraph.SetupPorts | TimeNanoseconds
+Audio Job | DSPGraph.ClearPortBuffers | TimeNanoseconds
+Audio Job | DSPGraph.SetupParameters.Interpolate | TimeNanoseconds
+Audio | DSPGraph.SetupParameters | TimeNanoseconds
+Audio Job | DSPGraph.NoopJob | TimeNanoseconds
+Audio Job | DSPGraph.Prepare | TimeNanoseconds
+Audio Job | DSPGraph.Alloc | TimeNanoseconds
+Audio Job | DSPGraph.Job | TimeNanoseconds
+Other | CrashReporter.RegisterLogCallback | TimeNanoseconds
+Other | Analytics.CloseService | TimeNanoseconds
+Other | Analytics.StopSession | TimeNanoseconds
+Other | Analytics.PauseSession | TimeNanoseconds
+Other | Analytics.ResumeSession | TimeNanoseconds
+Other | Analytics.StartSession | TimeNanoseconds
+Other | Analytics.InitializeSession | TimeNanoseconds
+Other | Analytics.OnPlayerSessionStateChanged | TimeNanoseconds
+Network | DownloadHandlerBuffer.OnReceiveData | TimeNanoseconds
+Network | TransportCurl.DoRequest | TimeNanoseconds
+Loading | ContentLoad.WaitForCompletion | TimeNanoseconds
+Loading | ContentLoad.Integrate | TimeNanoseconds
+Loading | ContentLoad.IntegrateTimeSliced | TimeNanoseconds
+Loading | ContentLoadFrontend.IntegrateUpdate | TimeNanoseconds
+Loading | ContentLoad.AwakeFromLoad | TimeNanoseconds
+Loading | ContentLoad.AddToIntegrateQueue | TimeNanoseconds
+Loading | ContentLoad.ReadObject | TimeNanoseconds
+Loading | ContentLoad.ProcessObject | TimeNanoseconds
+Loading | ContentLoad.ReadObjects | TimeNanoseconds
+Loading | ContentLoad.ProduceObjects | TimeNanoseconds
+Loading | ContentLoad.GetProduceData | TimeNanoseconds
+Loading | ContentLoad.AllocateInstanceIDs | TimeNanoseconds
+Loading | ContentLoad.InitializeSerializedFile | TimeNanoseconds
+Physics | ClothScene.SolverChunkJob | TimeNanoseconds
+Physics | ClothScene.ReadbackJob | TimeNanoseconds
+Physics | ClothScene.SkinningJob | TimeNanoseconds
+Physics | ClothScene.Update | TimeNanoseconds
+Render | ClothManager.UploadSimulatedSkinData | TimeNanoseconds
+Physics | ClothManager.LateUpdate | TimeNanoseconds
+Other | WebCamTexture.GetPixels32 | TimeNanoseconds
+Other | WebCamTexture.GetPixels | TimeNanoseconds
+Other | YuvToRgb | TimeNanoseconds
+Other | YuvToRgbProcess | TimeNanoseconds
+Loading | StopVideoTextures | TimeNanoseconds
+Audio | SoundManager.GetHandle | TimeNanoseconds
+Audio | SoundManager.CreateSoundInternal | TimeNanoseconds
+Audio | SoundManager.UpdateChannels | TimeNanoseconds
+Audio | SoundManager.IntegrateFMODSound | TimeNanoseconds
+Audio | SoundManager.LoadFMODSound | TimeNanoseconds
+Audio | SoundManager.Update | TimeNanoseconds
+Audio | SoundHandle.Instance.AsyncReadCallbackStatic | TimeNanoseconds
+Audio | SoundHandle.Instance.FinalizeLoading | TimeNanoseconds
+Audio | SoundHandle.Instance.UpdateLoadState | TimeNanoseconds
+Audio | SoundHandle.Instance.LoadCompressedBackground | TimeNanoseconds
+Audio | SoundHandle.Instance.Dispose | TimeNanoseconds
+Audio | SoundHandle.Instance.CreateChannel | TimeNanoseconds
+Audio | SoundHandle.Instance.Destructor | TimeNanoseconds
+Audio | StreamingSoundDecoder.Stop | TimeNanoseconds
+Audio | StreamingSoundDecoder.Seek | TimeNanoseconds
+Audio | StreamingSoundDecoder.ReadData | TimeNanoseconds
+Audio | SoundDecoder.ConvertSamples | TimeNanoseconds
+Audio | SoundDecoder.SampleFramesRequired | TimeNanoseconds
+Audio | SoundDecoder.Produce | TimeNanoseconds
+Audio | AudioClip.CreateFSBDataAudioSampleProvider | TimeNanoseconds
+Audio | AudioClip.CreateFSBStreamingAudioSampleProvider | TimeNanoseconds
+Audio | AudioClip.CreateFileStreamingAudioSampleProvider | TimeNanoseconds
+Audio | AudioClip.CreateMemoryAudioSampleProvider | TimeNanoseconds
+Audio | AudioClip.CreateAudioSampleProvider | TimeNanoseconds
+Audio | AudioProfiler.CaptureFrame | TimeNanoseconds
+Audio | AudioProfiler.CaptureAudioClips | TimeNanoseconds
+Audio | AudioProfiler.CaptureDSPNodes | TimeNanoseconds
+Audio | AudioProfiler.CaptureChannelGroup | TimeNanoseconds
+Audio | AudioSource.Update | TimeNanoseconds
+Audio | AudioManager.FixedUpdate | TimeNanoseconds
+Audio | AudioManager.Update | TimeNanoseconds
+Audio | AudioManager.GetMemory | TimeNanoseconds
+Loading | Init FMOD | TimeNanoseconds
+Audio | AudioManager.MarkAudioSourceOneShotDependencies | TimeNanoseconds
+Audio | Audio.FMODSystemUpdate | TimeNanoseconds
+Audio | Audio.Thread | TimeNanoseconds
+Loading | AssetBundles.LoadFromManagedStream | TimeNanoseconds
+Loading | AssetBundleLoadFromAsyncOperation.IsCrc32Valid | TimeNanoseconds
+Loading | AssetBundle.LoadBundleObject | TimeNanoseconds
+Loading | AssetBundle.LoadAssetBundle | TimeNanoseconds
+Loading | AssetBundle.LoadAsset | TimeNanoseconds
+Loading | AssetBundle.Unload | TimeNanoseconds
+Other | AssetBundles.RecompressBundle | TimeNanoseconds
+Loading | AssetBundle.asset/allAssets [Forced assets loading] | TimeNanoseconds
+Loading | AssetBundle.PerformAssetLoad | TimeNanoseconds
+Loading | AssetBundle.allAssets | TimeNanoseconds
+Loading | AssetBundle.asset | TimeNanoseconds
+Loading | AssetBundle.LoadAssetAsync [Collecting dependencies] | TimeNanoseconds
+Loading | AssetBundle.LoadAssetAsync | TimeNanoseconds
+Loading | AssetBundle.UnloadAsync.Integrate.CleanupStorage | TimeNanoseconds
+Loading | AssetBundle.UnloadAsync.Integrate.CloseFiles | TimeNanoseconds
+Loading | AssetBundle.UnloadAsync.Integrate.DestroyObjects | TimeNanoseconds
+Loading | AssetBundle.UnloadAsync.Integrate | TimeNanoseconds
+Loading | AssetBundle.UnloadAsync.UnmapStreams | TimeNanoseconds
+Loading | AssetBundle.UnloadAsync.SortInstanceIds | TimeNanoseconds
+Loading | AssetBundle.UnloadAsync.CollectInstanceIDs | TimeNanoseconds
+Loading | AssetBundle.UnloadAsync.Perform | TimeNanoseconds
+Loading | AssetBundles.LoadFromFile | TimeNanoseconds
+Animation | AnimatorControllerPlayable.PrepareFrame | TimeNanoseconds
+Animation | AnimationScriptPlayable.ProcessAnimation | TimeNanoseconds
+Animation | AnimationScriptPlayable.ProcessRootMotion | TimeNanoseconds
+Animation | AnimationClipPlayable.EvaluateClip | TimeNanoseconds
+Animation | SortConstraintsByDependencies | TimeNanoseconds
+Animation | ConstraintManager::Update::JobSetup | TimeNanoseconds
+Animation | ConstraintManager::Update | TimeNanoseconds
+Animation | AvatarBuilder.BuildAvatar | TimeNanoseconds
+Animation | GameObject.SampleAnimation | TimeNanoseconds
+Animation | CopyAnimation | TimeNanoseconds
+Animation | ClipAnimation | TimeNanoseconds
+Animation | Animator.Rebind | TimeNanoseconds
+Animation | Animator.ApplyOnAnimatorMove | TimeNanoseconds
+Animation | Animator.ApplyBuiltinRootMotion | TimeNanoseconds
+Animation | Animator.FireStateMachineBehaviours | TimeNanoseconds
+Animation | Animator.FireAnimationEvents | TimeNanoseconds
+Animation | Animator.PrepareAnimationEvents | TimeNanoseconds
+Animation | Animator.WriteProperties | TimeNanoseconds
+Animation | Animator.WriteTransforms | TimeNanoseconds
+Animation | Animator.EvaluateTwistBone | TimeNanoseconds
+Animation | Animator.EvaluateIK | TimeNanoseconds
+Animation | Animator.EvaluateRetargeter | TimeNanoseconds
+Animation | Animator.SetupControllerDataSet | TimeNanoseconds
+Animation | Animator.SetupAvatarDataSet | TimeNanoseconds
+Animation | Animator.Initialize | TimeNanoseconds
+Animation | Animators.SortWriteJob | TimeNanoseconds
+Animation | Animators.WriteJob | TimeNanoseconds
+Animation | Animators.IKAndTwistBoneJob | TimeNanoseconds
+Animation | Animators.RetargeterJob | TimeNanoseconds
+Animation | Animators.ProcessAnimationsJob | TimeNanoseconds
+Animation | Animators.ProcessGraphJob | TimeNanoseconds
+Animation | Animators.PrepareSecondPass | TimeNanoseconds
+Animation | Animators.PrepareFirstPass | TimeNanoseconds
+Animation | Animators.WriteProperties | TimeNanoseconds
+Animation | Animators.FireAnimationEventsAndBehaviours | TimeNanoseconds
+Animation | Animators.ApplyOnAnimatorMove | TimeNanoseconds
+Animation | Animators.Update | TimeNanoseconds
+Animation | RemoveUnnecessaryTransforms | TimeNanoseconds
+Animation | DeoptimizeTransformHierarchy | TimeNanoseconds
+Animation | OptimizeTransformHierarchy | TimeNanoseconds
+Animation | Animator.ProcessAnimations | TimeNanoseconds
+Animation | Animator.ProcessGraph | TimeNanoseconds
+Animation | Animation.ModifyAnimationClip [Triggers RebuildInternalState] | TimeNanoseconds
+Animation | Animation.RemoveMixingTransform [Triggers RebuildInternalState] | TimeNanoseconds
+Animation | Animation.AddMixingTransform [Triggers RebuildInternalState] | TimeNanoseconds
+Director | Director.AnimatedProperty | TimeNanoseconds
+Other | Sort BuildCurveKeys | TimeNanoseconds
+Render | MeshSkinning.CalculateSkinningMatrices | TimeNanoseconds
+Animation | ValidateBoundCurves | TimeNanoseconds
+Animation | Animation.Deactivate [Triggers RebuildInternalState] | TimeNanoseconds
+Animation | Animation.Clone [Triggers RebuildInternalState] | TimeNanoseconds
+Animation | Animation.RemoveClip [Triggers RebuildInternalState] | TimeNanoseconds
+Animation | Animation.AddClip [Triggers RebuildInternalState] | TimeNanoseconds
+Animation | Animation.DestroyAnimationClip [Triggers RebuildInternalState] | TimeNanoseconds
+Animation | Animation.Sample | TimeNanoseconds
+Animation | Animation.Update | TimeNanoseconds
+Animation | Animation.RebuildInternalState | TimeNanoseconds
+Physics | Physics.SwapBuffers | TimeNanoseconds
+Physics | Physics.ContactEvent | TimeNanoseconds
+Physics | Physics.StorePhysXContacts | TimeNanoseconds
+Physics | Physics.PrepareContactBuffers | TimeNanoseconds
+Physics | StoreInterpolationPoses | TimeNanoseconds
+Physics | Physics.JointBreaks | TimeNanoseconds
+Physics | Physics.Contacts | TimeNanoseconds
+Physics | Physics.TriggerStays | TimeNanoseconds
+Physics | Physics.TriggerEnterExits | TimeNanoseconds
+Physics | Physics.ExecuteDeferredTriggerErase | TimeNanoseconds
+Physics | Physics.ProcessReports | TimeNanoseconds
+Physics | PxScene.simulate | TimeNanoseconds
+Physics | BatchQuery.ExecuteSpherecastJob | TimeNanoseconds
+Physics | BatchQuery.ExecuteOverlapSphereJob | TimeNanoseconds
+Physics | BatchQuery.ExecuteOverlapCapsuleJob | TimeNanoseconds
+Physics | BatchQuery.ExecuteOverlapBoxJob | TimeNanoseconds
+Physics | BatchQuery.ExecuteCapsulecastJob | TimeNanoseconds
+Physics | BatchQuery.ExecuteBoxcastJob | TimeNanoseconds
+Physics | BatchQuery.ExecuteRaycastJob | TimeNanoseconds
+Physics | BatchQuery.ExecuteClosestPointJob | TimeNanoseconds
+Ai | NavMesh.GenerateOffMeshLinks | TimeNanoseconds
+Ai | DynamicMesh.ClipDetailMesh | TimeNanoseconds
+Ai | DynamicMesh.WriteDetailMesh | TimeNanoseconds
+Ai | DynamicMesh.DynamicMeshToTile | TimeNanoseconds
+Ai | DynamicMesh.TileToDynamicMesh | TimeNanoseconds
+Ai | Carving.BuildBVTree | TimeNanoseconds
+Ai | Carving.ProjectVertices | TimeNanoseconds
+Ai | Carving.ConvexHulls | TimeNanoseconds
+Ai | Carving.ApplyResults | TimeNanoseconds
+Ai | Carving.Clipping | TimeNanoseconds
+Ai | Carving.Prepare | TimeNanoseconds
+Ai | DynamicMesh.Create | TimeNanoseconds
+Ai | DynamicMesh.ClipPolys | TimeNanoseconds
+Ai | DynamicMesh.FindNeighbors | TimeNanoseconds
+Ai | NavMesh.ConnectOffMeshConnection | TimeNanoseconds
+Ai | NavMesh.RemoveTile | TimeNanoseconds
+Ai | NavMesh.AddTile | TimeNanoseconds
+Ai | Crowd.HeightMesh | TimeNanoseconds
+Ai | Crowd.OffMeshLinkMovement | TimeNanoseconds
+Ai | Crowd.OffMeshLinkTrigger | TimeNanoseconds
+Ai | Crowd.Steering | TimeNanoseconds
+Ai | Crowd.Integrate | TimeNanoseconds
+Ai | Crowd.Avoidance | TimeNanoseconds
+Ai | Crowd.Collision | TimeNanoseconds
+Ai | Crowd.Movement | TimeNanoseconds
+Ai | Crowd.RepathTrigger | TimeNanoseconds
+Ai | Crowd.ValidatePath | TimeNanoseconds
+Ai | Crowd.Corners | TimeNanoseconds
+Ai | Crowd.Proximity.Collect | TimeNanoseconds
+Ai | Crowd.PathOptimization | TimeNanoseconds
+Ai | Crowd.Pathfinding | TimeNanoseconds
+Ai | Crowd.Proximity.Insert | TimeNanoseconds
+Ai | NavMesh.GenerateHeightMesh | TimeNanoseconds
+Ai | NavMesh.DestroyTempMesh | TimeNanoseconds
+Ai | NavMesh.Recast.Free | TimeNanoseconds
+Ai | NavMesh.Recast.Alloc | TimeNanoseconds
+Ai | NavMesh.Integrate.UpdateSurface | TimeNanoseconds
+Ai | NavMesh.Integrate.UpdateTiles | TimeNanoseconds
+Ai | NavMesh.Integrate.RemoveTiles | TimeNanoseconds
+Ai | NavMesh.Integrate | TimeNanoseconds
+Ai | NavMesh.ReleaseSharedMesh | TimeNanoseconds
+Ai | NavMesh.DebugDraw | TimeNanoseconds
+Ai | NavMesh.AcquireSharedMesh | TimeNanoseconds
+Ai | NavMesh.HashSource | TimeNanoseconds
+Ai | NavMesh.HashTileAggregate | TimeNanoseconds
+Ai | NavMesh.HashTile | TimeNanoseconds
+Ai | NavMesh.RasterizeModifierBox | TimeNanoseconds
+Ai | NavMesh.RasterizeAABox | TimeNanoseconds
+Ai | NavMesh.Rasterize | TimeNanoseconds
+Ai | NavMesh.MeshTriangles | TimeNanoseconds
+Ai | NavMesh.ExtractTerrainMesh | TimeNanoseconds
+Ai | NavMesh.TileMeshAggregate | TimeNanoseconds
+Ai | NavMesh.TileMesh | TimeNanoseconds
+Ai | NavMesh.CreateData | TimeNanoseconds
+Ai | NavMesh.CombineTiles | TimeNanoseconds
+Ai | NavMesh.UpdateNavMeshData | TimeNanoseconds
+Ai | NavMesh.BuildNavMeshData | TimeNanoseconds
+Ai | NavMesh.Recast.RasterizeTriangles | TimeNanoseconds
+Ai | NavMesh.Recast.FilterWalkable | TimeNanoseconds
+Ai | NavMesh.Recast.FilterBorder | TimeNanoseconds
+Ai | NavMesh.Recast.ErodeArea | TimeNanoseconds
+Ai | NavMesh.Recast.BuildCompactHeightfield | TimeNanoseconds
+Ai | NavMesh.Recast.BuildRegionsFilter | TimeNanoseconds
+Ai | NavMesh.Recast.BuildRegions | TimeNanoseconds
+Ai | NavMesh.Recast.BuildContours | TimeNanoseconds
+Ai | NavMesh.Recast.MergePolyMeshDetail | TimeNanoseconds
+Ai | NavMesh.Recast.BuildPolyMeshDetail | TimeNanoseconds
+Ai | NavMesh.Recast.BuildPolyMesh | TimeNanoseconds
+Ai | TransformRenderers | TimeNanoseconds
+Ai | TransformColliders | TimeNanoseconds
+Ai | Terrrains | TimeNanoseconds
+Ai | Colliders | TimeNanoseconds
+Ai | Renderers | TimeNanoseconds
+Ai | CollectSources | TimeNanoseconds
+Ai | Components.NavMeshAgent.SendMessage | TimeNanoseconds
+Ai | Components.NavMeshAgent.Transform | TimeNanoseconds
+Ai | SynchronizeAgentTransformsToSimulation | TimeNanoseconds
+Ai | SynchronizeSimulationToAgentTransforms | TimeNanoseconds
+Ai | NavMeshManager.UnloadData | TimeNanoseconds
+Ai | NavMeshManager.LoadData | TimeNanoseconds
+Ai | NavMeshManager.SyncTileIndices | TimeNanoseconds
+Ai | Components.OffMeshLink.Position | TimeNanoseconds
+Ai | Components.NavMeshObstacle.Transform | TimeNanoseconds
+Ai | Components.NavMeshAgent.State | TimeNanoseconds
+Ai | NavMeshManager.NotifyNavMeshCleanup | TimeNanoseconds
+Ai | NavMeshManager.NotifyNavMeshAdded | TimeNanoseconds
+Ai | NavMeshManager | TimeNanoseconds
+Other | Webcam.UploadTexture | TimeNanoseconds
+Other | Webcam.Update | TimeNanoseconds
+Internal | Gfx.WaitForGfxCommandsFromMainThread | TimeNanoseconds
+Render | Create GfxDeviceClient | TimeNanoseconds
+Render | Create Client Gfx Device Main | TimeNanoseconds
+Render | CreateGfxDeviceWorker | TimeNanoseconds
+Render | Gfx.WaitForRenderThread | TimeNanoseconds
+Render | Gfx.EndAsyncJobFrame | TimeNanoseconds
+Render | Gfx.GetComputeBufferData_Request | TimeNanoseconds
+Render | Gfx.ReadbackImage | TimeNanoseconds
+Render | Gfx.CaptureScreenshot | TimeNanoseconds
+Render | Gfx.FinishRendering | TimeNanoseconds
+Render | Gfx.WaitForPresentOnGfxThread | TimeNanoseconds
+Render | CreateGLESGfxDevice | TimeNanoseconds
+Render | gD3D12SetHitGroupShadersJob | TimeNanoseconds
+Render | GfxDeviceD3D12.SetRayTracingInstanceShaders | TimeNanoseconds
+Render | GfxDeviceD3D12.BuildRayTracingAccelerationStructures | TimeNanoseconds
+Render | GfxDeviceD3D12.UpdateRayTracingAccelerationStructures | TimeNanoseconds
+Render | GfxDeviceD3D12.BuildTopLevelAccelerationStructure | TimeNanoseconds
+Render | BuildBottomLevelAccelerationStructure | TimeNanoseconds
+Render | PlaceBottomLevelAccelerationStructure | TimeNanoseconds
+Render | GfxDeviceD3D12.BuildBottomLevelAccelerationStructures | TimeNanoseconds
+Render | GfxDeviceD3D12Base.DispatchRayTracingProgram | TimeNanoseconds
+Render | D3D12RayTracingStateObject.CacheShaderIdentifiers | TimeNanoseconds
+Render | D3D12RayTracingState.CreateCollection | TimeNanoseconds
+Render | D3D12RayTracingState.Create | TimeNanoseconds
+Render | D3D12RayTracingState.SetShaderRecordDescriptors | TimeNanoseconds
+Render | D3D12RayTracingState.SetDescriptorHeaps | TimeNanoseconds
+Render | D3D12RayTracingState.Setup | TimeNanoseconds
+Render | D3D12RayTracingState.ResourceBarriers | TimeNanoseconds
+Render | D3D12RayTracingState.Transition | TimeNanoseconds
+Render | D3D12RayTracingState.SetGlobalDescriptorTables | TimeNanoseconds
+Render | WriteHitGroupRecordsJobKernel | TimeNanoseconds
+Render | D3D12RayTracingState.WriteHitGroupRecords | TimeNanoseconds
+Render | D3D12RayTracingState.WriteShaderTableRecords | TimeNanoseconds
+Render | D3D12RayTracingShaderRuntimeData.GetGlobalResources | TimeNanoseconds
+VSync | DXGI.WaitOnSwapChain | TimeNanoseconds
+Render | CreateResourceWithTag | TimeNanoseconds
+Render | CreateCommittedResourceWithTag | TimeNanoseconds
+VSync | GfxDeviceD3D12.WaitForLastPresent | TimeNanoseconds
+Render | CreateGraphicsPipelineAsync | TimeNanoseconds
+Render | GfxDeviceD3D12Base_InvalidateState | TimeNanoseconds
+Render | CreateGfxDeviceD3D12 | TimeNanoseconds
+Render | GfxDeviceD3D12Base | TimeNanoseconds
+Render | CreateD3D12GfxDevice | TimeNanoseconds
+Render | GfxDeviceD3D12.ReserveScratchMemory | TimeNanoseconds
+Render | GfxDeviceD3D12.FinishRenderingWithMessagePump | TimeNanoseconds
+Render | GfxDeviceD3D12.FinishRendering | TimeNanoseconds
+Render | GfxDeviceD3D12.WaitForGPU | TimeNanoseconds
+Render | D3D12UploadBuffer.Wait | TimeNanoseconds
+Render | D3D12UploadBuffer.Deallocate | TimeNanoseconds
+Render | D3D12UploadBuffer.Allocate | TimeNanoseconds
+Render | InitializeD3D12.CreateD3D11On12Device | TimeNanoseconds
+Render | InitializeD3D12.D3D12_CreateCommandQueue | TimeNanoseconds
+Render | InitializeD3D12.CreateCommandQueues | TimeNanoseconds
+Render | InitializeD3D12.CreateDevice | TimeNanoseconds
+Render | InitializeD3D12.EnumAdapter | TimeNanoseconds
+Render | InitializeD3D12.LoadDxgi | TimeNanoseconds
+Render | InitializeD3D12.LoadD3D12 | TimeNanoseconds
+Render | InitializeD3D12.LoadD3D11 | TimeNanoseconds
+Render | InitializeD3D12 | TimeNanoseconds
+Render | InitializeD3D12DebugLayer | TimeNanoseconds
+Render | CreatePSO.Job | TimeNanoseconds
+Render | GfxTask_PluginEventAndData | TimeNanoseconds
+Render | GfxTask_ReadValue | TimeNanoseconds
+Render | GfxTask_UnmapTiledResource | TimeNanoseconds
+Render | GfxTask_MapTiledResource | TimeNanoseconds
+Render | GfxTask_UpdateCopyFence | TimeNanoseconds
+Render | GfxTask_WaitOnGpuFence | TimeNanoseconds
+Render | GfxTask_InsertGpuFence | TimeNanoseconds
+Render | GfxTask_RecycleGfxDevice | TimeNanoseconds
+Render | GfxTask_Present | TimeNanoseconds
+Render | GfxTask_DeleteBuffer | TimeNanoseconds
+Render | GfxTask_ReleaseAsyncCommandHeader | TimeNanoseconds
+Render | GfxTask_ExecuteFromPlugin | TimeNanoseconds
+Render | GfxTask_Execute | TimeNanoseconds
+Render | GfxTask_SyncJobFence | TimeNanoseconds
+Render | GfxDeviceD3D12.ResourceBarriers | TimeNanoseconds
+Render | GfxDeviceD3D12.ExecuteCommandList | TimeNanoseconds
+Render | GfxDeviceD3D12.Reuse | TimeNanoseconds
+Render | GfxDeviceD3D12.Swap | TimeNanoseconds
+Render | GraphicsCaps.InitD3D12 | TimeNanoseconds
+Render | CreateGraphicsPipelineImpl | TimeNanoseconds
+Render | BufferD3D12.InitializeResource | TimeNanoseconds
+Render | BufferD3D12.CreateBufferResource | TimeNanoseconds
+Render | BufferD3D12.UpdateInternal | TimeNanoseconds
+Render | BufferD3D12.Reinitialize | TimeNanoseconds
+Render | BufferD3D12.CleanupResource | TimeNanoseconds
+Render | BufferD3D11.UpdateBuffer | TimeNanoseconds
+VSync | GfxDeviceD3D11.WaitForLastPresent | TimeNanoseconds
+Render | CreateD3D11GfxDevice | TimeNanoseconds
+Render | IDXGISwapChain::Present | TimeNanoseconds
+Render | GfxDeviceD3D11.RefreshSafeFrame | TimeNanoseconds
+Render | GfxDeviceD3D11.PopEventQuery | TimeNanoseconds
+Render | GfxDeviceD3D11.WaitForQueuedPresentsToComplete | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateLights.Init | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateLights.Enqueue | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateAlbedo | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.RemoveCustomLights | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.AddCustomLights | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.Prepare | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.SyncRuntimeData | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.LoadSystemsData | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.LoadProbeSetsData | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateGpuTexture | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.PostUpdate | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.GetCachedSystemRenderers | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateProbeSets | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateSystems | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateEnvironmentLighting | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateLights.Add | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateLights.Remove | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateLights | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateMaterialsScheduledAsync | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateMaterialsScheduled | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.UpdateMaterialsForSystem | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.FastUpdateEmissive | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.ApplyAlbedoData | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.RebuildCachedSystemRenderers | TimeNanoseconds
+Lighting | EnlightenRuntimeManager.PatchLightmapsOnLightmapSettings | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Lighting | RadiosityDataManager.PurgeProbeSets | TimeNanoseconds
+Lighting | RadiosityDataManager.PurgeSystems | TimeNanoseconds
+Lighting | RadiosityDataManager.AddAlbedoData | TimeNanoseconds
+Lighting | RadiosityDataManager.AddRadiosityData | TimeNanoseconds
+Lighting | RadiosityDataManager.AddVisibilityData | TimeNanoseconds
+Lighting | RadiosityDataManager.AddInputWorkspace | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Render | CreateGraphicsPipelineAsync | TimeNanoseconds
+Render | CreateVKGfxDevice | TimeNanoseconds
+Render | Gfx.CreateBufferResource | TimeNanoseconds
+Render | AcquireNextFrame | TimeNanoseconds
+Render | CreateGraphicsPipelineImpl | TimeNanoseconds
+Render | VKUploadBuffer.Deallocate | TimeNanoseconds
+Render | VKUploadBuffer.Allocate | TimeNanoseconds
+Render | GfxDeviceVK.ExecuteCommandList | TimeNanoseconds
+Render | GfxDeviceVK.Present | TimeNanoseconds
+Render | GfxDeviceVK.SyncSubmission | TimeNanoseconds
+Render | CreatePSO.Job | TimeNanoseconds
+Loading | Loading.AwakeFromLoad | TimeNanoseconds
+Loading | ReadObjectFromSerializedFile | TimeNanoseconds
+Loading | Loading.LoadFileCompletely | TimeNanoseconds
+Loading | LoadFileThreaded | TimeNanoseconds
+Loading | LoadFileThreaded_LoadObjects | TimeNanoseconds
+Loading | Loading.LoadRemainingPreallocatedObjects | TimeNanoseconds
+Loading | LoadObjectsThreaded | TimeNanoseconds
+Loading | AwakeFromLoad Threaded | TimeNanoseconds
+Loading | IntegrateAllThreadedObjects | TimeNanoseconds
+Loading | Loading.ReadObjectThreaded | TimeNanoseconds
+Loading | Loading.LoadFileHeaders | TimeNanoseconds
+Loading | Loading.RegisterAndAwakeAssetsTimeSliced | TimeNanoseconds
+Loading | Loading.LoadFromActivationQueue stalled [wait for loading operation to finish] | TimeNanoseconds
+Loading | Loading.LoadObjectsThreaded | TimeNanoseconds
+Loading | Loading.LockPersistentManager | TimeNanoseconds
+Loading | Loading.IsObjectAvailable | TimeNanoseconds
+Loading | Loading.LoadFile | TimeNanoseconds
+Loading | Loading.ReadObject | TimeNanoseconds
+Loading | Loading.FindInThreadedActivationQueue | TimeNanoseconds
+Loading | Loading.WriteFile | TimeNanoseconds
+Loading | Loading.IDRemapping | TimeNanoseconds
+Loading | Loading.MakeObjectPersistent | TimeNanoseconds
+Loading | Loading.MakeObjectUnpersistent | TimeNanoseconds
+Loading | BackupScriptedObjects | TimeNanoseconds
+Loading | AwakeScriptedObjects | TimeNanoseconds
+Loading | RestoreManagedReferences | TimeNanoseconds
+Loading | ManagedObjectProxy.Cleanup | TimeNanoseconds
+Loading | ManagedObjectProxy.Init | TimeNanoseconds
+Scripts | Scripting.GetDefaultExecutionOrder | TimeNanoseconds
+Scripts | Scripting.GetRequiredComponents | TimeNanoseconds
+Scripts | Scripting.GetParentTypeDisallowingMultipleInclusion | TimeNanoseconds
+Loading | Mono.JIT | TimeNanoseconds
+GC | Mono.DomainUnload | TimeNanoseconds
+GC | GC.Finalizer | TimeNanoseconds
+Memory | GC.Alloc | TimeNanoseconds
+GC | GC.Resize | TimeNanoseconds
+GC | GC.Collect | TimeNanoseconds
+GC | GarbageCollector.CollectIncremental | TimeNanoseconds
+Loading | BackupInstance | TimeNanoseconds
+Loading | LoadAssembly | TimeNanoseconds
+Loading | DomainReloadProfiling:SnapshotPrint | TimeNanoseconds
+Loading | DomainReloadProfiling:SnapshotSort | TimeNanoseconds
+Loading | DomainReloadProfiling:SnapshotCreate | TimeNanoseconds
+Loading | RebuildTransferFunctionScriptingTraits | TimeNanoseconds
+Loading | FinalizeReload | TimeNanoseconds
+Loading | LoadAllAssembliesAndSetupDomain | TimeNanoseconds
+Loading | BeginReloadAssembly | TimeNanoseconds
+Scripts | Initialize Mono | TimeNanoseconds
+Other | UnloadDomain | TimeNanoseconds
+Loading | LoadAssemblies | TimeNanoseconds
+Loading | ReloadAssembly | TimeNanoseconds
+Loading | RebuildNativeTypeToScriptingClass | TimeNanoseconds
+Loading | RebuildCommonClasses | TimeNanoseconds
+Loading | CreateAndSetChildDomain | TimeNanoseconds
+Loading | ReleaseScriptingObjects | TimeNanoseconds
+Other | GlobalCallbacks.logCallback | TimeNanoseconds
+Loading | MonoScriptManager.CollectGarbage | TimeNanoseconds
+Loading | MonoScript.PopulateMethods | TimeNanoseconds
+Scripts | Script RebuildFromAwake | TimeNanoseconds
+Loading | MonoScript.Renew | TimeNanoseconds
+Loading | MonoScript.Release | TimeNanoseconds
+Director | PlayableGraph.DestroyPendingPlayables | TimeNanoseconds
+PlayerLoop | Director.Update | TimeNanoseconds
+Director | Director.PlayableManagement | TimeNanoseconds
+Director | Director.HouseKeeping | TimeNanoseconds
+Director | Director.ProcessFrame | TimeNanoseconds
+Director | Director.PrepareFrameJob | TimeNanoseconds
+Director | Director.PrepareFrame | TimeNanoseconds
+Director | Director.AdvanceTime | TimeNanoseconds
+Director | Director.SampleTime | TimeNanoseconds
+Lighting | DilateAndDownsample | TimeNanoseconds
+Lighting | CallbackBakingStageReached | TimeNanoseconds
+Lighting | ExtractLightProbeGroupsRuntime | TimeNanoseconds
+Lighting | ExtractLights | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Lighting | ComputeMetaPassHash | TimeNanoseconds
+Lighting | MaterialRenderer.RenderEmissive | TimeNanoseconds
+Lighting | MaterialRenderer.RenderAlbedo | TimeNanoseconds
+Lighting | MaterialRenderer.RenderMaterials | TimeNanoseconds
+Lighting | MaterialRenderer.MeshDraw | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Lighting | ComputeEnvironmentLightingHash | TimeNanoseconds
+Render | Batch.ProcessGeometryJob | TimeNanoseconds
+Render | Batch.DrawDynamic | TimeNanoseconds
+Render | Batch.DrawStatic | TimeNanoseconds
+Render | RenderLoopDevice.Idle | TimeNanoseconds
+Render | Batch.DrawInstanced | TimeNanoseconds
+Render | Batch.FillInstanceProperties | TimeNanoseconds
+Render | FrameTime.GPU | TimeNanoseconds
+Render | Initialize Gfx Device | TimeNanoseconds
+Render | CreateRealGfxDevice | TimeNanoseconds
+Render | Gfx.UpdateBufferRanges | TimeNanoseconds
+Render | Gfx.EndTextureWrite | TimeNanoseconds
+Render | Gfx.BeginTextureWrite | TimeNanoseconds
+Render | DrawBuffersBatchMode | TimeNanoseconds
+Render | Gfx.CopyTextureData | TimeNanoseconds
+Render | Gfx.UnmapTexture | TimeNanoseconds
+Render | Gfx.MapTexture | TimeNanoseconds
+Render | Gfx.Reserve | TimeNanoseconds
+Render | Gfx.IntegrateTexture | TimeNanoseconds
+Render | Gfx.UploadTextureData | TimeNanoseconds
+Render | Gfx.CreateTextureThreaded | TimeNanoseconds
+Render | Gfx.CreateTexture | TimeNanoseconds
+Render | ComputeSkinningDispatch | TimeNanoseconds
+Loading | Texture.WaitForAsyncUpload | TimeNanoseconds
+Render | EndDynamicVBOFrame | TimeNanoseconds
+Render | EndGraphicsJobs | TimeNanoseconds
+Render | WaitForRenderJobs | TimeNanoseconds
+Render | PutAllGeometryJobFence | TimeNanoseconds
+Render | PutGeometryJobFence | TimeNanoseconds
+Render | ScheduleGeometryJobs | TimeNanoseconds
+Render | Profiler.FlushRenderCounters | TimeNanoseconds
+Render | Profiler.ExceededUsedTextureStatsSlots | TimeNanoseconds
+Render | Profiler.CollectUsedTextureStats | TimeNanoseconds
+Render | GpuRecorder.FrameTick | TimeNanoseconds
+Render | CreateGpuProgram | TimeNanoseconds
+Memory | UnsafeUtility.Free | TimeNanoseconds
+Memory | UnsafeUtility.Malloc | TimeNanoseconds
+Physics | Rigidbody.SetKinematic [Re-create non-convex MeshCollider for Rigidbody] | TimeNanoseconds
+Physics | Rigidbody.SetKinematic | TimeNanoseconds
+Physics | Rigidbody.SweepTestAll | TimeNanoseconds
+Physics | Rigidbody.SweepTest | TimeNanoseconds
+Physics | FastCookTriangleMesh | TimeNanoseconds
+Physics | Physics.RecreatePhysicsScene | TimeNanoseconds
+Overhead | Profiler.CollectPhysicsStats | TimeNanoseconds
+Physics | Physics.SyncBatchQueries | TimeNanoseconds
+Physics | Physics.HandleArticulationHierarchyChanges | TimeNanoseconds
+Physics | Physics.HandleBodyHierarchyChanges | TimeNanoseconds
+Physics | Physics.HandleColliderHierarchyChanges | TimeNanoseconds
+Physics | Physics.SyncRigidbodyTransform | TimeNanoseconds
+Physics | Physics.SyncColliderTransform | TimeNanoseconds
+Physics | Physics.UpdateVehicles | TimeNanoseconds
+Physics | Physics.UpdateArticulations | TimeNanoseconds
+Physics | Physics.UpdateBodies | TimeNanoseconds
+Physics | Physics.Simulate | TimeNanoseconds
+Physics | Physics.InterpolationSorting | TimeNanoseconds
+Physics | Physics.Interpolation | TimeNanoseconds
+Physics | Physics.FetchResults | TimeNanoseconds
+Physics | Physics.BoxCastNonAlloc | TimeNanoseconds
+Physics | Physics.CapsuleCastNonAlloc | TimeNanoseconds
+Physics | Physics.RaycastNonAlloc | TimeNanoseconds
+Physics | Physics.OverlapBoxNonAlloc | TimeNanoseconds
+Physics | Physics.OverlapCapsuleNonAlloc | TimeNanoseconds
+Physics | Physics.OverlapSphereNonAlloc | TimeNanoseconds
+Physics | Physics.OverlapBox | TimeNanoseconds
+Physics | Physics.BoxCastAll | TimeNanoseconds
+Physics | Physics.BoxCast | TimeNanoseconds
+Physics | Physics.CheckBox | TimeNanoseconds
+Physics | Physics.CapsuleCastAll | TimeNanoseconds
+Physics | Physics.CapsuleCast | TimeNanoseconds
+Physics | Physics.SphereCastNonAlloc | TimeNanoseconds
+Physics | Physics.SphereCastAll | TimeNanoseconds
+Physics | Physics.SphereCast | TimeNanoseconds
+Physics | Physics.CheckSphere | TimeNanoseconds
+Physics | Physics.OverlapCapsule | TimeNanoseconds
+Physics | Physics.OverlapSphere | TimeNanoseconds
+Physics | Physics.CheckCapsule | TimeNanoseconds
+Physics | Physics.RaycastAll | TimeNanoseconds
+Physics | Physics.Raycast | TimeNanoseconds
+Physics | Mesh.Bake Scaled Mesh PhysX CollisionData | TimeNanoseconds
+Physics | Mesh.Bake PhysX CollisionData | TimeNanoseconds
+Internal | Profiler.WriteBuffer | TimeNanoseconds
+Other | MemoryProfiler.TakeSnapshot | TimeNanoseconds
+Overhead | Profiler.CollectGIStats | TimeNanoseconds
+Overhead | Profiler.CollectUICanvasStats | TimeNanoseconds
+Overhead | Profiler.CollectNetworkMessagesStats | TimeNanoseconds
+Overhead | Profiler.CollectNetworkOperationStats | TimeNanoseconds
+Overhead | Profiler.CollectVideoStats | TimeNanoseconds
+Overhead | Profiler.CollectAudioStats | TimeNanoseconds
+Overhead | CollectGPUSamples | TimeNanoseconds
+Internal | Profiler.Callstack | TimeNanoseconds
+Overhead | Profiler.CollectAudioStats | TimeNanoseconds
+Overhead | Profiler.CollectLegacyStats | TimeNanoseconds
+Overhead | Profiler.SerializeStats | TimeNanoseconds
+Internal | Semaphore.WaitForSignal | TimeNanoseconds
+Loading | Loading.MemoryFileSystemWrite | TimeNanoseconds
+Loading | Loading.MemoryFileSystemRead | TimeNanoseconds
+Loading | Loading.MemoryFileSystemSize | TimeNanoseconds
+Loading | Loading.MemoryFileSystemClose | TimeNanoseconds
+Loading | Loading.MemoryFileSystemOpen | TimeNanoseconds
+Loading | ManagedStreamFile.AllocateManagedBuffer | TimeNanoseconds
+Loading | ManagedStreamFile.ReadInternal | TimeNanoseconds
+Loading | ManagedStreamFile.Read | TimeNanoseconds
+FileIO | File.Seek | TimeNanoseconds
+FileIO | File.Write | TimeNanoseconds
+FileIO | File.Read | TimeNanoseconds
+FileIO | File.Close | TimeNanoseconds
+FileIO | File.Open | TimeNanoseconds
+Loading | Loading.ArchiveFileSystemWrite | TimeNanoseconds
+Loading | Loading.ArchiveFileSystemRead | TimeNanoseconds
+Loading | Loading.ArchiveFileSystemSize | TimeNanoseconds
+Loading | Loading.ArchiveFileSystemClose | TimeNanoseconds
+Loading | Loading.ArchiveFileSystemOpen | TimeNanoseconds
+Loading | Loading.ArchiveFileSystemMountFromMemory | TimeNanoseconds
+Loading | Loading.ArchiveFileSystemMount | TimeNanoseconds
+Lighting | SortedHashArray.sort | TimeNanoseconds
+Other | Sorting tests | TimeNanoseconds
+Other | FileUtilities.MoveFileOrDirectory | TimeNanoseconds
+Other | FileUtilities.IsParentDirectoryCreated | TimeNanoseconds
+Other | FileVFS.IsDirectoryCreated | TimeNanoseconds
+Other | Sorting tests | TimeNanoseconds
+Scripts | TransformAccessArray.Sort | TimeNanoseconds
+Other | TransformChangeSystem | TimeNanoseconds
+Other | Transform.SetHierarchyCapacity | TimeNanoseconds
+Other | Transform.SetParent | TimeNanoseconds
+Other | TestStats | TimeNanoseconds
+Other | TestRunning | TimeNanoseconds
+Other | TestPrepare | TimeNanoseconds
+Other | Test | TimeNanoseconds
+Loading | TextureStreamingManager.RemapResults | TimeNanoseconds
+Loading | TextureStreamingManager.CompactResults | TimeNanoseconds
+Loading | TextureStreamingManager.CopyResults | TimeNanoseconds
+Loading | TextureStreamingManager.Compact | TimeNanoseconds
+Loading | TextureStreamingManager.CopyJobData | TimeNanoseconds
+Loading | TextureStreamingManager.ResetMipLevels | TimeNanoseconds
+Loading | TextureStreamingManager.UpdateStats | TimeNanoseconds
+Loading | TextureStreamingManager.RemoveTexture | TimeNanoseconds
+Loading | TextureStreamingManager.AddTexture | TimeNanoseconds
+Loading | TextureStreamingManager.RemoveRenderer | TimeNanoseconds
+Loading | TextureStreamingManager.AddRenderer | TimeNanoseconds
+Loading | TextureStreamingManager.LoadMipLevels | TimeNanoseconds
+Loading | TextureStreamingManager.UpdateLoadingState | TimeNanoseconds
+Loading | TextureStreamingManager.UpdateRenderers | TimeNanoseconds
+Loading | TextureStreamingManager.Update | TimeNanoseconds
+Loading | TextureStreamingManager.CalcLoadOrder | TimeNanoseconds
+Loading | TextureStreamingManager.MemoryBudget | TimeNanoseconds
+Loading | TextureStreamingManager.UpdateJob | TimeNanoseconds
+Loading | TextureStreamingManager.UpdateCameras | TimeNanoseconds
+Render | Shader.DynamicLoadGPUProgram | TimeNanoseconds
+Render | Shader.CompileGPUProgram | TimeNanoseconds
+Render | Shader.CreateGPUProgram | TimeNanoseconds
+Render | Shader.EditorLoadVariant | TimeNanoseconds
+Render | Shader.WarmupAllShaders | TimeNanoseconds
+Render | ShaderVariantCollection.WarmupShaders | TimeNanoseconds
+Render | RayTracingAccelerationStructure.PrepareGeometries | TimeNanoseconds
+Render | RayTracingAccelerationStructure.Delete | TimeNanoseconds
+Render | RayTracingAccelerationStructure::AddInstanceList | TimeNanoseconds
+Render | RayTracingAccelerationStructure.CullInstances | TimeNanoseconds
+Render | RayTracingAccelerationStructure.ClearInstances | TimeNanoseconds
+Render | RayTracingAccelerationStructure.Build | TimeNanoseconds
+Render | RayTracingAccelerationStructure.SetInstanceShaders | TimeNanoseconds
+Render | RayTracingAccelerationStructureManager.Update | TimeNanoseconds
+Render | ShaderFromSerializedShader | TimeNanoseconds
+Render | RayTracingShadersSetupLoop.Execute | TimeNanoseconds
+Render | RayTracingShadersSetupLoop.SetupShadersForRange | TimeNanoseconds
+Render | ApplyDeferredShaderLoadActions | TimeNanoseconds
+Render | RayTracing.SetInstanceShaders | TimeNanoseconds
+Render | RayTracing.Dispatch | TimeNanoseconds
+Render | Material.ResetAllCachedMaterialData | TimeNanoseconds
+Render | Material.SetPassFast | TimeNanoseconds
+Render | Compute.Dispatch | TimeNanoseconds
+Render | ApplyPass.PrepareKeywords | TimeNanoseconds
+Render | RayTracingInstanceCulling.GenerateInstances | TimeNanoseconds
+Render | RayTracingInstanceCulling.CullingJob | TimeNanoseconds
+Loading | SceneManager.LoadSceneAsyncInto | TimeNanoseconds
+Internal | Profiler.SessionMetadata | TimeNanoseconds
+Internal | Profiler.FrameMetadata | TimeNanoseconds
+Render | FrameDebugger.SetEnabled | TimeNanoseconds
+Loading | Object.SetName | TimeNanoseconds
+Internal | Profiler.Default | TimeNanoseconds
+Overhead | Profiler.FlushCounters | TimeNanoseconds
+Internal | Main Thread | TimeNanoseconds
+Internal | <Uninitialized ProfilerMarker> | TimeNanoseconds
+Internal | bar | TimeNanoseconds
+Internal | foo | TimeNanoseconds
+Loading | GfxResource.Unregister | TimeNanoseconds
+Loading | GfxResource.Register | TimeNanoseconds
+Overhead | Profiler.FlushMemoryCounters | TimeNanoseconds
+Overhead | Profiler.FlushFileIOCounters | TimeNanoseconds
+Overhead | Profiler.FlushCountersWithFlushOnEndOfFrame | TimeNanoseconds
+Other | Sampler.SetSamplersEnabled | TimeNanoseconds
+Loading | Object.Unregister | TimeNanoseconds
+Loading | Object.Register | TimeNanoseconds
+Loading | UpdatePreloading | TimeNanoseconds
+Loading | Preload Single Step | TimeNanoseconds
+Loading | PreloadManager.Stop | TimeNanoseconds
+Loading | Application.WaitForAsyncOperationToComplete | TimeNanoseconds
+Loading | Application.Integrate Assets in Background | TimeNanoseconds
+Loading | Application.Wait for Integration | TimeNanoseconds
+Loading | Application.Preload Assets | TimeNanoseconds
+Loading | Application.LoadLevelAsync Integrate | TimeNanoseconds
+Loading | LoadSceneOperation | TimeNanoseconds
+Loading | Loading.Perform [Preloading assets] | TimeNanoseconds
+Overhead | PlayerConnection.Poll | TimeNanoseconds
+Network | GeneralConnection.AcquireLocalIP | TimeNanoseconds
+Network | Connections.Remove | TimeNanoseconds
+Network | Connections.Process | TimeNanoseconds
+Network | Connections.Poll | TimeNanoseconds
+Network | GeneralConnection.Poll | TimeNanoseconds
+Debug | PlayerConnection.Poll | TimeNanoseconds
+Network | Ping | TimeNanoseconds
+Loading | Initialize All BuiltinResources | TimeNanoseconds
+Loading | SwitchToStandaloneDefaultSettings | TimeNanoseconds
+PlayerLoop | PlayerLoop | TimeNanoseconds
+PlayerLoop | GlobalEventQueue | TimeNanoseconds
+Other | ProcessRemoteInput | TimeNanoseconds
+PlayerLoop | Cleanup Unused Cached Data | TimeNanoseconds
+PlayerLoop | Loading.UpdatePreloading | TimeNanoseconds
+PlayerLoop | Loading.UpdateWebStream | TimeNanoseconds
+VSync | XR.WaitForTargetFPS | TimeNanoseconds
+Gui | PlayerCleanupCachedData | TimeNanoseconds
+Scripts | PlayerEndOfFrame | TimeNanoseconds
+Render | Graphics.PresentAndSync | TimeNanoseconds
+Render | Device.Present | TimeNanoseconds
+Other | PlayerInitState | TimeNanoseconds
+Loading | LoadFirstScene | TimeNanoseconds
+Render | Initialize Graphics | TimeNanoseconds
+Loading | Initialize Player | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.FilterInstancesAndCreateScriptingArrayJob | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.FilterInstancesJob | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.FilterInstancesAndCreateScriptingArray | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.CreateScriptingArray | TimeNanoseconds
+Internal | ObjectDispatcher.SortInstancesJob | TimeNanoseconds
+Internal | ObjectDispatcher.SortInstances | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.CollectInstancesAndTransformsJob | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.CollectInstancesAndTransforms | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.CollectInstances | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.DispatchTransformChanges | TimeNanoseconds
+PlayerLoop | ObjectDispatcher.DispatchTypeChanges | TimeNanoseconds
+PlayerLoop | InitializeDefaultPlayerLoop | TimeNanoseconds
+Loading | MarkObjectDependencies | TimeNanoseconds
+Loading | MarkBehavior | TimeNanoseconds
+Loading | GarbageCollectWorker | TimeNanoseconds
+Loading | GC.BuildLiveObjectMaps | TimeNanoseconds
+Loading | GC.MarkSceneRootsAndReduceLiveObjects | TimeNanoseconds
+Loading | GC.FindLiveObjects | TimeNanoseconds
+Loading | ScriptableObject.OnDestroy | TimeNanoseconds
+Loading | GC.DeleteUnusedAssets | TimeNanoseconds
+Loading | GC.MarkNormalDependencies | TimeNanoseconds
+Loading | GC.MarkExternalDependencies | TimeNanoseconds
+Loading | GC.MarkStaticDependencies | TimeNanoseconds
+Loading | GC.MarkDependencies | TimeNanoseconds
+Loading | GarbageCollectAssetsProfile | TimeNanoseconds
+Loading | BatchDeleteObjectsThread | TimeNanoseconds
+Loading | BatchDeleteObjects | TimeNanoseconds
+Loading | CollectGameObjects | TimeNanoseconds
+Render | InitializeEngineGraphics | TimeNanoseconds
+Loading | UnloadScene | TimeNanoseconds
+Scripts | GameObject.AddComponent | TimeNanoseconds
+Other | Destroy | TimeNanoseconds
+Other | FindMainCamera | TimeNanoseconds
+Loading | CachingManager.Reset | TimeNanoseconds
+Physics | BatchQuery.ResultsJob | TimeNanoseconds
+Jobs | Find dependency chain | TimeNanoseconds
+Jobs | KickJobs | TimeNanoseconds
+Jobs | ScheduleAllocJob | TimeNanoseconds
+Jobs | EndJob | TimeNanoseconds
+Jobs | BeginJob | TimeNanoseconds
+Jobs | WaitForCompleted | TimeNanoseconds
+Jobs | WaitForJobGroupID | TimeNanoseconds
+Jobs | ScheduleJob | TimeNanoseconds
+Internal | CompleteAllJobs | TimeNanoseconds
+Lighting | JobStealing | TimeNanoseconds
+Internal | Idle | TimeNanoseconds
+Internal | CombineDependencies | TimeNanoseconds
+Other | Create Job Queue | TimeNanoseconds
+Other | Create Job System | TimeNanoseconds
+Internal | CombineJobResults | TimeNanoseconds
+Scripts | JobHandle.CompleteAll | TimeNanoseconds
+Scripts | JobHandle.Complete | TimeNanoseconds
+PlayerLoop | TimeManager.Update | TimeNanoseconds
+VSync | WaitForTargetFPS | TimeNanoseconds
+Render | SRPBatcher.DrawCommandsInjection | TimeNanoseconds
+Render | SRPBRender.ApplyShader | TimeNanoseconds
+Render | StdRender.ApplyShader | TimeNanoseconds
+Render | RenderLoop.ScheduleDraw | TimeNanoseconds
+Render | RenderLoop.DrawSRPBatcher | TimeNanoseconds
+Render | RenderLoop.Draw | TimeNanoseconds
+Render | RenderLoop.Sort | TimeNanoseconds
+Render | RenderLoop.Prepare | TimeNanoseconds
+Render | SRPBatcher.InstancedFill | TimeNanoseconds
+Render | SRPBatcher.Flush | TimeNanoseconds
+Render | SRPBShadow.ApplyShader | TimeNanoseconds
+Render | StdShadow.ApplyShader | TimeNanoseconds
+Render | Shadows.ExtractShaderPassContext | TimeNanoseconds
+Render | Shadows.ScheduleRenderJobs | TimeNanoseconds
+Render | Shadows.ExecuteDrawShadows | TimeNanoseconds
+Render | Shadows.PrepareDrawShadows | TimeNanoseconds
+Render | Shadows.DrawSRPBatcher | TimeNanoseconds
+Render | Shadows.Draw | TimeNanoseconds
+Render | Shadows.ExtractCasters | TimeNanoseconds
+Render | Shadows.SplitAndSortCasters | TimeNanoseconds
+Render | Shadows.Sort | TimeNanoseconds
+Render | CullResultsToVisibleReflectionProbes | TimeNanoseconds
+Render | CullResultsToVisibleLights | TimeNanoseconds
+Render | CullResultsToNativeArrays | TimeNanoseconds
+Render | CullScriptable | TimeNanoseconds
+Render | MeshSkinning.Skin | TimeNanoseconds
+Render | MeshSkinning.GPUSkinning | TimeNanoseconds
+Render | UpdateSkinnedMeshBoundingVolumes | TimeNanoseconds
+Render | MeshSkinning.CalcMatrices | TimeNanoseconds
+Render | MeshSkinning.SkinOnGPU | TimeNanoseconds
+Render | MeshSkinning.WaitForSkinThreads | TimeNanoseconds
+Render | MeshSkinning.Render | TimeNanoseconds
+Render | MeshSkinning.Prepare | TimeNanoseconds
+Render | MeshSkinning.UpdateImmediate | TimeNanoseconds
+Render | MeshSkinning.Update | TimeNanoseconds
+Render | SkinnedMeshUpdateAllNeeded | TimeNanoseconds
+Render | SkinnedMeshFinalizeUpdate | TimeNanoseconds
+Render | SkinnedMeshPrepareDispatchUpdate | TimeNanoseconds
+Render | SkinnedMeshOncePerFrameUpdate | TimeNanoseconds
+Render | CopyChannels | TimeNanoseconds
+Render | StaticBatching.MakeBatch | TimeNanoseconds
+Render | StaticBatching.KickOffBatching | TimeNanoseconds
+Render | StaticBatching.Finish | TimeNanoseconds
+Render | StaticBatching.CollectBatches | TimeNanoseconds
+Scripts | CombineMeshes | TimeNanoseconds
+Render | StaticBatching.BakeTransforms | TimeNanoseconds
+Render | StaticBatching.SortObjects | TimeNanoseconds
+Render | StaticBatching.FilterObjects | TimeNanoseconds
+Other | Mesh.SetIndexBufferData | TimeNanoseconds
+Other | Mesh.SetVertexBufferData | TimeNanoseconds
+Other | Mesh.SetIndexBufferParams | TimeNanoseconds
+Other | Mesh.SetVertexBufferParams | TimeNanoseconds
+Render | CombineIndices | TimeNanoseconds
+Render | CombineVertices | TimeNanoseconds
+Render | CombineMeshes | TimeNanoseconds
+Loading | Async.AsyncVertexDataReadCompleteCallback | TimeNanoseconds
+Loading | Async.ProcessRawVertexJob | TimeNanoseconds
+Loading | Async.UploadMesh | TimeNanoseconds
+Scripts | SpriteRenderer.OnChangeSprite | TimeNanoseconds
+Render | MeshRendererFinalizeUpdate | TimeNanoseconds
+Render | MeshRendererPrepareDispatchUpdate | TimeNanoseconds
+Render | MeshRenderer.ComputeScaledMesh | TimeNanoseconds
+Render | MeshRenderer.Render | TimeNanoseconds
+Render | FillQuadIndexBuffer | TimeNanoseconds
+Render | LOD.ComputeLOD | TimeNanoseconds
+Render | CommandBuffer.AfterShadowMapPass | TimeNanoseconds
+Render | CommandBuffer.BeforeShadowMapPass | TimeNanoseconds
+Render | CommandBuffer.AfterScreenspaceMask | TimeNanoseconds
+Render | CommandBuffer.BeforeScreenspaceMask | TimeNanoseconds
+Render | CommandBuffer.AfterShadowMap | TimeNanoseconds
+Render | CommandBuffer.BeforeShadowMap | TimeNanoseconds
+Render | CommandBuffer.AfterHaloAndLensFlares | TimeNanoseconds
+Render | CommandBuffer.BeforeHaloAndLensFlares | TimeNanoseconds
+Render | CommandBuffer.AfterReflections | TimeNanoseconds
+Render | CommandBuffer.BeforeReflections | TimeNanoseconds
+Render | CommandBuffer.AfterEverything | TimeNanoseconds
+Render | CommandBuffer.AfterImageEffects | TimeNanoseconds
+Render | CommandBuffer.BeforeImageEffects | TimeNanoseconds
+Render | CommandBuffer.AfterForwardAlpha | TimeNanoseconds
+Render | CommandBuffer.BeforeForwardAlpha | TimeNanoseconds
+Render | CommandBuffer.AfterSkybox | TimeNanoseconds
+Render | CommandBuffer.BeforeSkybox | TimeNanoseconds
+Render | CommandBuffer.AfterImageEffectsOpaque | TimeNanoseconds
+Render | CommandBuffer.BeforeImageEffectsOpaque | TimeNanoseconds
+Render | CommandBuffer.AfterForwardOpaque | TimeNanoseconds
+Render | CommandBuffer.BeforeForwardOpaque | TimeNanoseconds
+Render | CommandBuffer.AfterFinalPass | TimeNanoseconds
+Render | CommandBuffer.BeforeFinalPass | TimeNanoseconds
+Render | CommandBuffer.AfterLighting | TimeNanoseconds
+Render | CommandBuffer.BeforeLighting | TimeNanoseconds
+Render | CommandBuffer.AfterGBuffer | TimeNanoseconds
+Render | CommandBuffer.BeforeGBuffer | TimeNanoseconds
+Render | CommandBuffer.AfterDepthNormalsTexture | TimeNanoseconds
+Render | CommandBuffer.BeforeDepthNormalsTexture | TimeNanoseconds
+Render | CommandBuffer.AfterDepthTexture | TimeNanoseconds
+Render | CommandBuffer.BeforeDepthTexture | TimeNanoseconds
+Render | RenderingCommandBuffer.PrepareKeywords | TimeNanoseconds
+Render | Billboard.BatchJob | TimeNanoseconds
+Overhead | Texture.ReleaseTextureUploadMemory | TimeNanoseconds
+Overhead | Texture.CopyTextureDataThreaded | TimeNanoseconds
+Overhead | Texture.AcquireTextureUploadMemory | TimeNanoseconds
+Gui | TextRendering.RenderMeshWithDynamicChunk | TimeNanoseconds
+Render | Graphics.DrawProcedural | TimeNanoseconds
+Render | Render.LineOrTrail | TimeNanoseconds
+Render | Render.Mesh | TimeNanoseconds
+Render | Mesh.DrawVBO | TimeNanoseconds
+Lighting | ReduceProbes | TimeNanoseconds
+Loading | Async.TextureProcessingFinalizeCallback | TimeNanoseconds
+Loading | Async.DoCopyTextureDataJob | TimeNanoseconds
+Loading | Async.TextureProcessingUploadCallback | TimeNanoseconds
+Loading | Async.TextureProcessingCompleteCallback | TimeNanoseconds
+Loading | Async.TextureReadCompleteCallback | TimeNanoseconds
+Loading | Async.PrecreateTextureJob | TimeNanoseconds
+Loading | Async.DoCubemapMipmapJob | TimeNanoseconds
+Loading | Async.ScalingAndPaddingTexture | TimeNanoseconds
+Loading | Async.CubemapMipSkipping | TimeNanoseconds
+Loading | Async.DecrunchTexture | TimeNanoseconds
+Loading | Async.DirectTextureUploadComplete | TimeNanoseconds
+Loading | Async.DirectTextureEndWrite | TimeNanoseconds
+Loading | Async.DirectTextureReadComplete | TimeNanoseconds
+Loading | Async.DirectTextureLoadStart | TimeNanoseconds
+Loading | Async.DirectTextureRequestGPU | TimeNanoseconds
+Loading | Async.DirectTextureCreate | TimeNanoseconds
+Loading | Async.DirectTextureLoadBegin | TimeNanoseconds
+Loading | Async.UploadTexture | TimeNanoseconds
+Loading | Async.UploadTextureBegin | TimeNanoseconds
+Lighting | PostLoadSceneStaticLightmapSettings | TimeNanoseconds
+Lighting | OffsetLoadedRendererLightmapIndices | TimeNanoseconds
+Other | Image.ResizeJob | TimeNanoseconds
+Other | Image.FreeImageData | TimeNanoseconds
+Other | Image.AllocateImageData | TimeNanoseconds
+Render | CustomRenderTextures.Update | TimeNanoseconds
+Other | CubemapProcessor.ConvolutionJob | TimeNanoseconds
+Other | CubemapProcessor.Convolution | TimeNanoseconds
+Render | RenderTexture.ResolveAA | TimeNanoseconds
+Render | RenderTexture.SetActive | TimeNanoseconds
+Render | RenderTexture.GrabPixels | TimeNanoseconds
+Other | CubemapArray.GetPixels32 | TimeNanoseconds
+Other | CubemapArray.GetPixels | TimeNanoseconds
+Other | Cubemap.GetPixels | TimeNanoseconds
+Other | Texture3D.GetPixels32 | TimeNanoseconds
+Other | Texture3D.GetPixels | TimeNanoseconds
+Other | Texture2DArray.GetPixels32 | TimeNanoseconds
+Other | Texture2DArray.GetPixels | TimeNanoseconds
+Other | Texture2D.GetPixels32 | TimeNanoseconds
+Other | Texture2D.GetPixels | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Render | WatermarkRender | TimeNanoseconds
+Render | SplashScreenRenderForeground | TimeNanoseconds
+Render | SplashScreenRenderBackground | TimeNanoseconds
+Render | SplashScreenRender | TimeNanoseconds
+Other | SplashScreenEnd | TimeNanoseconds
+Other | SplashScreenFade | TimeNanoseconds
+Other | SplashScreenBegin | TimeNanoseconds
+Loading | Texture2D.Compress | TimeNanoseconds
+Loading | Texture.AwakeFromLoad | TimeNanoseconds
+Render | Renderers.OncePerFrameUpdate | TimeNanoseconds
+Render | Renderers.DebugDataAlloc | TimeNanoseconds
+Render | SyncUpdateRendererBoundingVolumes | TimeNanoseconds
+Render | FinalizeUpdateRendererBoundingVolumes | TimeNanoseconds
+Render | UpdateRendererBoundingVolumes | TimeNanoseconds
+Render | ScheduleUpdateRendererBoundingVolumes | TimeNanoseconds
+Render | PrepareUpdateRendererBoundingVolumes | TimeNanoseconds
+Vr | XR.CopyDepth | TimeNanoseconds
+Render | RenderTexture.GarbageCollectTemporary | TimeNanoseconds
+Loading | AsyncUploadManager.AsyncBufferDelete [Review Async Upload Buffer Size in Quality Settings] | TimeNanoseconds
+Loading | AsyncUploadManager.AsyncBufferResized [Review Async Upload Buffer Size in Quality Settings] | TimeNanoseconds
+Loading | AsyncUploadManager.CloseFile | TimeNanoseconds
+Loading | AsyncUploadManager.AsyncReadCompletion | TimeNanoseconds
+Loading | AsyncUploadManager.ScheduleAsyncRead | TimeNanoseconds
+Loading | AsyncUploadManager.ScheduleAsyncCommand | TimeNanoseconds
+Loading | AsyncUploadManager.ScheduleAsyncCommands | TimeNanoseconds
+Loading | AsyncUploadManager.AsyncResourceUploadBlocking | TimeNanoseconds
+Loading | AsyncUploadManager.AsyncResourceUploadGfxCallback | TimeNanoseconds
+Loading | AsyncUploadManager.AsyncResourceUpload | TimeNanoseconds
+Loading | AsyncUploadManager.AsyncResourceUploadAll | TimeNanoseconds
+Render | SpriteMeshGenerator.Simplify | TimeNanoseconds
+Render | SpriteMeshGenerator.TraceShape | TimeNanoseconds
+Render | SpriteMeshGenerator.Decompose | TimeNanoseconds
+Loading | Instantiate.Copy | TimeNanoseconds
+Loading | Instantiate.Produce | TimeNanoseconds
+Loading | Instantiate.Awake | TimeNanoseconds
+Loading | InstantiateAsync | TimeNanoseconds
+Loading | Instantiate | TimeNanoseconds
+Loading | CoroutinesDelayedCallsCleanup | TimeNanoseconds
+Other | CoroutinesDelayedCalls | TimeNanoseconds
+Other | DelayedCallManager.HasDelayedCall | TimeNanoseconds
+Other | DelayedCallManager.CancelAllCallDelayed | TimeNanoseconds
+Other | DelayedCallManager.CancelCallDelayed | TimeNanoseconds
+PlayerLoop | LateBehaviourUpdate | TimeNanoseconds
+PlayerLoop | FixedBehaviourUpdate | TimeNanoseconds
+PlayerLoop | BehaviourUpdate | TimeNanoseconds
+Loading | InstantiateMultiple.DeserializeClones.Job | TimeNanoseconds
+Loading | InstantiateMultiple.SerializeOrigin.Job | TimeNanoseconds
+Loading | InstantiateMultiple.Awake | TimeNanoseconds
+Loading | InstantiateMultiple.IntegrateInMainThread | TimeNanoseconds
+Loading | InstantiateMultiple.CancelAndCleanupInMainThread | TimeNanoseconds
+Loading | InstantiateMultiple.Produce.GameObjectAndTransform.Job | TimeNanoseconds
+Loading | InstantiateMultiple.Produce.Components.Job | TimeNanoseconds
+Loading | AsyncInstantiateOperation.WaitForCompletion | TimeNanoseconds
+Loading | AsyncInstantiateOperation.IntegrateInMainThread | TimeNanoseconds
+Loading | AsyncInstantiateOperation.CancelAndCleanupInMainThread | TimeNanoseconds
+Loading | AsyncInstantiateOperation.Schedule | TimeNanoseconds
+Loading | AsyncInstantiateOperation.Create | TimeNanoseconds
+Loading | AsyncReadManager.GetFileInfo | TimeNanoseconds
+Loading | AsyncReadManager.CloseHandleAsync | TimeNanoseconds
+Loading | AsyncReadManager.CloseFileAsync | TimeNanoseconds
+Loading | AsyncReadManager.OpenAsync | TimeNanoseconds
+Loading | AsyncReadManager.ReadFile | TimeNanoseconds
+Loading | AsyncReadManager.BeginRequest | TimeNanoseconds
+Loading | AsyncReadManager.SyncRequest | TimeNanoseconds
+Loading | AsyncReadManager.ClearMetrics | TimeNanoseconds
+Loading | AsyncReadManager.UpdateMetrics | TimeNanoseconds
+Loading | AsyncReadManager.GetMetricsSummary | TimeNanoseconds
+Render | DepthNormalsPass.Sort | TimeNanoseconds
+Render | DepthNormalsPass.Job | TimeNanoseconds
+Render | ReplacementPass.Sort | TimeNanoseconds
+Render | ReplacementPass.Job | TimeNanoseconds
+Render | DepthPass.Sort | TimeNanoseconds
+Render | DepthPass.Job | TimeNanoseconds
+Render | MotionVector.RenderJob | TimeNanoseconds
+Render | MotionVector.Render | TimeNanoseconds
+Render | MotionVector.Sort | TimeNanoseconds
+Render | RenderForward.PrepareRenderNodes | TimeNanoseconds
+Render | RenderForward.AssignProjectorQueuesJob | TimeNanoseconds
+Render | RenderForward.RenderLoopJob | TimeNanoseconds
+Render | RenderForwardAlpha.Render | TimeNanoseconds
+Render | RenderForwardAlpha.Sort | TimeNanoseconds
+Render | RenderForwardAlpha.Prepare | TimeNanoseconds
+Render | RenderForwardOpaque.Render | TimeNanoseconds
+Render | RenderForwardOpaque.CollectShadows | TimeNanoseconds
+Render | RenderForwardOpaque.Sort | TimeNanoseconds
+Render | RenderForwardOpaque.Prepare | TimeNanoseconds
+Render | RenderDeferred.CopyDepth | TimeNanoseconds
+Render | BatchRenderer.RenderSingle | TimeNanoseconds
+Render | BatchRenderer.Flush | TimeNanoseconds
+Render | Camera.AAResolve | TimeNanoseconds
+Render | RenderDeferred.ForwardObjectsIntoDepthNormals | TimeNanoseconds
+Render | RenderDeferred.ForwardObjectsIntoDepth | TimeNanoseconds
+Render | Render.MotionVectors | TimeNanoseconds
+Render | Render.TransparentGeometry | TimeNanoseconds
+Render | Render.OpaqueGeometry | TimeNanoseconds
+Render | Render.Prepare | TimeNanoseconds
+Render | CalculateLightProbeSamplingCoordinates | TimeNanoseconds
+Render | RenderDeferred.ReflectionsToEmissive | TimeNanoseconds
+Render | RenderDeferred.ReflProbeQuad | TimeNanoseconds
+Render | RenderDeferred.DefaultReflection | TimeNanoseconds
+Render | RenderDeferred.Reflections | TimeNanoseconds
+Render | RenderDeferred.CombineDepthNormals | TimeNanoseconds
+Render | RenderDeferred.ForwardObjectsToDepth | TimeNanoseconds
+Render | RenderDeferred.FinalPass | TimeNanoseconds
+Render | RenderDeferred.Light | TimeNanoseconds
+Render | RenderDeferred.Lighting | TimeNanoseconds
+Render | RenderDeferred.GBuffer | TimeNanoseconds
+Render | RenderDeferred.Sort | TimeNanoseconds
+Render | GUITexture.Draw | TimeNanoseconds
+Render | CullPerObjectReflectionProbesJob | TimeNanoseconds
+Render | CullPerObjectReflectionProbesCombine | TimeNanoseconds
+Render | CullPerObjectReflectionProbes | TimeNanoseconds
+Render | ComputeNeedsPerObjectLights | TimeNanoseconds
+Render | CullPerObjectLightsCombine | TimeNanoseconds
+Render | CullPerObjectLights | TimeNanoseconds
+Render | CullObjectsWithoutUmbra | TimeNanoseconds
+Render | CullDynamicObjectsWithUmbra | TimeNanoseconds
+Render | Shadows.CullShadowCastersDetailSpot | TimeNanoseconds
+Render | Shadows.CullShadowCastersDetailPoint | TimeNanoseconds
+Render | CullingGroupSendEvents | TimeNanoseconds
+Render | CullGroupCombineResults | TimeNanoseconds
+Render | CullGroupSphereRange | TimeNanoseconds
+Render | ScheduleCullingGroups | TimeNanoseconds
+Render | FrustumCullReflectionProbesJob | TimeNanoseconds
+Render | Camera.RenderSkybox | TimeNanoseconds
+Other | RenderSettings.CalculateReflectionFromSkybox | TimeNanoseconds
+Other | RenderSettings.CalculateAmbientProbeFromSkybox | TimeNanoseconds
+Render | RenderLoop.CleanupNodeQueue | TimeNanoseconds
+Render | RenderLoop.PrepareRenderNodes.AddProjectorNodes | TimeNanoseconds
+Render | RenderLoop.PrepareRenderNodes | TimeNanoseconds
+Render | SortLights | TimeNanoseconds
+Render | AddCustomActiveLocalLights | TimeNanoseconds
+Render | AddActiveLocalLights | TimeNanoseconds
+Render | AddDirectionalLights | TimeNanoseconds
+Render | FindBrightestDirectionalLight | TimeNanoseconds
+Render | FindActiveLights | TimeNanoseconds
+Render | CullLightFrustumLocal | TimeNanoseconds
+Render | OcclusionAndConnectivityCullLight | TimeNanoseconds
+Render | FrustumAndOcculusionCullLocalLightsCombine | TimeNanoseconds
+Render | FrustumAndOcculusionCullLocalLights | TimeNanoseconds
+Render | AddReflectionProbes | TimeNanoseconds
+Render | AddLocalLights | TimeNanoseconds
+Render | CullSendEvents | TimeNanoseconds
+Render | FindShadowCastingLights | TimeNanoseconds
+Render | FindLocalShadowCastingLights | TimeNanoseconds
+Render | FindDirectionalShadowCastingLights | TimeNanoseconds
+Render | PrepareSceneNodesCombineJob | TimeNanoseconds
+Render | SceneNodesInitJob | TimeNanoseconds
+Render | PrepareSceneNodesJob | TimeNanoseconds
+Render | PrepareSceneNodesSetUp | TimeNanoseconds
+Render | PrepareSceneNodes | TimeNanoseconds
+Render | CullSceneObjects | TimeNanoseconds
+Render | CullAllVisibleReflectionProbes | TimeNanoseconds
+Render | CullAllVisibleLights | TimeNanoseconds
+Render | SceneCulling | TimeNanoseconds
+Render | CullResults.CreateSharedRendererScene | TimeNanoseconds
+Render | DestroyCullResults | TimeNanoseconds
+Render | Recalc Bounds | TimeNanoseconds
+Render | Camera.Render | TimeNanoseconds
+Render | Graphics.Blit | TimeNanoseconds
+Render | Camera.ImageEffects | TimeNanoseconds
+Render | Halo.GeometryJob | TimeNanoseconds
+Render | Halo.Render | TimeNanoseconds
+Render | Prewarm Shaders | TimeNanoseconds
+Render | BlendCubemap | TimeNanoseconds
+Render | ReflectionProbes.Convolution | TimeNanoseconds
+Render | Camera.FindStacks | TimeNanoseconds
+Render | CollectTreeRenderers | TimeNanoseconds
+Render | PrepareSceneCullingParameters | TimeNanoseconds
+Render | UpdateODSWorldTexture | TimeNanoseconds
+Render | UpdateDepthNormalsTexture | TimeNanoseconds
+Render | UpdateDepthTexture | TimeNanoseconds
+Render | DrawingMultiCustomPost | TimeNanoseconds
+Render | DrawingMultiCustom | TimeNanoseconds
+Render | DrawingMultiCustomPre | TimeNanoseconds
+Render | Drawing | TimeNanoseconds
+Render | Culling | TimeNanoseconds
+Render | Camera.RenderToCubemap | TimeNanoseconds
+Render | Camera.CustomRender | TimeNanoseconds
+Render | Clear | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Render | Shadows.CullingCallbacks | TimeNanoseconds
+Render | Shadows.CombineLocalShadowCasterBoundsAndDestroyJob | TimeNanoseconds
+Render | Shadows.CombineLocalShadowCasterCullignIndexListsAndDestroy | TimeNanoseconds
+Render | Shadows.CombineDirectionalShadowCasterCullignIndexListsAndDestroy | TimeNanoseconds
+Render | Shadows.GenerateCombinedDynamicVisibleList | TimeNanoseconds
+Render | Shadows.CullShadowCastersWithoutUmbra | TimeNanoseconds
+Render | Shadows.CullShadowCastersDirectionalUmbra | TimeNanoseconds
+Render | Shadows.CullDirectionalShadowCasters | TimeNanoseconds
+Render | Shadows.CreateUmbraShadowCuller | TimeNanoseconds
+Render | Shadows.PrepareUmbraShadowCullerBuffers | TimeNanoseconds
+Render | Shadows.CullDirectionalCascades | TimeNanoseconds
+Render | Shadows.CullLocalLightShadowCasters | TimeNanoseconds
+Render | Shadows.CullShadowCastersLocalDetail | TimeNanoseconds
+Render | Shadows.CullShadowCastersLocal | TimeNanoseconds
+Render | Shadows.CullShadowCastersDirectionalDetail | TimeNanoseconds
+Render | Shadows.CullShadowCastersDirectional | TimeNanoseconds
+Render | CullSceneDynamicObjectsCombineJob | TimeNanoseconds
+Render | CullSceneDynamicObjects | TimeNanoseconds
+Render | CullQueryPortalVisibilityCombineJob | TimeNanoseconds
+Render | CullQueryPortalVisibilityUmbra | TimeNanoseconds
+Render | EndRenderQueueExtraction | TimeNanoseconds
+Render | BeginRenderQueueExtraction | TimeNanoseconds
+Render | QueuePrepareIntegrateMainThreadObjects | TimeNanoseconds
+Render | ExecuteRenderQueueJob | TimeNanoseconds
+Render | BlendLightProbesJobHalfFloat | TimeNanoseconds
+Render | BlendLightProbesJob | TimeNanoseconds
+Render | LightProbeProxyVolumeManager.Update | TimeNanoseconds
+Render | ReflectionProbes.Update | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Render | Projector.Render | TimeNanoseconds
+Render | ProbeSetTetrahedralizationBuildBoundingBox | TimeNanoseconds
+Render | GetLightProbeInterpolationWeights | TimeNanoseconds
+Render | ReflectionProbeAnchorPositionUpdate | TimeNanoseconds
+Render | ReflectionProbeAnchorManagerUpdate | TimeNanoseconds
+Render | ReflectionProbes.RenderProbe | TimeNanoseconds
+Render | Update Lights | TimeNanoseconds
+Render | BatchRendererGroup.AddReader | TimeNanoseconds
+Render | BatchRendererGroup.AcquireWrite | TimeNanoseconds
+Render | BatchRendererGroup.IncorporateCacheDelta | TimeNanoseconds
+Render | BatchRendererGroup.InvalidateStaleBatches | TimeNanoseconds
+Render | BatchRendererGroup.InvalidateMetadata | TimeNanoseconds
+Render | BatchRendererGroup.GetCacheDeltaWritable | TimeNanoseconds
+Render | BatchRendererGroup.UpdateMetadataCache | TimeNanoseconds
+Render | BatchRendererGroup.CreateMissingMetadata | TimeNanoseconds
+Render | Shadows.PrepareJob | TimeNanoseconds
+Render | Shadows.PrepareShadowmap | TimeNanoseconds
+Render | Shadows.RenderJobDir | TimeNanoseconds
+Render | Shadows.RenderJobSpot | TimeNanoseconds
+Render | Shadows.RenderJobPoint | TimeNanoseconds
+Render | Shadows.RenderJob | TimeNanoseconds
+Render | Shadows.ExtractCasters | TimeNanoseconds
+Render | Shadows.GenerateRenderNodeQueue | TimeNanoseconds
+Render | Shadows.RenderShadowMap | TimeNanoseconds
+Render | Shadows.Sort | TimeNanoseconds
+Render | Shadows.CollectShadows | TimeNanoseconds
+Render | SamplePerObjectReflectionProbes | TimeNanoseconds
+Render | Flare.GeometryJob | TimeNanoseconds
+Render | Flare.Update | TimeNanoseconds
+Render | Flare.Render | TimeNanoseconds
+Loading | GameObject.ActivateAwakeRecursively | TimeNanoseconds
+Loading | Component.SetGameObject | TimeNanoseconds
+Scripts | GameObject.Deactivate | TimeNanoseconds
+Scripts | GameObject.Activate | TimeNanoseconds
+Loading | Loading Gloabl Managers | TimeNanoseconds
+Loading | Loading Manager | TimeNanoseconds
+Loading | CollectGameManagers | TimeNanoseconds
+Other | FindObjectsOfType | TimeNanoseconds
+Scripts | MessageHandler ResolveCallbacks | TimeNanoseconds
+Internal | JobAlloc.Grow | TimeNanoseconds
+Internal | MemoryManager.FallbackDeallocation | TimeNanoseconds
+Memory | MemoryManager.FallbackAllocation | TimeNanoseconds
+Memory | Native.DeallocSlow | TimeNanoseconds
+Memory | Native.Dealloc | TimeNanoseconds
+Memory | Native.Realloc | TimeNanoseconds
+Memory | Native.Alloc | TimeNanoseconds
+Memory | LargeAllocation.Free | TimeNanoseconds
+Memory | LargeAllocation.Alloc | TimeNanoseconds
+Physics2D | Physics2D.GenerateBoxTilingShape | TimeNanoseconds
+Physics2D | Physics2D.GenerateTilingArea | TimeNanoseconds
+Physics2D | Physics2D.PrepareTilingSegment | TimeNanoseconds
+Render | Sprite.GetSpriteTileVertexAndIndexCount | TimeNanoseconds
+Render | Sprite.GetSourceAndDestinationRect | TimeNanoseconds
+Render | Sprite.Get9SliceRenderDataJob | TimeNanoseconds
+PlayerLoop | SortingGroup.UpdateSortingGroup | TimeNanoseconds
+PlayerLoop | SortingGroup.UpdateRenderer | TimeNanoseconds
+PlayerLoop | SortingGroupManager.Update | TimeNanoseconds
+PlayerLoop | SortingGroup.SortChildren | TimeNanoseconds
+Render | SpriteRenderer.RenderMultiple | TimeNanoseconds
+Render | SpriteRenderer.Render | TimeNanoseconds
+Render | SpriteRenderer.PrepareNode | TimeNanoseconds
+Other | CompareHashes | TimeNanoseconds
+Memory | System Used Memory | Bytes
+Memory | System Total Used Memory | Bytes
+Memory | App Resident Memory | Bytes
+Memory | App Committed Memory | Bytes
+Memory | Total Used Memory | Bytes
+Memory | Total Reserved Memory | Bytes
+Memory | GC Used Memory | Bytes
+Memory | GC Reserved Memory | Bytes
+Memory | Profiler Used Memory | Bytes
+Memory | Profiler Reserved Memory | Bytes
+Memory | Audio Used Memory | Bytes
+Memory | Audio Reserved Memory | Bytes
+Memory | Video Used Memory | Bytes
+Memory | Video Reserved Memory | Bytes
+Render | Render Textures Count | Count
+Render | Render Textures Bytes | Bytes
+Memory | Asset Count | Count
+Memory | Scene Object Count | Count
+Memory | Game Object Count | Count
+Memory | GC Allocation In Frame Count | Count
+Memory | GC Allocated In Frame | Bytes
+Memory | Gfx Used Memory | Bytes
+Memory | Gfx Reserved Memory | Bytes
+Memory | Texture Memory | Bytes
+Memory | Texture Count | Count
+Memory | Mesh Memory | Bytes
+Memory | Mesh Count | Count
+Memory | Material Memory | Bytes
+Memory | Material Count | Count
+Memory | AnimationClip Memory | Bytes
+Memory | AnimationClip Count | Count
+Memory | AudioClip Memory | Bytes
+Memory | AudioClip Count | Count
+Memory | Object Count | Count
+Lighting | Global Illumination Support | Undefined
+FileIO | File Seeks | Count
+FileIO | Files Opened | Count
+FileIO | Files Closed | Count
+FileIO | File Bytes Written | Bytes
+FileIO | File Bytes Read | Bytes
+FileIO | Reads in Flight | Count
+FileIO | File Handles Open | Count
+FileIO | File Reads Started | Count
+FileIO | File Reads Finished | Count
+Loading | Other Reads | Bytes
+Loading | Texture Reads | Bytes
+Loading | Virtual Texture Reads | Bytes
+Loading | Mesh Reads | Bytes
+Loading | Audio Reads | Bytes
+Loading | Scripting Reads | Bytes
+Loading | Entities Reads | Bytes
+PlayerLoop | loadedScriptingRuntime.Invoke | TimeNanoseconds
+Virtual Texturing | Required Tiles | Count
+Virtual Texturing | Atlases | Count
+Virtual Texturing | Total CPU Cache Size | Bytes
+Virtual Texturing | Total GPU Cache Size | Bytes
+Virtual Texturing | Missing Disk Data | Bytes
+Virtual Texturing | Read From Disk | Bytes
+Virtual Texturing | Max Cache Mip Bias | Count
+Virtual Texturing | Max Cache Demand | Percent
+Virtual Texturing | Missing Streaming Tiles | Count
+Physics2D | Total Bodies | Count
+Physics2D | Awake Bodies | Count
+Physics2D | Asleep Bodies | Count
+Physics2D | Dynamic Bodies | Count
+Physics2D | Kinematic Bodies | Count
+Physics2D | Static Bodies | Count
+Physics2D | Discrete Bodies | Count
+Physics2D | Continuous Bodies | Count
+Physics2D | Total Shapes | Count
+Physics2D | Awake Shapes | Count
+Physics2D | Asleep Shapes | Count
+Physics2D | Dynamic Shapes | Count
+Physics2D | Kinematic Shapes | Count
+Physics2D | Static Shapes | Count
+Physics2D | Total Contacts | Count
+Physics2D | Added Contacts | Count
+Physics2D | Removed Contacts | Count
+Physics2D | Broadphase Updates | Count
+Physics2D | Broadphase Pairs | Count
+Physics2D | Total Callbacks | Count
+Physics2D | Collision Enter | Count
+Physics2D | Collision Stay | Count
+Physics2D | Collision Exit | Count
+Physics2D | Trigger Enter | Count
+Physics2D | Trigger Stay | Count
+Physics2D | Trigger Exit | Count
+Physics2D | Total Queries | Count
+Physics2D | Raycast Queries | Count
+Physics2D | Shapecast Queries | Count
+Physics2D | Overlap Queries | Count
+Physics2D | IsTouching Queries | Count
+Physics2D | GetContacts Queries | Count
+Physics2D | Particle Queries | Count
+Physics2D | Total Transform Sync Calls | Count
+Physics2D | Transform Sync Bodies | Count
+Physics2D | Transform Sync Colliders | Count
+Physics2D | Transform Parent Sync Bodies | Count
+Physics2D | Transform Parent Sync Colliders | Count
+Physics2D | Solver World Count | Count
+Physics2D | Solver Simulation Count | Count
+Physics2D | Solver Discrete Islands | Count
+Physics2D | Solver Continuous Islands | Count
+Physics2D | Total Joints | Count
+Memory | Physics Used Memory (2D) | Bytes
+Memory | Physics Used Memory | Bytes
+Physics | Active Dynamic Bodies | Count
+Physics | Active Kinematic Bodies | Count
+Physics | Static Colliders | Count
+Physics | Dynamic Bodies | Count
+Physics | Articulation Bodies | Count
+Physics | Active Constraints | Count
+Physics | Overlaps | Count
+Physics | Discreet Overlaps | Count
+Physics | Continuous Overlaps | Count
+Physics | Modified Overlaps | Count
+Physics | Trigger Overlaps | Count
+Physics | Colliders Synced | Count
+Physics | Rigidbodies Synced | Count
+Physics | Physics Queries | Count
+Physics | Broadphase Adds/Removes | Count
+Physics | Broadphase Adds | Count
+Physics | Broadphase Removes | Count
+Physics | Narrowphase Touches | Count
+Physics | Narrowphase New Touches | Count
+Physics | Narrowphase Lost Touches | Count
+PlayerLoop | initializedPreloadedPlugins.Invoke | TimeNanoseconds
+PlayerLoop | PreloadPlugins.Initialize | TimeNanoseconds
+PlayerLoop | beforeInitializeEngineGraphics.Invoke | TimeNanoseconds
+PlayerLoop | XRPreInit.Initialize | TimeNanoseconds
+PlayerLoop | Subsystems.Initialize | TimeNanoseconds
+PlayerLoop | VR.BeforeInitializeEngineGraphics | TimeNanoseconds
+Render | Batches Count | Count
+Render | Draw Calls Count | Count
+Render | Triangles Count | Count
+Render | Vertices Count | Count
+Render | SetPass Calls Count | Count
+Render | Shadow Casters Count | Count
+Render | Visible Skinned Meshes Count | Count
+Render | Render Textures Changes Count | Count
+Render | Used Buffers Count | Count
+Render | Used Buffers Bytes | Bytes
+Render | Vertex Buffer Upload In Frame Count | Count
+Render | Vertex Buffer Upload In Frame Bytes | Bytes
+Render | Index Buffer Upload In Frame Count | Count
+Render | Index Buffer Upload In Frame Bytes | Bytes
+Render | Video Memory Bytes | Bytes
+Render | Dynamic Batches Count | Count
+Render | Dynamic Batched Draw Calls Count | Count
+Render | Dynamic Batched Triangles Count | Count
+Render | Dynamic Batched Vertices Count | Count
+Render | Static Batches Count | Count
+Render | Static Batched Draw Calls Count | Count
+Render | Static Batched Triangles Count | Count
+Render | Static Batched Vertices Count | Count
+Render | Instanced Batches Count | Count
+Render | Instanced Batched Draw Calls Count | Count
+Render | Instanced Batched Triangles Count | Count
+Render | Instanced Batched Vertices Count | Count
+Render | Used Textures Count | Count
+Render | Used Textures Bytes | Bytes
+Render | Dynamic Batching Time | TimeNanoseconds
+PlayerLoop | pluginGraphicsDeviceEvent.Invoke | TimeNanoseconds
+Render | CPU Total Frame Time | TimeNanoseconds
+Render | CPU Main Thread Frame Time | TimeNanoseconds
+Render | CPU Render Thread Frame Time | TimeNanoseconds
+Render | GPU Frame Time | TimeNanoseconds
+PlayerLoop | initializedGraphicsCaps.Invoke | TimeNanoseconds
+PlayerLoop | initializedEngineGraphics.Invoke | TimeNanoseconds
+PlayerLoop | TrailRenderer.OnGfxInitialized | TimeNanoseconds
+PlayerLoop | LineRenderer.OnGfxInitialized | TimeNanoseconds
+PlayerLoop | ParticleSystem.OnGfxInitialized | TimeNanoseconds
+PlayerLoop | SpriteRenderer.OnGfxInitialized | TimeNanoseconds
+PlayerLoop | TileMap.OnGfxInitialized | TimeNanoseconds
+PlayerLoop | SpriteShape.OnGfxInitialized | TimeNanoseconds
+PlayerLoop | audioSystemStartedUp.Invoke | TimeNanoseconds
+PlayerLoop | onBeforeAssemblyReload.Invoke | TimeNanoseconds
+Audio | Flush DSP connections | TimeNanoseconds
+Audio | MasterDSP | TimeNanoseconds
+PlayerLoop | registerTransferFunctionScriptingTraits.Invoke | TimeNanoseconds
+PlayerLoop | didReloadMonoDomain.Invoke | TimeNanoseconds
+PlayerLoop | ScriptingProfiler.LookupIgnoreAttributeClass | TimeNanoseconds
+PlayerLoop | Input.ResetTime | TimeNanoseconds
+PlayerLoop | createMonoScriptCache.Invoke | TimeNanoseconds
+PlayerLoop | doneInitializingEngineGraphics.Invoke | TimeNanoseconds
+PlayerLoop | SpriteMask.OnInitializeGraphics | TimeNanoseconds
+PlayerLoop | screenResolutionChanged.Invoke | TimeNanoseconds
+PlayerLoop | didChangeActiveScene.Invoke | TimeNanoseconds
+PlayerLoop | playerLoadFirstScenePreAwake.Invoke | TimeNanoseconds
+PlayerLoop | VR.PlayerLoadFirstScenePreAwake | TimeNanoseconds
+Managed Jobs | NativeArrayDisposeJob | TimeNanoseconds
+Burst Jobs | NativeArrayDisposeJob (Burst) | TimeNanoseconds
+Managed Jobs | NativeArrayDisposeJob (Cleanup) | TimeNanoseconds
+PlayerLoop | Graphics.WarmupPreloadedShaders | TimeNanoseconds
+PlayerLoop | splashScreenStateChange.Invoke | TimeNanoseconds
+PlayerLoop | suspendPointHook.Invoke | TimeNanoseconds
+PlayerLoop | preloadManagerLoop.Invoke | TimeNanoseconds
+Scripts | MindState.Petal.Update | TimeNanoseconds
+PlayerLoop | didUnloadScene.Invoke | TimeNanoseconds
+PlayerLoop | didDestroyWorld.Invoke | TimeNanoseconds
+PlayerLoop | PhysicsManager.RecreateScene | TimeNanoseconds
+PlayerLoop | sceneLoadedBeforeAwake.Invoke | TimeNanoseconds
+PlayerLoop | playerSessionStateChanged.Invoke | TimeNanoseconds
+PlayerLoop | gameObjectChangedScene.Invoke | TimeNanoseconds
+PlayerLoop | sceneLoadedAfterAwake.Invoke | TimeNanoseconds
+PlayerLoop | lightProbesUpdated.Invoke | TimeNanoseconds
+PlayerLoop | cleanupAfterLoad.Invoke | TimeNanoseconds
+PlayerLoop | TextRendering.FlushTextMeshGenerator | TimeNanoseconds
+PlayerLoop | ParticleSystem.CleanupAfterLoad | TimeNanoseconds
+PlayerLoop | resetRandomAfterSceneLoad.Invoke | TimeNanoseconds
+Scripts | MindState.Camera.Submit | TimeNanoseconds
+VSync | TimeUpdate.WaitForLastPresentationAndUpdateTime | TimeNanoseconds
+PlayerLoop | Initialization.UpdateCameraMotionVectors | TimeNanoseconds
+PlayerLoop | Initialization.DirectorSampleTime | TimeNanoseconds
+PlayerLoop | Initialization.AsyncUploadTimeSlicedUpdate | TimeNanoseconds
+PlayerLoop | Initialization.SynchronizeInputs | TimeNanoseconds
+PlayerLoop | Initialization.SynchronizeState | TimeNanoseconds
+PlayerLoop | Initialization.XREarlyUpdate | TimeNanoseconds
+PlayerLoop | EarlyUpdate.PollPlayerConnection | TimeNanoseconds
+PlayerLoop | EarlyUpdate.GpuTimestamp | TimeNanoseconds
+PlayerLoop | EarlyUpdate.AnalyticsCoreStatsUpdate | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UnityWebRequestUpdate | TimeNanoseconds
+PlayerLoop | EarlyUpdate.ExecuteMainThreadJobs | TimeNanoseconds
+PlayerLoop | EarlyUpdate.ProcessMouseInWindow | TimeNanoseconds
+PlayerLoop | EarlyUpdate.ClearLines | TimeNanoseconds
+PlayerLoop | EarlyUpdate.PresentBeforeUpdate | TimeNanoseconds
+PlayerLoop | EarlyUpdate.ResetFrameStatsAfterPresent | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UpdateAsyncInstantiate | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UpdateAsyncReadbackManager | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UpdateStreamingManager | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UpdateTextureStreamingManager | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UpdatePreloading | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UpdateContentLoading | TimeNanoseconds
+PlayerLoop | EarlyUpdate.RendererNotifyInvisible | TimeNanoseconds
+PlayerLoop | EarlyUpdate.PlayerCleanupCachedData | TimeNanoseconds
+PlayerLoop | CleanUp.TextRenderingGarbageCollect | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UpdateCanvasRectTransform | TimeNanoseconds
+PlayerLoop | EarlyUpdate.XRUpdate | TimeNanoseconds
+PlayerLoop | EarlyUpdate.UpdateInputManager | TimeNanoseconds
+PlayerLoop | EarlyUpdate.ScriptRunDelayedStartupFrame | TimeNanoseconds
+PlayerLoop | EarlyUpdate.DispatchEventQueueEvents | TimeNanoseconds
+PlayerLoop | EarlyUpdate.Physics2DEarlyUpdate | TimeNanoseconds
+PlayerLoop | EarlyUpdate.PhysicsResetInterpolatedTransformPosition | TimeNanoseconds
+PlayerLoop | EarlyUpdate.SpriteAtlasManagerUpdate | TimeNanoseconds
+PlayerLoop | EarlyUpdate.PerformanceAnalyticsUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.ClearLines | TimeNanoseconds
+PlayerLoop | FixedUpdate.NewInputFixedUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.DirectorFixedSampleTime | TimeNanoseconds
+PlayerLoop | FixedUpdate.AudioFixedUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.ScriptRunBehaviourFixedUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.DirectorFixedUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.LegacyFixedAnimationUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.XRFixedUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.PhysicsFixedUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.Physics2DFixedUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.PhysicsClothFixedUpdate | TimeNanoseconds
+PlayerLoop | FixedUpdate.DirectorFixedUpdatePostPhysics | TimeNanoseconds
+PlayerLoop | FixedUpdate.ScriptRunDelayedFixedFrameRate | TimeNanoseconds
+PlayerLoop | PreUpdate.PhysicsUpdate | TimeNanoseconds
+PlayerLoop | PreUpdate.Physics2DUpdate | TimeNanoseconds
+PlayerLoop | PreUpdate.CheckTexFieldInput | TimeNanoseconds
+PlayerLoop | PreUpdate.IMGUISendQueuedEvents | TimeNanoseconds
+PlayerLoop | PreUpdate.NewInputUpdate | TimeNanoseconds
+PlayerLoop | PreUpdate.SendMouseEvents | TimeNanoseconds
+PlayerLoop | PreUpdate.AIUpdate | TimeNanoseconds
+PlayerLoop | PreUpdate.WindUpdate | TimeNanoseconds
+PlayerLoop | PreUpdate.UpdateVideo | TimeNanoseconds
+PlayerLoop | Update.ScriptRunBehaviourUpdate | TimeNanoseconds
+PlayerLoop | Update.ScriptRunDelayedDynamicFrameRate | TimeNanoseconds
+PlayerLoop | Update.ScriptRunDelayedTasks | TimeNanoseconds
+PlayerLoop | Update.DirectorUpdate | TimeNanoseconds
+PlayerLoop | PreLateUpdate.AIUpdatePostScript | TimeNanoseconds
+PlayerLoop | PreLateUpdate.DirectorUpdateAnimationBegin | TimeNanoseconds
+PlayerLoop | PreLateUpdate.LegacyAnimationUpdate | TimeNanoseconds
+PlayerLoop | PreLateUpdate.DirectorUpdateAnimationEnd | TimeNanoseconds
+PlayerLoop | PreLateUpdate.DirectorDeferredEvaluate | TimeNanoseconds
+PlayerLoop | PreLateUpdate.EndGraphicsJobsAfterScriptUpdate | TimeNanoseconds
+PlayerLoop | PreLateUpdate.ConstraintManagerUpdate | TimeNanoseconds
+PlayerLoop | PreLateUpdate.ParticleSystemBeginUpdateAll | TimeNanoseconds
+PlayerLoop | PreLateUpdate.Physics2DLateUpdate | TimeNanoseconds
+PlayerLoop | PreLateUpdate.PhysicsLateUpdate | TimeNanoseconds
+PlayerLoop | PreLateUpdate.ScriptRunBehaviourLateUpdate | TimeNanoseconds
+PlayerLoop | UIEvents.StandAloneRenderUpdateCanvasRectTransform | TimeNanoseconds
+PlayerLoop | UIEvents.AlignCanvasRectTransformWithCamera | TimeNanoseconds
+PlayerLoop | UIEvents.WillRenderCanvases | TimeNanoseconds
+PlayerLoop | emitCanvasDataForCamera.Invoke | TimeNanoseconds
+PlayerLoop | addCustomLights.Invoke | TimeNanoseconds
+PlayerLoop | afterCullingOutputReady.Invoke | TimeNanoseconds
+PlayerLoop | beforeCameraRender.Invoke | TimeNanoseconds
+Render | GalleryPost | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PlayerSendFrameStarted | TimeNanoseconds
+PlayerLoop | FrameEvents.XRBeginFrame | TimeNanoseconds
+PlayerLoop | FrameEvents.NewInputBeforeRenderUpdate | TimeNanoseconds
+PlayerLoop | FrameEvents.OnBeforeRenderCallback | TimeNanoseconds
+PlayerLoop | PostLateUpdate.DirectorLateUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.ScriptRunDelayedDynamicFrameRate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PhysicsSkinnedClothBeginUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateRectTransform | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PlayerUpdateCanvases | TimeNanoseconds
+PlayerLoop | UIEvents.UpdateCanvasRectTransform | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateAudio | TimeNanoseconds
+Audio | Audibility computation | TimeNanoseconds
+PlayerLoop | PostLateUpdate.VFXUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.ParticleSystemEndUpdateAll | TimeNanoseconds
+PlayerLoop | PostLateUpdate.EndGraphicsJobsAfterScriptLateUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateCustomRenderTextures | TimeNanoseconds
+PlayerLoop | PostLateUpdate.XRPostLateUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateAllRenderers | TimeNanoseconds
+PlayerLoop | PostLateUpdate.EnlightenRuntimeUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateAllSkinnedMeshes | TimeNanoseconds
+PlayerLoop | PostLateUpdate.SortingGroupsUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateVideoTextures | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateVideo | TimeNanoseconds
+PlayerLoop | PostLateUpdate.DirectorRenderImage | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PlayerEmitCanvasGeometry | TimeNanoseconds
+PlayerLoop | UIEvents.CanvasManagerEmitOffScreenGeometry | TimeNanoseconds
+PlayerLoop | UIEvents.UIElementsRegisterRenderers | TimeNanoseconds
+PlayerLoop | UIEvents.CanvasmanagerEmitOnScreenGeometry | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PlayerRenderUIEBatchModeOffscreen | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PhysicsSkinnedClothFinishUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.FinishFrameRendering | TimeNanoseconds
+PlayerLoop | PostLateUpdate.BatchModeUpdate | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PlayerSendFrameComplete | TimeNanoseconds
+PlayerLoop | FrameEvents.XREndFrame | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateCaptureScreenshot | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PresentAfterDraw | TimeNanoseconds
+PlayerLoop | PostLateUpdate.ClearImmediateRenderers | TimeNanoseconds
+PlayerLoop | PostLateUpdate.PlayerSendFramePostPresent | TimeNanoseconds
+PlayerLoop | FrameEvents.XRPostPresent | TimeNanoseconds
+PlayerLoop | PostLateUpdate.UpdateResolution | TimeNanoseconds
+PlayerLoop | PostLateUpdate.InputEndFrame | TimeNanoseconds
+PlayerLoop | PostLateUpdate.TriggerEndOfFrameCallbacks | TimeNanoseconds
+PlayerLoop | PostLateUpdate.GUIClearEvents | TimeNanoseconds
+PlayerLoop | PostLateUpdate.ShaderHandleErrors | TimeNanoseconds
+PlayerLoop | PostLateUpdate.ResetInputAxis | TimeNanoseconds
+PlayerLoop | PostLateUpdate.ProfilerSynchronizeStats | TimeNanoseconds
+PlayerLoop | PostLateUpdate.MemoryFrameMaintenance | TimeNanoseconds
+PlayerLoop | PostLateUpdate.XRPreEndFrame | TimeNanoseconds
+PlayerLoop | PostLateUpdate.ProfilerEndFrame | TimeNanoseconds
+Scripts | Assembly-CSharp.dll!MindState::SilkComparison.Start() [Coroutine: System.Collections.IEnumerator.get_Current] [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.CoreModule.dll!UnityEngine::UnitySynchronizationContext.ExecuteTasks() [Invoke] | TimeNanoseconds
+Scripts | Assembly-CSharp.dll!MindState::SilkComparison.LateUpdate() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.UIModule.dll!UnityEngine::Canvas.SendPreWillRenderCanvases() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.CoreModule.dll!UnityEngine::Camera.FireOnPreCull() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.CoreModule.dll!UnityEngine::Camera.FireOnPreRender() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.CoreModule.dll!UnityEngine::Camera.FireOnPostRender() [Invoke] | TimeNanoseconds
+Scripts | Assembly-CSharp.dll!MindState::GalleryPost.OnRenderImage() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.GetCurrentPipelineAssetType() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.InputModule.dll!UnityEngineInternal.Input::NativeInputSystem.ShouldRunUpdate() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.InputModule.dll!UnityEngineInternal.Input::NativeInputSystem.NotifyBeforeUpdate() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.InputModule.dll!UnityEngineInternal.Input::NativeInputSystem.NotifyUpdate() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.CoreModule.dll!UnityEngine::Application.InvokeOnBeforeRender() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.CoreModule.dll!UnityEngine.Rendering::SupportedRenderingFeatures.IsLightmapBakeTypeSupportedByRef() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.CoreModule.dll!UnityEngine.Rendering::OnDemandRendering.GetRenderFrameInterval() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.InputLegacyModule.dll!UnityEngine::SendMouseEvents.DoSendMouseEvents() [Invoke] | TimeNanoseconds
+Scripts | UnityEngine.AIModule.dll!UnityEngine.AI::NavMesh.Internal_CallOnNavMeshPreUpdate() [Invoke] | TimeNanoseconds
+Scripts | Assembly-CSharp.dll!MindState::GalleryController.Update() [Invoke] | TimeNanoseconds
+Scripts | Assembly-CSharp.dll!MindState::HeroPetal.Update() [Invoke] | TimeNanoseconds
+Scripts | Assembly-CSharp.dll!MindState::SilkComparison.Update() [Invoke] | TimeNanoseconds
+Scripts | Assembly-CSharp.dll!MindState::SilkComparison.Start() [Coroutine: MoveNext] [Invoke] | TimeNanoseconds

@@ -1,0 +1,7 @@
+PASS unchanged: public void SetShapeParameters
+PASS unchanged: public void SetBrainMetrics
+PASS unchanged: void AcceptBrain
+PASS unchanged: public void RestartOpening
+PASS unchanged: public void SetShapeImmediate
+PASS unchanged: public void SetImmediate
+PASS unchanged: public void ResetDemo

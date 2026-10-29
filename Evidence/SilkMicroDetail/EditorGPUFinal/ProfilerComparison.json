@@ -1,0 +1,353 @@
+{
+    "unity": "2022.3.62f3c1",
+    "gpu": "NVIDIA GeForce RTX 3080",
+    "cpu": "11th Gen Intel(R) Core(TM) i5-11600KF @ 3.90GHz",
+    "graphicsApi": "Direct3D11",
+    "resolution": "1920x1080 offscreen 4xMSAA",
+    "mainCounter": "CPU Main Thread Frame Time",
+    "renderCounter": "CPU Render Thread Frame Time",
+    "gpuCounter": "GPU Frame Time",
+    "frameLimit": -1,
+    "meshVertices": 21730,
+    "meshTriangles": 41792,
+    "baselinePasses": 5,
+    "optimizedPasses": 5,
+    "segments": [
+        {
+            "name": "Frozen_1_A",
+            "variant": "A",
+            "animated": false,
+            "samples": 2099,
+            "seconds": 2.000345230102539,
+            "mainMs": {
+                "mean": 0.35777007860886175,
+                "p95": 0.5,
+                "min": 0.2989,
+                "max": 6.6537,
+                "availableSamples": 2099
+            },
+            "renderMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "gpuMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "gpuCameraMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "petalMs": {
+                "mean": 0.001682372558361113,
+                "p95": 0.0028,
+                "min": 0.0013,
+                "max": 0.0104,
+                "availableSamples": 2099
+            },
+            "submitMs": {
+                "mean": 0.24285002382086774,
+                "p95": 0.3292,
+                "min": 0.2095,
+                "max": 0.6662,
+                "availableSamples": 2099
+            },
+            "vertices": {
+                "mean": 152118.0,
+                "p95": 152118.0,
+                "min": 152118.0,
+                "max": 152118.0,
+                "availableSamples": 2099
+            },
+            "batches": {
+                "mean": 9.0,
+                "p95": 9.0,
+                "min": 9.0,
+                "max": 9.0,
+                "availableSamples": 2099
+            },
+            "gcFrame": {
+                "mean": 0.81467365412101,
+                "p95": 0.0,
+                "min": 0.0,
+                "max": 117.0,
+                "availableSamples": 2099
+            },
+            "petalGc": {
+                "mean": 0.0,
+                "p95": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "availableSamples": 2099
+            },
+            "frameMs": {
+                "mean": 0.9558312057738431,
+                "p95": 1.306600053794682,
+                "min": 0.8450999739579856,
+                "max": 7.231799885630608,
+                "availableSamples": 2099
+            }
+        },
+        {
+            "name": "Frozen_1_B",
+            "variant": "B",
+            "animated": false,
+            "samples": 2136,
+            "seconds": 2.0005931854248049,
+            "mainMs": {
+                "mean": 0.3636515426029964,
+                "p95": 0.517,
+                "min": 0.2989,
+                "max": 6.3332,
+                "availableSamples": 2136
+            },
+            "renderMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "gpuMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "gpuCameraMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "petalMs": {
+                "mean": 0.0017374999999999908,
+                "p95": 0.0029,
+                "min": 0.0013,
+                "max": 0.0086,
+                "availableSamples": 2136
+            },
+            "submitMs": {
+                "mean": 0.2464720973782769,
+                "p95": 0.3357,
+                "min": 0.2119,
+                "max": 0.6466,
+                "availableSamples": 2136
+            },
+            "vertices": {
+                "mean": 152118.0,
+                "p95": 152118.0,
+                "min": 152118.0,
+                "max": 152118.0,
+                "availableSamples": 2136
+            },
+            "batches": {
+                "mean": 9.0,
+                "p95": 9.0,
+                "min": 9.0,
+                "max": 9.0,
+                "availableSamples": 2136
+            },
+            "gcFrame": {
+                "mean": 0.7780898876404494,
+                "p95": 0.0,
+                "min": 0.0,
+                "max": 158.0,
+                "availableSamples": 2136
+            },
+            "petalGc": {
+                "mean": 0.0,
+                "p95": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "availableSamples": 2136
+            },
+            "frameMs": {
+                "mean": 0.9393329121266607,
+                "p95": 1.3142999960109592,
+                "min": 0.8262000046670437,
+                "max": 6.878499872982502,
+                "availableSamples": 2136
+            }
+        },
+        {
+            "name": "Animated_1_A",
+            "variant": "A",
+            "animated": true,
+            "samples": 291,
+            "seconds": 2.000865936279297,
+            "mainMs": {
+                "mean": 6.2513676975945009,
+                "p95": 6.6714,
+                "min": 5.8921,
+                "max": 11.8508,
+                "availableSamples": 291
+            },
+            "renderMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "gpuMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "gpuCameraMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "petalMs": {
+                "mean": 5.57384673539519,
+                "p95": 5.8277,
+                "min": 5.384,
+                "max": 6.1851,
+                "availableSamples": 291
+            },
+            "submitMs": {
+                "mean": 0.45219209621993125,
+                "p95": 0.5988,
+                "min": 0.3384,
+                "max": 0.9334,
+                "availableSamples": 291
+            },
+            "vertices": {
+                "mean": 152118.0,
+                "p95": 152118.0,
+                "min": 152118.0,
+                "max": 152118.0,
+                "availableSamples": 291
+            },
+            "batches": {
+                "mean": 9.0,
+                "p95": 9.0,
+                "min": 9.0,
+                "max": 9.0,
+                "availableSamples": 291
+            },
+            "gcFrame": {
+                "mean": 87.4295532646048,
+                "p95": 82.0,
+                "min": 82.0,
+                "max": 240.0,
+                "availableSamples": 291
+            },
+            "petalGc": {
+                "mean": 0.0,
+                "p95": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "availableSamples": 291
+            },
+            "frameMs": {
+                "mean": 6.894128515522709,
+                "p95": 7.436300162225962,
+                "min": 6.437799893319607,
+                "max": 12.497900053858757,
+                "availableSamples": 291
+            }
+        },
+        {
+            "name": "Animated_1_B",
+            "variant": "B",
+            "animated": true,
+            "samples": 290,
+            "seconds": 2.0053138732910158,
+            "mainMs": {
+                "mean": 6.286954824137926,
+                "p95": 6.7549,
+                "min": 5.9167,
+                "max": 12.1288,
+                "availableSamples": 290
+            },
+            "renderMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "gpuMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "gpuCameraMs": {
+                "mean": -1.0,
+                "p95": -1.0,
+                "min": -1.0,
+                "max": -1.0,
+                "availableSamples": 0
+            },
+            "petalMs": {
+                "mean": 5.5832451724137919,
+                "p95": 5.9127,
+                "min": 5.389,
+                "max": 7.6145,
+                "availableSamples": 290
+            },
+            "submitMs": {
+                "mean": 0.4586275862068967,
+                "p95": 0.6084,
+                "min": 0.341,
+                "max": 0.9772,
+                "availableSamples": 290
+            },
+            "vertices": {
+                "mean": 152118.0,
+                "p95": 152118.0,
+                "min": 152118.0,
+                "max": 152118.0,
+                "availableSamples": 290
+            },
+            "batches": {
+                "mean": 9.0,
+                "p95": 9.0,
+                "min": 9.0,
+                "max": 9.0,
+                "availableSamples": 290
+            },
+            "gcFrame": {
+                "mean": 87.44827586206897,
+                "p95": 82.0,
+                "min": 82.0,
+                "max": 240.0,
+                "availableSamples": 290
+            },
+            "petalGc": {
+                "mean": 0.0,
+                "p95": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "availableSamples": 290
+            },
+            "frameMs": {
+                "mean": 6.9352027478403059,
+                "p95": 7.5888000428676609,
+                "min": 6.459299940615892,
+                "max": 12.749100103974343,
+                "availableSamples": 290
+            }
+        }
+    ]
+}

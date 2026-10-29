@@ -84,7 +84,9 @@ finePleatCount 可在 Inspector 中设为 20–40，默认 32；改变细纹数�
 
 几何包含七条不完全规则的放射宽褶皱、非线性径向弯折、横向包卷、左右不同的局部翻折，以及多尺度软波浪外缘。根部保留非零尺寸，外缘不向中央尖端收拢。复用网格和工作数组。
 
-材质使用 Built-in StandardSpecular、宽高光和低强度掠射 sheen。单周期细纹法线沿角向重复 20–40 次，根部与外缘减弱，启用 mipmap、Trilinear 和各向异性过滤。已移除中央叶脉、金色分叉脉及羽枝。
+材质使用 Built-in StandardSpecular、宽高光和低强度掠射 sheen。细纹为覆盖完整扇面 UV 的非均匀放射法线，包含轻微弯曲、疏密变化和弱二级纤维；主细纹数量仍可设为 20–40。根部、远景和掠射角减弱细纹，启用 mipmap、Trilinear 和各向异性过滤。已移除中央叶脉、金色分叉脉及羽枝。
+
+轻量视觉优化另用一张打包遮罩提供 Smoothness Variation、微弱淡粉色差和背光权重，新增一次纹理采样，不增加渲染 Pass。主褶皱振幅为此前扇形版本的 80%；拓扑、卷绕、翻折、动画与脑机接口不变。法线与遮罩均为 1024² 线性数据纹理，实际材质额外纹理内存约 5.3 MiB（RGBA32 含 mipmap）。
 
 采用不透明深度写入，以薄片背光近似表现透光；**不是真实折射或物理次表面散射**。默认关闭 Bloom 和装饰粒子，使用中性主光、淡紫补光和冷色轮廓光。
 
@@ -98,12 +100,22 @@ finePleatCount 可在 Inspector 中设为 20–40，默认 32；改变细纹数�
     # 重生成材质、纹理、Prefab、场景，再构建；会覆盖这些生成资产
     powershell -ExecutionPolicy Bypass -File .\Tools\Build.ps1 -RecreateArt
 
-    # 三参数 27 组 × 3 个展开阶段检查、截图、900 秒长时测试
-    powershell -ExecutionPolicy Bypass -File .\Tools\Verify.ps1 -Seconds 900
+    # 三参数 27 组 × 3 个展开阶段检查、截图、短时回归
+    powershell -ExecutionPolicy Bypass -File .\Tools\Verify.ps1 -Seconds 10
+
+    # A/B 截图与 Profiler 三轮对比：冻结/动态两类，各三组 A/B、每段 60 秒
+    powershell -ExecutionPolicy Bypass -File .\Tools\CompareSilk.ps1
+
+    # 只生成 A/B 与展开阶段截图
+    powershell -ExecutionPolicy Bypass -File .\Tools\CompareSilk.ps1 -ScreensOnly
 
 编辑器菜单：MindState > Rebuild Gallery Assets / Build Windows Player。
 
-新结果写入 **Evidence/FanPetal**，与旧版 Evidence/Final 分开。先输出灰模，再输出丝绸多视角、细节、八组角点及五个展开阶段截图。检查有限坐标、法线、三角形退化、绕序和包围盒；长时测试交替输入三参数和脑电指标，持续环绕，每 30 秒重播展开。
+当前轻量优化结果写入 **Evidence/SilkMicroDetail**。Regression 子目录为原有网格、接口与展开回归；A_ / B_ 图片分别为优化前后，拍摄时相机、灯光、曝光、造型目标一致，关闭 Bloom 并固定材质呼吸。旧版 Evidence/FanPetal 和 Evidence/Final 保留供对照。
+
+ProfilerComparison.json 保存每轮均值和 P95，CSV 为逐帧原始计数器数据；四个代表性 .raw 文件可在 Unity Profiler 的 Load 功能中打开。采样关闭 Deep Profile、VSync 和限帧，冻结及动态各三轮，轮换 A/B 顺序，使用同一 Development Build。每段先预热 10 秒再记录 60 秒。CPU 提交耗时不等于 GPU 时间；没有返回有效值的 GPU/渲染线程帧指标用 -1 表示，并保存编辑器 GPU Profiler 的复查结果。
+
+A 基线资源仅由开发诊断工具显式加载，不会额外绘制一个花瓣；正式场景继续使用原有 Pearl 材质资产。生产版本的微纹全部由 Shader 实现，不添加逐纹几何或额外 CPU 网格更新。开发版的诊断振幅切换保留 A=100%、B=80%，Release 版本固定使用 80%。
 
 验证器在隐藏窗口中每帧显式 Camera.Render 到 1920×1080、4× MSAA RenderTexture，实际执行 GPU 渲染。相机截图不含操作面板。Validation.json 保存性能、内存、材质及检查结果；GPU 计时 -1 表示未返回有效数据。GC 指标仅覆盖曲面和材质参数更新，不包含 IMGUI、截图与日志。
 
