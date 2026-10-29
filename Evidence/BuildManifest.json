@@ -1,0 +1,70 @@
+[
+  {
+    "path": "Assets\\HeroPetal\\Art\\Champagne.mat",
+    "sha256": "97D9642FD55417F2E113CD8C0DF67F298D99CC123C5554C0C5A0032E24044DB8"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Art\\FilamentDetail.png",
+    "sha256": "E7404826A5CDB8FC8FFB33E5FF177F1353A67593AEFF1EFA96F70938A38751C5"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Art\\FilamentNormal.png",
+    "sha256": "AF8437125094BF279EEAF74EAD91A06E2B64C0DA9BC116CE682C2850000EA83E"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Art\\GoldBarb.asset",
+    "sha256": "4BA32C607E010C11DECC606C5CBE48033DCE71B94664E1A073320B4F5730582B"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Art\\Pearl.mat",
+    "sha256": "D0A2861495512E420C85DC02B73652B13506183B4192EEC24C8B335F731D69F1"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Art\\StudioReflection.asset",
+    "sha256": "CA07AF579E45EDB7E65ADA00A2A966F49B0C7B2A2D7B6F18F66AA81E74F5D195"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Editor\\CreateGallery.cs",
+    "sha256": "E677671FDEF8771BC3BE0A9D6E987B17B4056DEFDFBDC817FD084C31C4CFFFF6"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Editor\\EditorSmoke.cs",
+    "sha256": "CD4D5D631BCBE5903641AEF3CA2E1E8ADE423C34DAB1133AFD41BA9E7F67F47B"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Prefabs\\HeroPetal.prefab",
+    "sha256": "60E58FACDEEC90EF49F3CA3071449BC940E362184D813AA12A780E2D35F90E80"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Runtime\\GalleryController.cs",
+    "sha256": "AE5A4B256193796614BC4021C7F564D7B5BEF76B1605C09150C2F80A06AC3C5B"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Runtime\\GalleryPost.cs",
+    "sha256": "7230949E47733BB394B0C89AE992C31F5B0FE6610260605C4892B208E31F953D"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Runtime\\HeroPetal.cs",
+    "sha256": "64E6FFCD279AAF43C79207F210B07E5F17A60035763AB3FFB7239496142C67D6"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Runtime\\RuntimeValidation.cs",
+    "sha256": "6D2AB7C7036DB180B8636330443570ADFADDC5C106C4BFBFC410EFAA64A4F8CE"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Scenes\\HeroPetalGallery.unity",
+    "sha256": "6A6980874F8427B6B42455F2411D40EF242265E43ACAE6C5DC18C8E680FF11F1"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Shaders\\GalleryPost.shader",
+    "sha256": "B039DCEA2FF74AE26FEA892FA7AC1FDFA98475968B0FDFBADC8BB80047687C91"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Shaders\\Gold.shader",
+    "sha256": "DE6FA0173C9F23519ADFEDE202FDB0D4BABDCD5029494DB3EDA0A6C2A6843FF0"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Shaders\\Pearl.shader",
+    "sha256": "F666B1E25B9A78B89F838DB9AE86EF2068C1091C40438A4E0F9F85CBA15EBF9C"
+  }
+]

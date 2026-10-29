@@ -1,0 +1,54 @@
+[
+  {
+    "path": "Assets\\HeroPetal\\Art\\Pearl.mat",
+    "sha256": "2D449D2626F6464EFDB5F696E36551691668048D4007D30C36560A1B8BC0AB4B"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Art\\RadialSilkNormal.png",
+    "sha256": "75A78C6A4A2AE0C447CB2352999FC4CD282C425DEDBCB61A13C3F52C55425B00"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Art\\StudioReflection.asset",
+    "sha256": "CA07AF579E45EDB7E65ADA00A2A966F49B0C7B2A2D7B6F18F66AA81E74F5D195"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Editor\\CreateGallery.cs",
+    "sha256": "8D358120C0D0C3E6C1926D4539843E73C1A84EC1685B46DF0591E4261CDF9D82"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Editor\\EditorSmoke.cs",
+    "sha256": "DDFAA93589B5864C74D23B6E4BF3B6568BE7F3195AEE59DA057145B744EE4BE1"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Prefabs\\HeroPetal.prefab",
+    "sha256": "64D7D0CFEFD9125F7E809890592D797E1258C75DABBE54C983D58E173CC24DBC"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Runtime\\GalleryController.cs",
+    "sha256": "9BCCE2AA5A31393C2F5443A5B02A07106CB28A8529583854CD0969F729326EC3"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Runtime\\GalleryPost.cs",
+    "sha256": "EAB2DB50EB5DB2E5863AD8CEA036F6ECA2CA9E6F7FFC618F69D79BAA56D0FC91"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Runtime\\HeroPetal.cs",
+    "sha256": "66E485F6FC2316AD3E5DC0BC41A6C1DB203C48FF75A735F01B135FE9F2D43151"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Runtime\\RuntimeValidation.cs",
+    "sha256": "619B67D8F48B2F72C25A5551B528EDE8F6C795B4913EF31721795B36E668B542"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Scenes\\HeroPetalGallery.unity",
+    "sha256": "2ABC3B67F4DBD54E6D5AF6962EC9914ED641523466E3E35F72425833C055E62C"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Shaders\\GalleryPost.shader",
+    "sha256": "B039DCEA2FF74AE26FEA892FA7AC1FDFA98475968B0FDFBADC8BB80047687C91"
+  },
+  {
+    "path": "Assets\\HeroPetal\\Shaders\\Pearl.shader",
+    "sha256": "596F558C8426FC0370E4113647226FCC7E9F461B331404DDDA90F521630F06E6"
+  }
+]
