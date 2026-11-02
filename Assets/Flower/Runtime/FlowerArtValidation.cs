@@ -27,7 +27,7 @@ public sealed class FlowerArtValidation:MonoBehaviour {
  string path; Camera cam; RenderTexture rt; Texture2D tex;
  void Shot(string file) { cam.Render(); var old=RenderTexture.active; RenderTexture.active=rt; tex.ReadPixels(new Rect(0,0,rt.width,rt.height),0,0); tex.Apply(); RenderTexture.active=old; File.WriteAllBytes(file,tex.EncodeToJPG(90)); }
  IEnumerator Start() {
- path=Path.Combine(Application.dataPath,"../../../Evidence/FlowerArt"); Directory.CreateDirectory(path); File.WriteAllText(path+"/Complete.txt","Running"); File.WriteAllText(path+"/Checks.txt","");
+ path=Path.Combine(Application.dataPath,Array.IndexOf(Environment.GetCommandLineArgs(),"-heartRegression")>=0?"../../../Evidence/FlowerHeart/ArtRegression":"../../../Evidence/FlowerArt"); Directory.CreateDirectory(path); File.WriteAllText(path+"/Complete.txt","Running"); File.WriteAllText(path+"/Checks.txt","");
  yield return null; var f=FindObjectOfType<FlowerAssembler>(); var g=FindObjectOfType<FlowerGallery>(); g.showInterface=false;
  cam=GetComponent<Camera>(); cam.enabled=false; rt=new RenderTexture(960,540,24){antiAliasing=4}; rt.Create(); cam.targetTexture=rt; tex=new Texture2D(960,540,TextureFormat.RGB24,false);
  g.SetView(22,55,9); QualitySettings.vSyncCount=0; Application.targetFrameRate=-1;
@@ -42,7 +42,7 @@ public sealed class FlowerArtValidation:MonoBehaviour {
  for(int i=0;i<4;i++) {
  f.SetArtPreviewImmediate((FlowerArtState)i); string folder=path+"/"+((FlowerArtState)i); Directory.CreateDirectory(folder);
  yield return null; Shot(path+"/"+((FlowerArtState)i)+".jpg"); int before=f.MeshUpdates;
- for(int frame=0;frame<(Array.IndexOf(Environment.GetCommandLineArgs(),"-artScreensOnly")>=0?0:400);frame++) { Shot(folder+"/"+frame.ToString("0000")+".jpg"); yield return null; }
+ for(int frame=0;frame<(Array.IndexOf(Environment.GetCommandLineArgs(),"-artScreensOnly")>=0?0:(Array.IndexOf(Environment.GetCommandLineArgs(),"-heartRegression")>=0?100:400));frame++) { if(Array.IndexOf(Environment.GetCommandLineArgs(),"-heartRegression")<0||frame%20==0) Shot(folder+"/"+frame.ToString("0000")+".jpg"); yield return null; }
  Require(i==1 ? (Array.IndexOf(Environment.GetCommandLineArgs(),"-artScreensOnly")>=0||f.MeshUpdates>before) : before==f.MeshUpdates,i==1?"Gathering breath uses cached mesh uploads":"No art mesh uploads "+i); Require(f.RootAnchorError()<.0001f,"Attached roots "+i);
  }
  if(Array.IndexOf(Environment.GetCommandLineArgs(),"-artScreensOnly")>=0) { Application.Quit(); yield break; }
@@ -51,7 +51,7 @@ public sealed class FlowerArtValidation:MonoBehaviour {
  if(clip==0) { f.SetArtPreviewImmediate(FlowerArtState.Clarity); f.SetArtState(FlowerArtState.Gathering); }
  else { f.SetArtPreviewImmediate(FlowerArtState.Gathering); f.SetArtState(clip==1?FlowerArtState.Clarity:clip==2?FlowerArtState.Wandering:FlowerArtState.Quiet); }
  string folder=path+"/"+(clip==0?"EnterGathering":"ExitGathering"+clip); Directory.CreateDirectory(folder);
- for(int frame=0;frame<400;frame++) { Shot(folder+"/"+frame.ToString("0000")+".jpg"); yield return null; }
+ for(int frame=0;frame<(Array.IndexOf(Environment.GetCommandLineArgs(),"-heartRegression")>=0?100:400);frame++) { if(Array.IndexOf(Environment.GetCommandLineArgs(),"-heartRegression")<0||frame%20==0) Shot(folder+"/"+frame.ToString("0000")+".jpg"); yield return null; }
  }
  f.SetArtPreviewImmediate(FlowerArtState.Gathering); f.SetFrozen(true);
  foreach(float elevation in new[]{90f,8f,55f}) { g.SetView(22,elevation,9); yield return null; Shot(path+"/Bud_View_"+elevation+".jpg"); }
@@ -70,13 +70,14 @@ public sealed class FlowerArtValidation:MonoBehaviour {
  f.SetBrainMetrics(1,1); Require(f.ArtStatus=="外部脑电","External reconnect");
  int meshes=Resources.FindObjectsOfTypeAll<Mesh>().Length, mats=Resources.FindObjectsOfTypeAll<Material>().Length;
  f.SimulateArtBrain(); var samples=new List<float>(); long maxGc=0; double interpolationTotal=0,uploadTotal=0; int startUpdates=f.MeshUpdates;
- float until=Time.realtimeSinceStartup+600,reportAt=Time.realtimeSinceStartup+30;
+ float soakSeconds=Array.IndexOf(Environment.GetCommandLineArgs(),"-heartRegression")>=0?60:600;
+ float until=Time.realtimeSinceStartup+soakSeconds,reportAt=Time.realtimeSinceStartup+30;
  while(Time.realtimeSinceStartup<until) {
  cam.Render(); samples.Add((float)f.LastUpdateMilliseconds); interpolationTotal+=f.InterpolateMs; uploadTotal+=f.UploadMs; maxGc=Math.Max(maxGc,f.LastUpdateAllocation);
- if(Time.realtimeSinceStartup>=reportAt) { File.WriteAllText(path+"/Progress.txt",(600-(until-Time.realtimeSinceStartup)).ToString("F0")+" seconds"); reportAt+=30; }
+ if(Time.realtimeSinceStartup>=reportAt) { File.WriteAllText(path+"/Progress.txt",(soakSeconds-(until-Time.realtimeSinceStartup)).ToString("F0")+" seconds"); reportAt+=30; }
  yield return null;
  }
- Require(f.MeshUpdates>startUpdates,"Cached path uploads during ten-minute blend"); Require(meshes==Resources.FindObjectsOfTypeAll<Mesh>().Length,"Stable mesh count"); Require(mats==Resources.FindObjectsOfTypeAll<Material>().Length,"Stable material count"); Require(maxGc==0,"Art update zero GC");
+ Require(f.MeshUpdates>startUpdates,"Cached path uploads during blend soak"); Require(meshes==Resources.FindObjectsOfTypeAll<Mesh>().Length,"Stable mesh count"); Require(mats==Resources.FindObjectsOfTypeAll<Material>().Length,"Stable material count"); Require(maxGc==0,"Art update zero GC");
  samples.Sort(); File.WriteAllText(path+"/Performance.txt","samples="+samples.Count+" updateP95ms="+samples[(int)(samples.Count*.95f)]+" maxUpdateGc="+maxGc+" interpolationMeanMs="+interpolationTotal/samples.Count+" uploadMeanMs="+uploadTotal/samples.Count+" meshUploads="+(f.MeshUpdates-startUpdates));
  File.WriteAllText(path+"/Complete.txt","Complete"); Application.Quit();
  }

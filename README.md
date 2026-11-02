@@ -1,12 +1,14 @@
 # MindState · main 正式版本
 
+已批准合入根部裁切与连续花丝版本，底部球体移除、原薄圆片下移。见[当前发布记录](Docs/FlowerRelease.md)。
+
 当前主版本为四态脑电艺术呈现，凝聚完整复用原开合轨迹收拢为花苞，并在原全局进度0–0.04内作5秒周期轻微呼吸。默认进入澄明（慢旋转＋规则微颤），漫游错相摇曳，幽微保持直立并呈现柔和慢波。
 
 - Unity 2022.3.62f3c1，Built-in Render Pipeline。
 - 正式场景：[FlowerGallery](Assets/Flower/Scenes/FlowerGallery.unity)。
 - 正式配置：[ExhibitionPeony](Assets/Flower/Art/ExhibitionPeony.asset)。
 - 唯一正式程序：[MindState.exe](Builds/Windows/MindState.exe)。保留同目录Data、MonoBleedingEdge和DLL。
-- [操作及接口](Assets/Flower/README.zh-CN.md) · [最新实机视频与验收](Evidence/FlowerArt/报告.md)。
+- [操作及接口](Assets/Flower/README.zh-CN.md) · [最新实机视频与验收](Docs/FlowerRelease.md)。
 
 面板选择四态、模拟脑电或外部输入；空格冻结/继续，H隐藏面板，拖动环绕，滚轮缩放，R进入原开合重播，重置恢复澄明。
 

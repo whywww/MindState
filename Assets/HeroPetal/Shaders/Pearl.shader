@@ -16,6 +16,7 @@ Shader "MindState/Radial Pearl Silk"
         _ArtClock ("Art clock", Float) = 0
         _ArtPhase ("Art phase", Float) = 0
         _Breath ("Breathing", Float) = 0
+        _RootTrim ("Petal root cut", Vector) = (0,0,0,0)
     }
     SubShader
     {
@@ -27,10 +28,17 @@ Shader "MindState/Radial Pearl Silk"
         sampler2D _BumpMap,_DetailMask;
         fixed4 _Color,_RootColor,_PinkColor;
         half _BumpStrength,_Smoothness,_SmoothnessVariation,_FineCount,_GrayMode,_Breath;
+        float4 _RootTrim; float4x4 _RootTrimWorldToFlower;
         float4 _ArtWeights; float _ArtClock,_ArtPhase;
         struct Input { float2 uv_BumpMap; float3 viewDir; float3 worldPos; float3 worldNormal; INTERNAL_DATA };
         void surf(Input IN,inout SurfaceOutputStandardSpecular o)
         {
+            if(_RootTrim.x>.5) {
+                float3 root=mul(_RootTrimWorldToFlower,float4(IN.worldPos,1)).xyz;
+                float radius=length(root.xz);
+                if(IN.uv_BumpMap.y<=.25 || radius<_RootTrim.z*1.15) clip(root.y-(_RootTrim.y+.004));
+                if(IN.uv_BumpMap.y<=.25 && root.y<_RootTrim.w) clip(_RootTrim.z-radius);
+            }
             float2 uv=IN.uv_BumpMap;
             float2 detailUV=float2(uv.x*(_FineCount/32.0),uv.y);
             half4 detail=tex2D(_DetailMask,detailUV);

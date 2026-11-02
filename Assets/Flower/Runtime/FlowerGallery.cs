@@ -37,13 +37,13 @@ namespace MindState
         {
             float a=azimuth*Mathf.Deg2Rad,e=elevation*Mathf.Deg2Rad;
             Vector3 dir=new Vector3(Mathf.Sin(a)*Mathf.Cos(e),Mathf.Sin(e),-Mathf.Cos(a)*Mathf.Cos(e));
-            return Quaternion.LookRotation(-dir,elevation>89?Vector3.forward:Vector3.up);
+            return Quaternion.LookRotation(-dir,Mathf.Abs(elevation)>89?Vector3.forward:Vector3.up);
         }
         void PositionCamera()
         {
             float a=azimuth*Mathf.Deg2Rad,e=elevation*Mathf.Deg2Rad;
             Vector3 dir=new Vector3(Mathf.Sin(a)*Mathf.Cos(e),Mathf.Sin(e),-Mathf.Cos(a)*Mathf.Cos(e));
-            Vector3 up=elevation>89?Vector3.forward:Vector3.up;
+            Vector3 up=Mathf.Abs(elevation)>89?Vector3.forward:Vector3.up;
             Quaternion rotation=Quaternion.LookRotation(-dir,up);
             Vector3 target=focus-rotation*Vector3.right*(showInterface?.55f:0);
             transform.SetPositionAndRotation(target+dir*distance,rotation);

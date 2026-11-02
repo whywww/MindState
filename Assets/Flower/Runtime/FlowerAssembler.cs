@@ -137,6 +137,8 @@ namespace MindState
                 }
             }
             Destroy(source.gameObject); BuildHeart();
+            float discRadius=0;foreach(var layer in layers)discRadius=Mathf.Max(discRadius,layer.config.rootRadius);
+            foreach(var layer in layers)foreach(var petal in layer.petals)petal.block.SetVector("_RootTrim",new Vector4(1,layers[0].config.rootHeight,(discRadius+.04f)*.92f,layers[0].config.rootHeight+.012f));
             float initialProgress=bloomProgress; bloomProgress=1; ApplyPose(); FullBloomBounds=WorldBounds;
             foreach(var l in layers) foreach(var p in l.petals) p.fullMatrix=p.body.localToWorldMatrix;
             bloomProgress=initialProgress; ApplyPose();
@@ -208,6 +210,8 @@ namespace MindState
             p.anchor.SetLocalPositionAndRotation(position,rotation);
             p.scale=scale; p.body.localScale=scale;
             p.body.localPosition=-Vector3.Scale(SurfaceFor(l,index).root,scale);
+            p.block.SetMatrix("_RootTrimWorldToFlower",p.anchor.parent.worldToLocalMatrix);
+            p.renderer.SetPropertyBlock(p.block);
         }
         static Vertex Interpolate(Vertex a,Vertex b,float f) { Vertex r; Interpolate(ref a,ref b,f,out r); return r; }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -250,29 +254,60 @@ namespace MindState
             rotation=Quaternion.LookRotation(depth,direction)*Quaternion.Euler(0,cachedRoll??c.RollAt(progress),0)*Quaternion.Euler(0,0,roll);
         }
         static float RootStaggerSign(int index,int count)=>count%2==1&&index==count-1?0:index%2==0?-1:1;
-        // Small solid heart and twelve short, rounded stamens, combined once; no transparent passes.
+        // Concealed roots and curved filaments are generated once and share two renderers.
         void BuildHeart()
         {
             coreMesh=CombineHeart(false); stamenMesh=CombineHeart(true);
-            AddHeartRenderer("Warm blush receptacle",coreMesh,coreMaterial);
-            AddHeartRenderer("Champagne & pearl anthers",stamenMesh,stamenMaterial);
+            AddHeartRenderer("Concealed filament roots",coreMesh,coreMaterial);
+            AddHeartRenderer("Layered champagne anthers",stamenMesh,stamenMaterial);
         }
         Mesh CombineHeart(bool anthers)
         {
-            int count=anthers?12:13; var parts=new CombineInstance[count];
-            GameObject primitive=GameObject.CreatePrimitive(PrimitiveType.Sphere); primitive.SetActive(false); primitive.transform.SetParent(generated,false);
-            Mesh sphere=primitive.GetComponent<MeshFilter>().sharedMesh;
-            for(int i=0;i<count;i++)
+            var vertices=new System.Collections.Generic.List<Vector3>();
+            var uv=new System.Collections.Generic.List<Vector2>();
+            var triangles=new System.Collections.Generic.List<int>();
+            Action<Vector3,Vector3,int,int,float> ellipsoid=(center,scale,rings,sides,groove)=>
             {
-                float a=i*2.399963f,r=.07f+.055f*Mathf.Sqrt((i+1)/12f);
-                Vector3 position,scale;
-                if(!anthers&&i==0) { position=new Vector3(0,1.05f,0); scale=new Vector3(.36f,.15f,.36f); }
-                else { int j=anthers?i:i-1; a=j*2.399963f; r=.065f+.065f*Mathf.Sqrt((j+1)/12f); float height=1.13f+.045f*Mathf.Sin(j*1.7f);
-                    position=new Vector3(Mathf.Cos(a)*r,anthers?height:1.08f,Mathf.Sin(a)*r);
-                    scale=anthers?new Vector3(.042f,.055f,.038f):new Vector3(.015f,(height-1.07f)*2,.015f); }
-                parts[i]=new CombineInstance { mesh=sphere,transform=Matrix4x4.TRS(position,Quaternion.Euler(0,i*31,12*Mathf.Sin(i)),scale) };
+                int start=vertices.Count;
+                for(int y=0;y<=rings;y++) for(int x=0;x<=sides;x++)
+                {
+                    float v=y/(float)rings,u=x/(float)sides,t=v*Mathf.PI,a=u*Mathf.PI*2;
+                    float g=1-groove*Mathf.Pow(Mathf.Abs(Mathf.Cos(a)),16);
+                    vertices.Add(center+Vector3.Scale(new Vector3(Mathf.Sin(t)*Mathf.Cos(a)*g,Mathf.Cos(t),Mathf.Sin(t)*Mathf.Sin(a)),scale)); uv.Add(new Vector2(u,v));
+                }
+                for(int y=0;y<rings;y++) for(int x=0;x<sides;x++)
+                {
+                    int q=start+y*(sides+1)+x;
+                    if(y>0) { triangles.Add(q);triangles.Add(q+1);triangles.Add(q+sides+1); }
+                    if(y<rings-1) { triangles.Add(q+1);triangles.Add(q+sides+2);triangles.Add(q+sides+1); }
+                }
+            };
+            float floorY=layers[0].config.rootHeight;
+            float floorRadius=0; foreach(var layer in layers) floorRadius=Mathf.Max(floorRadius,layer.config.rootRadius);
+            floorRadius+=.04f;
+            if(!anthers)
+                ellipsoid(new Vector3(0,floorY,0),new Vector3(floorRadius,.012f,floorRadius),12,32,0);
+            var random=new System.Random(preset.randomSeed+913);
+            for(int j=0;j<30;j++)
+            {
+                float a=j*2.39996323f;
+                float r=.025f+.105f*Mathf.Sqrt((j+.5f)/30f);
+                float height=.87f+.075f*(float)random.NextDouble();
+                var tip=new Vector3(Mathf.Cos(a)*r,height,Mathf.Sin(a)*r);
+                if(anthers) ellipsoid(tip,new Vector3(.008f,.028f,.006f),12,20,.16f);
+                else
+                {
+                    int start=vertices.Count; const int steps=8,sides=8;
+                    for(int y=0;y<=steps;y++)
+                    {
+                        float t=y/(float)steps; var c=new Vector3(tip.x*(.65f+.35f*t*t),Mathf.Lerp(floorY+.004f,height,t),tip.z*(.65f+.35f*t*t));
+                        for(int x=0;x<=sides;x++) { float angle=x*Mathf.PI*2/sides; vertices.Add(c+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*.005f);uv.Add(new Vector2(x/(float)sides,t)); }
+                    }
+                    for(int y=0;y<steps;y++) for(int x=0;x<sides;x++) { int q=start+y*(sides+1)+x;triangles.Add(q);triangles.Add(q+sides+1);triangles.Add(q+1);triangles.Add(q+1);triangles.Add(q+sides+1);triangles.Add(q+sides+2); }
+                }
             }
-            var mesh=new Mesh { name=anthers?"Combined twelve soft anthers":"Combined heart and short filaments" }; mesh.CombineMeshes(parts,true,true); Destroy(primitive); return mesh;
+            var mesh=new Mesh { name=anthers?"Thirty grooved champagne anthers":"Closed receptacle and curved filaments" };
+            mesh.SetVertices(vertices);mesh.SetUVs(0,uv);mesh.SetTriangles(triangles,0);mesh.RecalculateNormals();mesh.RecalculateBounds();return mesh;
         }
         void AddHeartRenderer(string title,Mesh mesh,Material material)
         { var go=new GameObject(title); go.transform.SetParent(generated,false); go.AddComponent<MeshFilter>().sharedMesh=mesh; go.AddComponent<MeshRenderer>().sharedMaterial=material; }
