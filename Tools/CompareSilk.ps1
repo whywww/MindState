@@ -1,9 +1,9 @@
-param([switch]$ScreensOnly,[int]$Seconds=60,[int]$Rounds=3)
+﻿param([switch]$ScreensOnly,[int]$Seconds=60,[int]$Rounds=3)
 $ErrorActionPreference='Stop'
 if ($Seconds -lt 1 -or $Rounds -lt 1) { throw 'Seconds 和 Rounds 必须为正数。' }
 $taskRoot=Split-Path -Parent $PSScriptRoot
-$taskPlayer=Join-Path $taskRoot 'Builds\Windows\MindState.exe'
-$taskEvidence=Join-Path $taskRoot 'Evidence\SilkMicroDetail'
+$taskPlayer=Join-Path $taskRoot 'Builds\Validation\MindState.exe'
+$taskEvidence=Join-Path $taskRoot 'Evidence\FlowerPerformance\SingleSilk'
 $taskLog=Join-Path $taskRoot 'SilkComparisonPlayer.log'
 $taskArgs=@('-silkAB','-abSeconds',$Seconds,'-abRounds',$Rounds,'-evidencePath',('"'+$taskEvidence+'"'),'-screen-width','1920','-screen-height','1080','-windowed','-force-d3d11','-logFile',('"'+$taskLog+'"'))
 if ($ScreensOnly) { $taskArgs+='-abScreensOnly' }

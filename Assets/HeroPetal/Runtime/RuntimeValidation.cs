@@ -37,7 +37,7 @@ namespace MindState
         static void Bootstrap()
         {
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-verifyPetal")>=0)
-                Camera.main.gameObject.AddComponent<RuntimeValidation>();
+                PetalDiagnosticScene.Start<RuntimeValidation>();
         }
         IEnumerator Start()
         {
@@ -209,3 +209,4 @@ namespace MindState
         }
     }
 }
+

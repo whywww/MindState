@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Flower/Scenes/FlowerGallery.unity
+    guid: d769a5d725da379439a1896fefe18147
+  - enabled: 1
     path: Assets/HeroPetal/Scenes/HeroPetalGallery.unity
     guid: bd04da83d61772a448a3b7719db2f533
   m_configObjects: {}

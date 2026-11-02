@@ -1,0 +1,1 @@
+PASS stride=40, maxPosition=0, maxAngle=8.806082E-06, handedness=True

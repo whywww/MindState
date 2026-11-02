@@ -1,0 +1,395 @@
+Mono path[0] = 'E:/Unity/MindState/Builds/Validation/MindState_Data/Managed'
+Mono config path = 'E:/Unity/MindState/Builds/Validation/MonoBleedingEdge/etc'
+Input System module state changed to: Initialized.
+[PhysX] Initialized MultithreadedTaskDispatcher with 12 workers.
+Initialize engine version: 2022.3.62f3c1 (1623fc0bbb97)
+[Subsystems] Discovering subsystems at path E:/Unity/MindState/Builds/Validation/MindState_Data/UnitySubsystems
+Forcing GfxDevice: Direct3D 11
+GfxDevice: creating device client; threaded=1; jobified=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce RTX 3080 (ID=0x2216)
+    Vendor:   NVIDIA
+    VRAM:     10053 MB
+    Driver:   32.0.16.1088
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.097 seconds
+- Finished resetting the current domain, in  0.001 seconds
+<RI> Initializing input.
+<RI> Input initialized.
+<RI> Initialized touch support.
+[PhysX] Initialized MultithreadedTaskDispatcher with 12 workers.
+UnloadTime: 0.580800 ms
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+[PhysX] Initialized MultithreadedTaskDispatcher with 12 workers.
+UnloadTime: 2.465600 ms
+Unloading 12 unused Assets to reduce memory usage. Loaded Objects now: 118.
+Total: 0.380300 ms (FindLiveObjects: 0.012300 ms CreateObjectMapping: 0.001900 ms MarkObjects: 0.287300 ms  DeleteObjects: 0.078600 ms)
+
+PASS Exact Unity editor/player version
+PASS Built-in pipeline
+PASS 1080p offscreen render target available
+PASS Pearl shader supported
+PASS Shape 0,0,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,0,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,0,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 0,0,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,0,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,0,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 0,0,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,0,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,0,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 0,1,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,1,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,1,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 0,1,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,1,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,1,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 0,1,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,1,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,1,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 0,2,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,2,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,2,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 0,2,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,2,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,2,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 0,2,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 0,2,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 0,2,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,0,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,0,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,0,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,0,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,0,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,0,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,0,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,0,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,0,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,1,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,1,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,1,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,1,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,1,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,1,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,1,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,1,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,1,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,2,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,2,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,2,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,2,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,2,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,2,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 1,2,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 1,2,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 1,2,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,0,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,0,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,0,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,0,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,0,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,0,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,0,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,0,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,0,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,1,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,1,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,1,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,1,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,1,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,1,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,1,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,1,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,1,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,2,0 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,2,0 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,2,0 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,2,1 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,2,1 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,2,1 / unfold 2: finite, normals, faces, winding, bounds
+PASS Shape 2,2,2 / unfold 0: finite, normals, faces, winding, bounds
+PASS Shape 2,2,2 / unfold 1: finite, normals, faces, winding, bounds
+PASS Shape 2,2,2 / unfold 2: finite, normals, faces, winding, bounds
+PASS Non-finite shape inputs ignored
+PASS Shape inputs clamped independently
+PASS Shape API selects direct input without simulated overwrite
+PASS Direct shape targets held independently
+PASS Non-finite input ignored
+PASS Input clamped to normalized interval
+PASS Target step smoothed continuously
+PASS Freeze preserves geometry
+PASS Compatibility restart resets unfolding and unfreezes
+PASS Stable material count through unfolding replay
+PASS Fan surface update: zero managed bytes per frame
+PASS Unity allocated memory growth below 8 MiB tolerance
+MINDSTATE_VALIDATION_COMPLETE {"unity":"2022.3.62f3c1","gpu":"NVIDIA GeForce RTX 3080","cpu":"11th Gen Intel(R) Core(TM) i5-11600KF @ 3.90GHz","graphicsApi":"Direct3D11","resolution":"1920x1080","durationSeconds":1.0,"frames":61,"materialsStart":10,"materialsEnd":10,"meanFps":59.97334074822617,"petalCpuMeanMs":5.085422950819672,"petalCpuMaxMs":5.3406,"gpuMeanMs":-1.0,"cameraSubmitCpuMeanMs":0.2684918032786885,"petalGcMaxBytes":0,"memoryStart":49014198,"memoryEnd":49014486,"checks":["PASS Exact Unity editor/player version","PASS Built-in pipeline","PASS 1080p offscreen render target available","PASS Pearl shader supported","PASS Shape 0,0,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,0,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,0,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 0,0,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,0,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,0,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 0,0,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,0,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,0,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 0,1,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,1,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,1,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 0,1,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,1,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,1,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 0,1,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,1,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,1,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 0,2,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,2,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,2,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 0,2,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,2,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,2,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 0,2,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 0,2,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 0,2,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,0,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,0,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,0,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,0,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,0,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,0,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,0,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,0,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,0,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,1,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,1,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,1,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,1,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,1,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,1,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,1,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,1,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,1,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,2,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,2,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,2,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,2,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,2,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,2,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 1,2,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 1,2,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 1,2,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,0,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,0,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,0,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,0,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,0,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,0,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,0,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,0,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,0,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,1,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,1,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,1,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,1,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,1,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,1,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,1,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,1,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,1,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,2,0 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,2,0 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,2,0 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,2,1 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,2,1 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,2,1 / unfold 2: finite, normals, faces, winding, bounds","PASS Shape 2,2,2 / unfold 0: finite, normals, faces, winding, bounds","PASS Shape 2,2,2 / unfold 1: finite, normals, faces, winding, bounds","PASS Shape 2,2,2 / unfold 2: finite, normals, faces, winding, bounds","PASS Non-finite shape inputs ignored","PASS Shape inputs clamped independently","PASS Shape API selects direct input without simulated overwrite","PASS Direct shape targets held independently","PASS Non-finite input ignored","PASS Input clamped to normalized interval","PASS Target step smoothed continuously","PASS Freeze preserves geometry","PASS Compatibility restart resets unfolding and unfreezes","PASS Stable material count through unfolding replay","PASS Fan surface update: zero managed bytes per frame","PASS Unity allocated memory growth below 8 MiB tolerance"]}
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+Memory Statistics:
+[ALLOC_TEMP_TLS] TLS Allocator
+  StackAllocators : 
+    [ALLOC_TEMP_MAIN]
+      Peak usage frame count: [1.0 KB-2.0 KB]: 424 frames, [32.0 KB-64.0 KB]: 1 frames, [128.0 KB-256.0 KB]: 8 frames, [256.0 KB-0.5 MB]: 21 frames, [1.0 MB-2.0 MB]: 1 frames, [2.0 MB-4.0 MB]: 1 frames
+      Initial Block Size 4.0 MB
+      Current Block Size 4.0 MB
+      Peak Allocated Bytes 2.0 MB
+      Overflow Count 0
+    [ALLOC_TEMP_Loading.AsyncRead]
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 249 B
+      Overflow Count 0
+    [ALLOC_TEMP_Loading.PreloadManager]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 33.2 KB
+      Overflow Count 8
+    [ALLOC_TEMP_Background Job.Worker 8]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 6]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 2.0 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 0]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 0 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 10]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 9]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 5]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 3.1 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 14]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 6]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 4]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 3.1 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 3]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 3.1 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 12]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_EnlightenWorker] x 6
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 15]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 1]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 2]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 7]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_UnityGfxDeviceWorker]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 18.6 KB
+      Overflow Count 0
+    [ALLOC_TEMP_AssetGarbageCollectorHelper] x 11
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 138 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 5]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 9]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 0 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 13]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 8]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 0 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 7]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 2.0 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 1]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 12.0 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 2]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 3.1 KB
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 3]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 11]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Job.Worker 10]
+      Initial Block Size 256.0 KB
+      Current Block Size 256.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 0]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_Background Job.Worker 4]
+      Initial Block Size 32.0 KB
+      Current Block Size 32.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+    [ALLOC_TEMP_BatchDeleteObjects]
+      Initial Block Size 64.0 KB
+      Current Block Size 64.0 KB
+      Peak Allocated Bytes 54 B
+      Overflow Count 0
+[ALLOC_DEFAULT] Dual Thread Allocator
+  Peak main deferred allocation count 30
+    [ALLOC_BUCKET]
+      Large Block size 4.0 MB
+      Used Block count 1
+      Peak Allocated bytes 0.9 MB
+    [ALLOC_DEFAULT_MAIN]
+      Peak usage frame count: [16.0 MB-32.0 MB]: 456 frames
+      Requested Block Size 16.0 MB
+      Peak Block count 1
+      Peak Allocated memory 21.3 MB
+      Peak Large allocation bytes 8.0 MB
+    [ALLOC_DEFAULT_THREAD]
+      Peak usage frame count: [16.0 MB-32.0 MB]: 456 frames
+      Requested Block Size 16.0 MB
+      Peak Block count 1
+      Peak Allocated memory 21.1 MB
+      Peak Large allocation bytes 16.0 MB
+[ALLOC_TEMP_JOB_1_FRAME]
+  Initial Block Size 2.0 MB
+  Used Block Count 0
+  Overflow Count (too large) 0
+  Overflow Count (full) 0
+[ALLOC_TEMP_JOB_2_FRAMES]
+  Initial Block Size 2.0 MB
+  Used Block Count 0
+  Overflow Count (too large) 0
+  Overflow Count (full) 0
+[ALLOC_TEMP_JOB_4_FRAMES (JobTemp)]
+  Initial Block Size 2.0 MB
+  Used Block Count 1
+  Overflow Count (too large) 0
+  Overflow Count (full) 0
+[ALLOC_TEMP_JOB_ASYNC (Background)]
+  Initial Block Size 1.0 MB
+  Used Block Count 1
+  Overflow Count (too large) 0
+  Overflow Count (full) 0
+[ALLOC_GFX] Dual Thread Allocator
+  Peak main deferred allocation count 1
+    [ALLOC_BUCKET]
+      Large Block size 4.0 MB
+      Used Block count 1
+      Peak Allocated bytes 0.9 MB
+    [ALLOC_GFX_MAIN]
+      Peak usage frame count: [1.0 MB-2.0 MB]: 434 frames, [8.0 MB-16.0 MB]: 22 frames
+      Requested Block Size 16.0 MB
+      Peak Block count 2
+      Peak Allocated memory 13.0 MB
+      Peak Large allocation bytes 0 B
+    [ALLOC_GFX_THREAD]
+      Peak usage frame count: [1.0 MB-2.0 MB]: 456 frames
+      Requested Block Size 16.0 MB
+      Peak Block count 1
+      Peak Allocated memory 1.8 MB
+      Peak Large allocation bytes 0 B
+[ALLOC_CACHEOBJECTS] Dual Thread Allocator
+  Peak main deferred allocation count 26
+    [ALLOC_BUCKET]
+      Large Block size 4.0 MB
+      Used Block count 1
+      Peak Allocated bytes 0.9 MB
+    [ALLOC_CACHEOBJECTS_MAIN]
+      Peak usage frame count: [256.0 KB-0.5 MB]: 456 frames
+      Requested Block Size 4.0 MB
+      Peak Block count 1
+      Peak Allocated memory 482.5 KB
+      Peak Large allocation bytes 0 B
+    [ALLOC_CACHEOBJECTS_THREAD]
+      Peak usage frame count: [1.0 MB-2.0 MB]: 455 frames, [2.0 MB-4.0 MB]: 1 frames
+      Requested Block Size 4.0 MB
+      Peak Block count 1
+      Peak Allocated memory 2.7 MB
+      Peak Large allocation bytes 0 B
+[ALLOC_TYPETREE] Dual Thread Allocator
+  Peak main deferred allocation count 0
+    [ALLOC_BUCKET]
+      Large Block size 4.0 MB
+      Used Block count 1
+      Peak Allocated bytes 0.9 MB
+    [ALLOC_TYPETREE_MAIN]
+      Peak usage frame count: [4.0 KB-8.0 KB]: 456 frames
+      Requested Block Size 2.0 MB
+      Peak Block count 1
+      Peak Allocated memory 4.6 KB
+      Peak Large allocation bytes 0 B
+    [ALLOC_TYPETREE_THREAD]
+      Peak usage frame count: [0-1.0 KB]: 456 frames
+      Requested Block Size 2.0 MB
+      Peak Block count 1
+      Peak Allocated memory 176 B
+      Peak Large allocation bytes 0 B

@@ -4,6 +4,26 @@ namespace MindState
 {
     public enum PetalInputMode { SimulatedBrain, ExternalBrain, DirectShape }
 
+    [System.Serializable]
+    public struct PetalSurfaceProfile
+    {
+        [Range(1,7)] public int widePleatCount;
+        [Range(0,1)] public float surfaceDetail,rimVariation;
+        public bool softFolds;
+        [Range(0,90)] public float closureBendDegrees,closureSideLeftDegrees,closureSideRightDegrees;
+        [Range(0,1)] public float foldStrength,edgeStrength;
+        public static PetalSurfaceProfile Legacy=>new PetalSurfaceProfile { widePleatCount=7,surfaceDetail=1,rimVariation=1 };
+        public PetalSurfaceProfile Constrained()=>new PetalSurfaceProfile {
+            widePleatCount=Mathf.Clamp(widePleatCount,1,7), softFolds=softFolds,
+            closureBendDegrees=float.IsNaN(closureBendDegrees)||float.IsInfinity(closureBendDegrees)?0:Mathf.Clamp(closureBendDegrees,0,90),
+            closureSideLeftDegrees=Angle(closureSideLeftDegrees),closureSideRightDegrees=Angle(closureSideRightDegrees),
+            foldStrength=Clean(foldStrength),edgeStrength=Clean(edgeStrength),
+            surfaceDetail=float.IsNaN(surfaceDetail)||float.IsInfinity(surfaceDetail)?1:Mathf.Clamp01(surfaceDetail),
+            rimVariation=float.IsNaN(rimVariation)||float.IsInfinity(rimVariation)?1:Mathf.Clamp01(rimVariation) };
+        static float Angle(float value)=>float.IsNaN(value)||float.IsInfinity(value)?0:Mathf.Clamp(value,0,90);
+        static float Clean(float value)=>float.IsNaN(value)||float.IsInfinity(value)?0:Mathf.Clamp01(value);
+    }
+
     [RequireComponent(typeof(MeshFilter),typeof(MeshRenderer))]
     public sealed class HeroPetal : MonoBehaviour
     {
@@ -27,7 +47,7 @@ namespace MindState
         public Mesh RuntimeMesh=>mesh;
         public double LastUpdateMilliseconds { get; private set; }
         public long LastUpdateAllocation { get; private set; }
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || FLOWER_VALIDATION
         // Only the diagnostics runner selects 1.0 for the preserved A baseline.
         internal float diagnosticPleatScale=0.8f;
 #endif
@@ -41,7 +61,14 @@ namespace MindState
         Vector2[] uv;
         int[] boundary;
         readonly float[] sinTheta=new float[Cols],cosTheta=new float[Cols],rimRadius=new float[Cols],widePleat=new float[Cols],rimWave=new float[Cols],leftFold=new float[Cols],rightFold=new float[Cols];
+        readonly float[] foldCenter=new float[7],foldWidth=new float[7],foldPower=new float[7],foldBend=new float[7];
+        float edgePhase;
+        readonly float[] sectionRest=new float[Cols],sectionX=new float[Cols],sectionZ=new float[Cols];
+        readonly float[] closureY=new float[257],closureZ=new float[257];
+        int preparedSeed=int.MinValue,preparedCount;
         float elapsed,nextSample;
+        float trajectoryCurlLimit=1,trajectoryFoldScale=1;
+        PetalSurfaceProfile surfaceProfile=PetalSurfaceProfile.Legacy;
         static readonly int BreathId=Shader.PropertyToID("_Breath"),FineCountId=Shader.PropertyToID("_FineCount"),GrayId=Shader.PropertyToID("_GrayMode");
 
         void Awake()
@@ -86,6 +113,9 @@ namespace MindState
         /// <summary>Main thread, degrees / normalized curl / normalized softness. Selects DirectShape.</summary>
         public void SetShapeParameters(float openingAngleDegrees,float curlAmount01,float pleatSoftness01)
         {
+            trajectoryCurlLimit=1;
+            trajectoryFoldScale=1;
+            surfaceProfile=PetalSurfaceProfile.Legacy;
             inputMode=PetalInputMode.DirectShape;
             if(Finite(openingAngleDegrees)) targetOpeningAngle=Mathf.Clamp(openingAngleDegrees,90,150);
             if(Finite(curlAmount01)) targetCurlAmount=Mathf.Clamp01(curlAmount01);
@@ -99,6 +129,9 @@ namespace MindState
         }
         void AcceptBrain(float a,float r)
         {
+            trajectoryCurlLimit=1;
+            trajectoryFoldScale=1;
+            surfaceProfile=PetalSurfaceProfile.Legacy;
             if(Finite(a)) targetAttention=Mathf.Clamp01(a);
             if(Finite(r)) targetRelaxation=Mathf.Clamp01(r);
             targetOpeningAngle=90+60*targetRelaxation;
@@ -108,8 +141,22 @@ namespace MindState
         public void RestartOpening() { OpeningProgress=0; frozen=false; }
         public void RestartGrowth()=>RestartOpening();
         public void SetShapeImmediate(float angle,float curl,float softness,float progress=1)
+        { SetShapeImmediateLimited(angle,curl,softness,progress,1); }
+
+        // Flower pose-cache sampling only. The existing single-petal API always uses limit=1.
+        public void SetShapeImmediateLimited(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale=1)
+        { SetShapeImmediateLimited(angle,curl,softness,progress,maximumCurl,edgeFoldScale,PetalSurfaceProfile.Legacy); }
+
+        public void SetShapeImmediateLimited(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile)
+        { SetShapeImmediateLimited(angle,curl,softness,progress,maximumCurl,edgeFoldScale,profile,0); }
+
+        public void SetShapeImmediateLimited(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile,int foldSeed)
         {
             SetShapeParameters(angle,curl,softness);
+            surfaceProfile=profile.Constrained();
+            if(surfaceProfile.softFolds) PrepareSoftFolds(foldSeed);
+            trajectoryCurlLimit=Finite(maximumCurl)?Mathf.Clamp01(maximumCurl):1;
+            trajectoryFoldScale=Finite(edgeFoldScale)?Mathf.Clamp01(edgeFoldScale):1;
             OpeningAngle=targetOpeningAngle; CurlAmount=targetCurlAmount; PleatSoftness=targetPleatSoftness;
             OpeningProgress=Finite(progress)?Mathf.Clamp01(progress):1; frozen=false;
             if(mesh!=null) Rebuild();
@@ -152,11 +199,56 @@ namespace MindState
             LastUpdateMilliseconds=(System.Diagnostics.Stopwatch.GetTimestamp()-started)*1000.0/System.Diagnostics.Stopwatch.Frequency;
         }
 
+        void PrepareSoftFolds(int seed)
+        {
+            int count=surfaceProfile.widePleatCount;
+            if(preparedSeed==seed&&preparedCount==count) return;
+            preparedSeed=seed; preparedCount=count;
+            var random=new System.Random(seed);
+            edgePhase=(float)random.NextDouble()*Mathf.PI*2;
+            for(int i=0;i<count;i++)
+            {
+                foldCenter[i]=.16f+.68f*(i+.5f+((float)random.NextDouble()-.5f)*.42f)/count;
+                foldWidth[i]=(.29f/count+.035f)*Mathf.Lerp(.85f,1.2f,(float)random.NextDouble());
+                foldPower[i]=Mathf.Lerp(.65f,1,(float)random.NextDouble());
+                foldBend[i]=Mathf.Lerp(-.065f,.065f,(float)random.NextDouble());
+            }
+        }
+        float SoftFold(float u,float t)
+        {
+            float value=0;
+            for(int i=0;i<surfaceProfile.widePleatCount;i++)
+            {
+                float center=.5f+(foldCenter[i]-.5f)*Mathf.Lerp(.65f,1,t)+foldBend[i]*Mathf.Sin(t*Mathf.PI+i*.7f);
+                float q=(u-center)/(foldWidth[i]*Mathf.Lerp(.8f,1.2f,t));
+                value+=foldPower[i]*(Mathf.Exp(-q*q)-.18f*Mathf.Exp(-q*q*.22f));
+            }
+            // Smoothly bound combined valleys to one quarter of the primary peak.
+            return value<0?-.25f*(1-Mathf.Exp(value/.25f)):value;
+        }
+
+        static float SideAngle(float q,float left,float right)=>q*Mathf.Lerp(left,right,Mathf.SmoothStep(0,1,Mathf.InverseLerp(-.35f,.35f,q)));
+        void PrepareSideSection(float t,float radius,float left,float right)
+        {
+            float flare=.72f+.28f*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.05f,.8f,t));
+            for(int x=0;x<Cols;x++) sectionRest[x]=radius*(1+(rimRadius[x]-1)*Mathf.SmoothStep(0,1,t))*sinTheta[x]*flare;
+            int middle=WidthSegments/2; sectionX[middle]=sectionRest[middle]; sectionZ[middle]=0;
+            float fade=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.1f,.8f,t));
+            for(int direction=-1;direction<=1;direction+=2) for(int x=middle+direction;x>=0&&x<Cols;x+=direction)
+            {
+                int previous=x-direction; float dx=sectionRest[x]-sectionRest[previous];
+                float q=(x+previous)/(float)WidthSegments-1;
+                float angle=SideAngle(q,left*fade,right*fade);
+                sectionX[x]=sectionX[previous]+dx*Mathf.Cos(angle);
+                sectionZ[x]=sectionZ[previous]-dx*Mathf.Sin(angle);
+            }
+        }
+        static float ClosureAngle(float distance,float bend)=>bend*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.2575f,2.575f,distance));
         void Rebuild()
         {
-            float curl=Mathf.Lerp(1,CurlAmount,Mathf.SmoothStep(0,1,OpeningProgress));
+            float curl=Mathf.Lerp(trajectoryCurlLimit,Mathf.Min(CurlAmount,trajectoryCurlLimit),Mathf.SmoothStep(0,1,OpeningProgress));
             float amplitude=Mathf.Lerp(0.145f,0.075f,PleatSoftness);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || FLOWER_VALIDATION
             amplitude*=diagnosticPleatScale;
 #else
             amplitude*=0.8f;
@@ -168,36 +260,88 @@ namespace MindState
                 float u=x/(float)WidthSegments,s=u*2-1,theta=s*OpeningAngle*Mathf.Deg2Rad*0.5f*(1-0.45f*curl);
                 sinTheta[x]=Mathf.Sin(theta); cosTheta[x]=Mathf.Cos(theta);
                 rimRadius[x]=1+0.042f*Mathf.Sin(s*6.8f+0.6f)+0.018f*Mathf.Sin(s*16.6f-0.9f)+0.007f*Mathf.Cos(s*32.7f);
-                float phase=2*Mathf.PI*(u*7+0.075f*Mathf.Sin(u*8.2f+0.4f));
+                if(surfaceProfile.rimVariation!=1) rimRadius[x]=1+(rimRadius[x]-1)*surfaceProfile.rimVariation;
+                float phase=2*Mathf.PI*(u*surfaceProfile.widePleatCount+0.075f*Mathf.Sin(u*8.2f+0.4f));
                 widePleat[x]=Mathf.Cos(phase)+Mathf.Lerp(0.16f,0.025f,PleatSoftness)*Mathf.Cos(phase*2+0.3f);
                 rimWave[x]=0.085f*Mathf.Sin(s*9.3f+0.2f)+0.026f*Mathf.Sin(s*22.3f);
+                if(surfaceProfile.softFolds)
+                {
+                    rimRadius[x]=1+surfaceProfile.edgeStrength*(.042f*Mathf.Sin(s*6.1f+.6f+edgePhase*.18f)+.014f*Mathf.Sin(s*11.7f-.9f-edgePhase*.25f));
+                    rimWave[x]=.09f*Mathf.Sin(s*6.7f+.2f+edgePhase*.2f)+.025f*Mathf.Sin(s*11.1f-edgePhase*.3f);
+                }
                 leftFold[x]=Mathf.Exp(-Mathf.Pow((s+0.72f)/0.29f,2));
                 rightFold[x]=Mathf.Exp(-Mathf.Pow((s-0.80f)/0.23f,2));
             }
             // Compose two cylindrical coordinate warps. Each remains invertible in the
             // supported range; additive competing bends can pinch the parameter surface.
             float crossCurvature=0.04f+0.24f*curl,radialCurvature=0.06f+0.66f*curl;
+            float closing=1-OpeningProgress;
+            float leftSide=surfaceProfile.closureSideLeftDegrees*Mathf.Deg2Rad*Mathf.SmoothStep(0,1,closing);
+            float rightSide=surfaceProfile.closureSideRightDegrees*Mathf.Deg2Rad*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.12f,1,closing));
+            bool sideActive=leftSide>0||rightSide>0;
+            float closure=surfaceProfile.closureBendDegrees*Mathf.Deg2Rad*(1-Mathf.SmoothStep(0,1,OpeningProgress));
+            if(closure>0)
+            {
+                closureY[0]=closureZ[0]=0;
+                for(int i=1;i<257;i++)
+                {
+                    const float step=3f/256; float y=(i-.5f)*step;
+                    float a=radialCurvature*y,b=a+ClosureAngle(y,closure);
+                    closureY[i]=closureY[i-1]+(Mathf.Cos(b)-Mathf.Cos(a))*step;
+                    closureZ[i]=closureZ[i-1]+(Mathf.Sin(a)-Mathf.Sin(b))*step;
+                }
+            }
             for(int y=0;y<Rows;y++)
             {
                 float t=y/(float)LengthSegments,t2=t*t,t6=t2*t2*t2;
                 float pleatEnvelope=t2,foldEnvelope=Mathf.SmoothStep(0,1,Mathf.InverseLerp(0.55f,1,t));
                 float radius=0.025f+2.55f*t;
+                if(sideActive) PrepareSideSection(t,radius,leftSide,rightSide);
                 for(int x=0;x<Cols;x++)
                 {
                     float s=x/(float)WidthSegments*2-1,rimScale=1+(rimRadius[x]-1)*Mathf.SmoothStep(0,1,t);
                     float rho=radius*rimScale;
                     float flare=0.72f+0.28f*Mathf.SmoothStep(0,1,Mathf.InverseLerp(0.05f,0.8f,t));
                     float flatX=rho*sinTheta[x]*flare;
-                    flatX+=0.075f*t2*Mathf.Sin(t*4.2f+0.2f);
+                    flatX+=0.075f*t2*Mathf.Sin(t*4.2f+0.2f)*surfaceProfile.surfaceDetail;
                     float flatY=rho*cosTheta[x];
                     float height=amplitude*pleatEnvelope*widePleat[x];
-                    height+=0.11f*s*pleatEnvelope+0.055f*t2*Mathf.Sin(s*4.7f+0.4f)+t6*rimWave[x];
+                    height+=0.11f*s*pleatEnvelope+0.055f*t2*Mathf.Sin(s*4.7f+0.4f)+t6*rimWave[x]*surfaceProfile.rimVariation;
+                    height*=surfaceProfile.surfaceDetail;
                     float localAngle=foldEnvelope*(0.72f*leftFold[x]*(0.4f+0.6f*curl)-0.90f*rightFold[x]*(0.45f+0.55f*curl));
+                    localAngle*=trajectoryFoldScale;
                     float tail=2.55f*Mathf.Max(0,t-0.55f);
                     height+=tail*Mathf.Sin(localAngle);
+                    if(surfaceProfile.softFolds)
+                    {
+                        float u=(s+1)*.5f;
+                        float envelope=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.06f,.5f,t))*(1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.65f,1,t)));
+                        float sides=Mathf.SmoothStep(0,1,Mathf.InverseLerp(0,.16f,u))*(1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.84f,1,u)));
+                        // Macro drape, medium folds and the independent rim have separate scales.
+                        float drape=.35f+.65f*surfaceProfile.surfaceDetail;
+                        flatX=rho*sinTheta[x]*flare+.06f*t2*Mathf.Sin(t*4.2f+.2f+edgePhase*.08f)*drape;
+                        height=(.095f*s*t2+.075f*t2*Mathf.Sin(s*3.4f+.4f+edgePhase*.25f))*drape;
+                        height+=amplitude*surfaceProfile.foldStrength*envelope*sides*SoftFold(u,t);
+                        height+=t6*surfaceProfile.edgeStrength*rimWave[x];
+                        height+=tail*Mathf.Sin(localAngle*.85f);
+                    }
+                    if(sideActive) flatX+=sectionX[x]-sectionRest[x];
                     float radialRadius=1/radialCurvature+height;
                     float py=-1.10f+Mathf.Sin(radialCurvature*flatY)*radialRadius;
                     float radialZ=Mathf.Cos(radialCurvature*flatY)*radialRadius-1/radialCurvature;
+                    if(closure>0)
+                    {
+                        float f=Mathf.Clamp(flatY/3*256,0,255.999f); int a=(int)f;
+                        float angle=radialCurvature*flatY+ClosureAngle(flatY,closure);
+                        py=-1.10f+Mathf.Sin(radialCurvature*flatY)/radialCurvature+Mathf.Lerp(closureY[a],closureY[a+1],f-a)+height*Mathf.Sin(angle);
+                        radialZ=(Mathf.Cos(radialCurvature*flatY)-1)/radialCurvature+Mathf.Lerp(closureZ[a],closureZ[a+1],f-a)+height*Mathf.Cos(angle);
+                    }
+                    if(sideActive)
+                    {
+                        float longitudinalAngle=radialCurvature*flatY+ClosureAngle(flatY,closure);
+                        py+=sectionZ[x]*Mathf.Sin(longitudinalAngle);
+                        radialZ+=sectionZ[x]*Mathf.Cos(longitudinalAngle);
+                    }
                     float crossRadius=1/crossCurvature+radialZ;
                     float px=Mathf.Sin(crossCurvature*flatX)*crossRadius;
                     float pz=Mathf.Cos(crossCurvature*flatX)*crossRadius-1/crossCurvature;

@@ -1,0 +1,234 @@
+{
+  "FinalBaseline": {
+    "states": [
+      {
+        "metrics": {
+          "state": "Bud hold",
+          "samples": 12115,
+          "interpolationMs": 0.0,
+          "uploadMs": 0.0,
+          "transformMs": 0.0,
+          "materialMs": 8.813041683862511e-05,
+          "wallMeanMs": 4.952899414084193,
+          "cpuMeanMs": 4.947051253982664,
+          "cpuP95Ms": 9.0658,
+          "updateMeanMs": 0.0031481469252992375,
+          "updateP95Ms": 0.0082,
+          "gpuMeanMs": -1.0,
+          "maxGc": 0,
+          "updateGc": 0,
+          "vertices": 1585483,
+          "batches": 82,
+          "meshUpdates": 0
+        },
+        "wall": {
+          "frames": 12115,
+          "seconds": 60.0043764,
+          "meanFps": 201.9019399391675,
+          "p95WallMs": 9.0806,
+          "p99WallMs": 11.3694,
+          "maxWallMs": 23.7939,
+          "over20ms": 2,
+          "over33ms": 0
+        }
+      },
+      {
+        "metrics": {
+          "state": "Animated bloom",
+          "samples": 4054,
+          "interpolationMs": 12.176635125801667,
+          "uploadMs": 1.2939701776023662,
+          "transformMs": 0.028018376911692164,
+          "materialMs": 4.6127281697088406e-05,
+          "wallMeanMs": 14.80329988193967,
+          "cpuMeanMs": 14.803801913912192,
+          "cpuP95Ms": 25.0172,
+          "updateMeanMs": 13.504768006906762,
+          "updateP95Ms": 22.8075,
+          "gpuMeanMs": -1.0,
+          "maxGc": 0,
+          "updateGc": 0,
+          "vertices": 1585483,
+          "batches": 82,
+          "meshUpdates": 15834
+        },
+        "wall": {
+          "frames": 4054,
+          "seconds": 60.0125777,
+          "meanFps": 67.55250574747433,
+          "p95WallMs": 25.0387,
+          "p99WallMs": 31.0566,
+          "maxWallMs": 44.2865,
+          "over20ms": 1543,
+          "over33ms": 18
+        }
+      },
+      {
+        "metrics": {
+          "state": "Full bloom hold",
+          "samples": 8351,
+          "interpolationMs": 0.0,
+          "uploadMs": 0.0,
+          "transformMs": 0.0,
+          "materialMs": 0.0002088851634534684,
+          "wallMeanMs": 7.185573871769394,
+          "cpuMeanMs": 7.169773640402353,
+          "cpuP95Ms": 14.5898,
+          "updateMeanMs": 0.005963094240210757,
+          "updateP95Ms": 0.0119,
+          "gpuMeanMs": -1.0,
+          "maxGc": 0,
+          "updateGc": 0,
+          "vertices": 1585483,
+          "batches": 82,
+          "meshUpdates": 0
+        },
+        "wall": {
+          "frames": 8351,
+          "seconds": 60.006727409999996,
+          "meanFps": 139.16772936043037,
+          "p95WallMs": 14.7357,
+          "p99WallMs": 25.4335,
+          "maxWallMs": 244.16891,
+          "over20ms": 175,
+          "over33ms": 58
+        }
+      }
+    ],
+    "failed": []
+  },
+  "Refined": {
+    "states": [
+      {
+        "metrics": {
+          "state": "Bud hold",
+          "samples": 10361,
+          "interpolationMs": 0.0,
+          "uploadMs": 0.0,
+          "transformMs": 0.0,
+          "materialMs": 0.00017361258565774497,
+          "wallMeanMs": 5.788786689151953,
+          "cpuMeanMs": 5.776944814882762,
+          "cpuP95Ms": 10.342,
+          "updateMeanMs": 0.004662561528809996,
+          "updateP95Ms": 0.0101,
+          "gpuMeanMs": -1.0,
+          "maxGc": 0,
+          "updateGc": 0,
+          "vertices": 1585483,
+          "batches": 82,
+          "meshUpdates": 0
+        },
+        "wall": {
+          "frames": 10361,
+          "seconds": 59.9776189,
+          "meanFps": 172.74777141911514,
+          "p95WallMs": 10.3488,
+          "p99WallMs": 13.5833,
+          "maxWallMs": 32.8943,
+          "over20ms": 11,
+          "over33ms": 0
+        }
+      },
+      {
+        "metrics": {
+          "state": "Animated bloom",
+          "samples": 4552,
+          "interpolationMs": 9.256189828646749,
+          "uploadMs": 1.1683501098418279,
+          "transformMs": 0.08125193321616848,
+          "materialMs": 5.151581722319704e-05,
+          "wallMeanMs": 13.182243618087906,
+          "cpuMeanMs": 13.178987286028116,
+          "cpuP95Ms": 22.7467,
+          "updateMeanMs": 10.52073372144111,
+          "updateP95Ms": 18.4413,
+          "gpuMeanMs": -1.0,
+          "maxGc": 0,
+          "updateGc": 0,
+          "vertices": 1585483,
+          "batches": 82,
+          "meshUpdates": 18060
+        },
+        "wall": {
+          "frames": 4552,
+          "seconds": 60.005573,
+          "meanFps": 75.85962057224252,
+          "p95WallMs": 22.8994,
+          "p99WallMs": 44.3824,
+          "maxWallMs": 79.1474,
+          "over20ms": 434,
+          "over33ms": 88
+        }
+      },
+      {
+        "metrics": {
+          "state": "Full bloom hold",
+          "samples": 9813,
+          "interpolationMs": 0.0,
+          "uploadMs": 0.0,
+          "transformMs": 0.0,
+          "materialMs": 0.00019314175073880492,
+          "wallMeanMs": 6.114498215975239,
+          "cpuMeanMs": 6.103258019973516,
+          "cpuP95Ms": 11.0494,
+          "updateMeanMs": 0.004838826047080411,
+          "updateP95Ms": 0.0103,
+          "gpuMeanMs": -1.0,
+          "maxGc": 0,
+          "updateGc": 0,
+          "vertices": 1585483,
+          "batches": 82,
+          "meshUpdates": 0
+        },
+        "wall": {
+          "frames": 9813,
+          "seconds": 60.001571000000006,
+          "meanFps": 163.54571782795486,
+          "p95WallMs": 11.0598,
+          "p99WallMs": 14.4681,
+          "maxWallMs": 45.8302,
+          "over20ms": 9,
+          "over33ms": 1
+        }
+      }
+    ],
+    "failed": []
+  },
+  "RefinedSoak60": {
+    "states": [
+      {
+        "metrics": {
+          "state": "Animated bloom",
+          "samples": 32180,
+          "interpolationMs": 10.16621324425109,
+          "uploadMs": 1.0626291485394685,
+          "transformMs": 0.0732885425730263,
+          "materialMs": 5.635177128650821e-05,
+          "wallMeanMs": 18.645545772743926,
+          "cpuMeanMs": 13.900231530950839,
+          "cpuP95Ms": 26.396,
+          "updateMeanMs": 11.316895068365511,
+          "updateP95Ms": 21.139,
+          "gpuMeanMs": -1.0,
+          "maxGc": 0,
+          "updateGc": 0,
+          "vertices": 1585483,
+          "batches": 82,
+          "meshUpdates": 145922
+        },
+        "wall": {
+          "frames": 32180,
+          "seconds": 600.0136644,
+          "meanFps": 53.63211191561656,
+          "p95WallMs": 26.5974,
+          "p99WallMs": 46.7719,
+          "maxWallMs": 2297.4844,
+          "over20ms": 4063,
+          "over33ms": 846
+        }
+      }
+    ],
+    "failed": []
+  }
+}

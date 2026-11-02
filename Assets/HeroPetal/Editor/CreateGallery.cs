@@ -179,10 +179,7 @@ namespace MindState.Editor
         [MenuItem("MindState/Build Windows Player")]
         public static void Build()
         {
-            Directory.CreateDirectory("Builds/Windows");
-            var report=BuildPipeline.BuildPlayer(EditorBuildSettings.scenes,"Builds/Windows/MindState.exe",BuildTarget.StandaloneWindows64,BuildOptions.Development);
-            if(report.summary.result!=UnityEditor.Build.Reporting.BuildResult.Succeeded) throw new Exception("Player build failed: "+report.summary.result);
-            Debug.Log("MINDSTATE_BUILD_SUCCESS bytes="+report.summary.totalSize);
+            PerformanceBuild.Delivery();
         }
     }
 }

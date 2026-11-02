@@ -1,0 +1,462 @@
+{
+  "verifiedRoot": "E:\\Unity\\MindState",
+  "validationProjects": [
+    "FlowerClosure",
+    "FlowerClosureSide",
+    "FlowerNarrow",
+    "FlowerPerformance",
+    "FlowerShingle",
+    "SoftFoldsBaseline"
+  ],
+  "targets": [
+    {
+      "path": "E:\\Unity\\MindState\\.validation",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Builds\\Validation",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FanPetal",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FanPetalDiagnostic",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FanPetalGray",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FanPetalPreflight",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FanPetalPreview",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FanPetalReview",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\Final",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerAssembly",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerAvoidance",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerClosure",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerClosureSide",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerNarrow",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerSequentialBloom",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerShingle",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerSoftFolds",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerStagger",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\Preview",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\Preview2",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\Preview3",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\Reverted",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\SilkMicroDetail",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\BuildManifest.json",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\EditorPlayMode.txt",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\验收报告.md",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Baseline",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\ControlledBaseline",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Optimized",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Smoke",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Soak60",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Source",
+      "kind": "directory"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Baseline.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\BaselineAssembler.cs.txt",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\BaselineBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\ControlledBaseline.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\DeliveryBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\DeliverySmoke.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\FinalBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Optimized.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\OptimizedBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\RefinedBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Smoke.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\Soak60.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Evidence\\FlowerPerformance\\VisualSmokeComparison.json",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Build.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Build2.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Build3.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Build4.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\BuildFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\CreateProject.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\EditorPlayMode.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\EditorPlayModeFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanBuild2.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanBuild3.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanBuildDelivery.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanBuildFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanDiagnostic.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanEditorPlayMode.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanGrayPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanPreflight.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanPreviewPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanReview.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanSetup.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanSetup2.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanSetupFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FanVerificationPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FinalImport.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerAvoidanceBaseline.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerAvoidanceEditor.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerBuild2.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerBuild3.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerBuildComplete.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerBuildDelivery.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerBuildFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerBuildFraming.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerDeliveryPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerEditorDelivery.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerEditorPlayMode.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerPetalRegression.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerPreview.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerPreview2.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerSetup.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerSetup2.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerSilkRegression.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerValidationFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\FlowerValidationPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\MainBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\MainScenePlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Preview2Player.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Preview3Player.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\PreviewPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Setup.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Setup2.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Setup3.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Setup4.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SetupFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkBuild.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkBuild2.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkBuild3.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkBuildFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkComparisonPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkEditorGPU.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkEditorGPUFinal.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkPreview.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkProbe.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkRegressionPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\SilkSetup.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\VerificationPlayer.log",
+      "kind": "file"
+    },
+    {
+      "path": "E:\\Unity\\MindState\\Tools\\VerifyFlowerSoftFolds.ps1",
+      "kind": "file"
+    }
+  ],
+  "status": "removed"
+}

@@ -1,0 +1,248 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e91aca221762ccf4d8006abab02f5174, type: 3}
+  m_Name: ExhibitionPeony
+  m_EditorClassIdentifier: 
+  randomSeed: 731
+  colorVariation: 0.035
+  layers:
+  - name: "Outer / \u73CD\u73E0\u5916\u88D9"
+    count: 6
+    size: 1
+    azimuth: 0
+    rootRadius: 0.12728754
+    rootHeight: 0.040129438
+    closedTilt: 50
+    openTilt: 70
+    openingAngle: 125
+    curl: 0.14
+    softness: 0.82
+    delay: 0
+    duration: 12
+    pearl: {r: 0.9, g: 0.88, b: 0.95, a: 1}
+    root: {r: 0.71, g: 0.61, b: 0.77, a: 1}
+    pink: {r: 0.96, g: 0.81, b: 0.87, a: 1}
+    width: 0.6
+    maximumCurl: 0.4
+    edgeFoldScale: 0.425
+    surfaceProfile:
+      widePleatCount: 3
+      surfaceDetail: 0.85
+      rimVariation: 0.75
+      closureBendDegrees: 45
+      closureSideLeftDegrees: 50
+      closureSideRightDegrees: 40
+      softFolds: 1
+      foldStrength: 0.45
+      edgeStrength: 0.65
+    microNormalScale: 1
+    roll: 12
+    bloomRoll:
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 12
+    - 12
+    - 12
+    - 12
+    - 12
+    - 12
+    stagedOffsets: 1
+    tangentOffset: 0
+    depthOffset: 0
+    rootStagger: 0
+    azimuthVariation: 0.3
+    tiltVariation: 0.3
+    rollVariation: 0.4
+    widthVariation: 0
+    lengthVariation: 0.008
+    petalOffsets:
+    - height: -0.04
+      tilt: 3.6000001
+      lengthScale: 1.036
+    - height: 0.021625001
+      tilt: -2.025
+      lengthScale: 0.97975
+    - height: -0.007875
+      tilt: 0.67499995
+      lengthScale: 1.00675
+    - height: 0.047250003
+      tilt: -4.05
+      lengthScale: 0.95949996
+    - height: -0.026250001
+      tilt: 2.25
+      lengthScale: 1.0225
+    - height: 0.0052500004
+      tilt: -0.45000002
+      lengthScale: 0.99549997
+  - name: "Middle / \u6DE1\u7C89\u82B1\u51A0"
+    count: 5
+    size: 0.83943135
+    azimuth: 30
+    rootRadius: 0.13
+    rootHeight: 0.16435789
+    closedTilt: 50
+    openTilt: 50
+    openingAngle: 118
+    curl: 0.28
+    softness: 0.76
+    delay: 1.8
+    duration: 12
+    pearl: {r: 0.91, g: 0.85, b: 0.93, a: 1}
+    root: {r: 0.76, g: 0.59, b: 0.71, a: 1}
+    pink: {r: 0.98, g: 0.77, b: 0.84, a: 1}
+    width: 0.5
+    maximumCurl: 0.4
+    edgeFoldScale: 0.25
+    surfaceProfile:
+      widePleatCount: 2
+      surfaceDetail: 0.5
+      rimVariation: 0.4
+      closureBendDegrees: 55
+      closureSideLeftDegrees: 65
+      closureSideRightDegrees: 50
+      softFolds: 1
+      foldStrength: 0.45
+      edgeStrength: 0.45
+    microNormalScale: 0.7
+    roll: 12
+    bloomRoll:
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 4
+    - 6
+    - 6
+    - 6
+    - 6
+    - 6
+    - 6
+    - 6
+    - 8
+    - 8
+    - 8
+    - 8
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    - 10
+    stagedOffsets: 1
+    tangentOffset: 0
+    depthOffset: 0
+    rootStagger: 0
+    azimuthVariation: 0.3
+    tiltVariation: 0.3
+    rollVariation: 0.4
+    widthVariation: 0
+    lengthVariation: 0.008
+    petalOffsets:
+    - height: -0.039375
+      tilt: 3.9375
+      lengthScale: 1.0562501
+    - height: 0.018375
+      tilt: -1.8375001
+      lengthScale: 0.97375
+    - height: 0.044625
+      tilt: -4.4624996
+      lengthScale: 0.93625003
+    - height: -0.0131250005
+      tilt: 1.3125
+      lengthScale: 1.0187501
+    - height: -0.010500001
+      tilt: 1.05
+      lengthScale: 1.015
+  - name: "Inner / \u6D45\u7D2B\u82B1\u676F"
+    count: 3
+    size: 0.56
+    azimuth: 12
+    rootRadius: 0.1
+    rootHeight: 0.32979265
+    closedTilt: 49.890434
+    openTilt: 37
+    openingAngle: 110
+    curl: 0.38
+    softness: 0.7
+    delay: 3.6
+    duration: 12
+    pearl: {r: 0.87, g: 0.83, b: 0.95, a: 1}
+    root: {r: 0.76, g: 0.61, b: 0.78, a: 1}
+    pink: {r: 0.96, g: 0.79, b: 0.86, a: 1}
+    width: 0.4
+    maximumCurl: 0.9
+    edgeFoldScale: 0.1
+    surfaceProfile:
+      widePleatCount: 1
+      surfaceDetail: 0.25
+      rimVariation: 0.15
+      softFolds: 1
+      foldStrength: 0.45
+      edgeStrength: 0.25
+    microNormalScale: 0.4
+    roll: 5
+    bloomRoll: []
+    stagedOffsets: 0
+    tangentOffset: 0
+    depthOffset: 0
+    rootStagger: 0
+    azimuthVariation: 0.3
+    tiltVariation: 0.3
+    rollVariation: 0.4
+    widthVariation: 0
+    lengthVariation: 0.008
+    petalOffsets:
+    - height: -0.0045
+      tilt: 0.67499995
+      lengthScale: 1.00675
+    - height: 0.006
+      tilt: -0.90000004
+      lengthScale: 0.991
+    - height: -0.0015
+      tilt: 0.22500001
+      lengthScale: 1.00225

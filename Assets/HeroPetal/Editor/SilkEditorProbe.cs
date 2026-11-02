@@ -11,7 +11,7 @@ namespace MindState.Editor
     {
         public static void Run()
         {
-            Directory.CreateDirectory("Evidence/SilkMicroDetail/EditorGPU");
+            Directory.CreateDirectory("Evidence/FlowerPerformance/SingleSilk/EditorGPU");
             Profiler.enabled=true;
             Profiler.SetAreaEnabled(ProfilerArea.GPU,true);
             var driver=typeof(UnityEditor.Editor).Assembly.GetType("UnityEditorInternal.ProfilerDriver");
@@ -34,7 +34,7 @@ namespace MindState.Editor
                         info+="OS capability="+method.Invoke(null,null)+"\n";
                 }
             }
-            File.WriteAllText("Evidence/SilkMicroDetail/EditorGPU/Capabilities.txt",info);
+            File.WriteAllText("Evidence/FlowerPerformance/SingleSilk/EditorGPU/Capabilities.txt",info);
             EditorSceneManager.OpenScene("Assets/HeroPetal/Scenes/HeroPetalGallery.unity");
             EditorApplication.EnterPlaymode();
         }

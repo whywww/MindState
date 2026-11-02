@@ -1,4 +1,4 @@
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || FLOWER_VALIDATION
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,7 +38,7 @@ namespace MindState
         static void Bootstrap()
         {
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-silkAB")>=0)
-                Camera.main.gameObject.AddComponent<SilkComparison>();
+                PetalDiagnosticScene.Start<SilkComparison>();
         }
         void LateUpdate()
         {
@@ -273,3 +273,4 @@ namespace MindState
     }
 }
 #endif
+
