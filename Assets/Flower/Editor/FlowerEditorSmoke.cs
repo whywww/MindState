@@ -22,7 +22,7 @@ namespace MindState.Editor
             {
                 var f=UnityEngine.Object.FindObjectOfType<FlowerAssembler>();
                 if(f==null||!f.Ready||f.PetalCount!=14||f.bloomProgress<.99f||f.RootAnchorError()>.00001f) throw new Exception("Flower initialization / bloom / anchors failed");
-                Directory.CreateDirectory("Evidence/FlowerPerformance/MainVerification"); File.WriteAllText("Evidence/FlowerPerformance/MainVerification/EditorPlayMode.txt","PASS Unity "+Application.unityVersion+" Play Mode: 14 petals, 6 shared meshes, full bloom, connected roots.");
+                Directory.CreateDirectory("Evidence/FlowerArt/LegacyWholeBud"); File.WriteAllText("Evidence/FlowerArt/LegacyWholeBud/EditorPlayMode.txt","PASS Unity "+Application.unityVersion+" Play Mode: 14 petals, 6 shared meshes, full bloom, connected roots.");
                 Debug.Log("MINDSTATE_FLOWER_EDITOR_PASS"); EditorApplication.Exit(0);
             }
             catch(Exception e) { Debug.LogException(e); EditorApplication.Exit(2); }

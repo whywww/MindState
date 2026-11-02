@@ -67,18 +67,20 @@ namespace MindState
             GUI.Label(new Rect(44,112,250,60),"浮光 · 花境",title);
             GUI.Label(new Rect(46,183,230,30),"P E A R L   P E O N Y",small);
             GUI.Label(new Rect(46,249,230,100),"一重珍珠，一重浅紫。\n让柔软的弧缘，\n在时间中缓缓舒展。",text);
-            GUI.Label(new Rect(46,401,230,30),"01   绽放 / BLOOM",small);
-            GUI.Label(new Rect(46,451,230,36),flower.frozen?"静止观赏":flower.bloomProgress>=1?"盛放 · 自由观察":flower.autoPlay?"逐层展开中":"手动姿态 · 自由观察",text);
-            float p=GUI.HorizontalSlider(new Rect(46,510,230,24),flower.bloomProgress,0,1);
-            if(p!=flower.bloomProgress) flower.SetBloomProgress(p);
-            GUI.Label(new Rect(46,548,230,30),(flower.bloomProgress*100).ToString("000")+"%  /  "+flower.BloomDuration.ToString("0.0")+" SECONDS",small);
-            if(Button(46,605,108,"重新绽放")) flower.PlayBloom();
-            if(Button(168,605,108,flower.frozen?"继续":"冻结")) flower.frozen=!flower.frozen;
+            GUI.Label(new Rect(46,380,230,32),flower.ArtStatus,small);
+            if(Button(46,425,108,"澄明")) flower.SetArtState(FlowerArtState.Clarity);
+            if(Button(168,425,108,"凝聚")) flower.SetArtState(FlowerArtState.Gathering);
+            if(Button(46,475,108,"漫游")) flower.SetArtState(FlowerArtState.Wandering);
+            if(Button(168,475,108,"幽微")) flower.SetArtState(FlowerArtState.Quiet);
+            if(Button(46,535,108,"模拟脑电")) flower.SimulateArtBrain();
+            if(Button(168,535,108,"外部输入")) flower.WaitForArtBrain();
+            if(Button(46,595,108,"开合重播")) flower.PlayBloom();
+            if(Button(168,595,108,flower.frozen?"继续":"冻结")) flower.SetFrozen(!flower.frozen);
             GUI.Label(new Rect(46,710,230,30),"02   观察 / VIEW",small);
             if(Button(46,759,108,"正面")) SetView(0,90);
             if(Button(168,759,108,"3/4")) SetView(22,55);
             if(Button(46,812,108,"侧面")) SetView(22,8);
-            if(Button(168,812,108,"重置")) { SetView(22,55); flower.PlayBloom(); }
+            if(Button(168,812,108,"重置")) { SetView(22,55); flower.ResetArt(); }
             GUI.Label(new Rect(46,939,230,65),"拖动环绕 · 滚轮缩放\nR 重播 · 空格冻结 · H 隐藏",small);
             GUI.matrix=saved;
         }

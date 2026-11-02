@@ -47,11 +47,11 @@ namespace MindState
         int previousCascades;
         bool qualitySaved;
 
-        void Start() { previousCascades=QualitySettings.shadowCascades; qualitySaved=true; QualitySettings.shadowCascades=0; RebuildFlower(); }
+        void Start() { previousCascades=QualitySettings.shadowCascades; qualitySaved=true; QualitySettings.shadowCascades=0; RebuildFlower(); if(!ArtDiagnosticsRequested()) SetArtState(FlowerArtState.Clarity); }
         static bool Finite(float v)=>!float.IsNaN(v)&&!float.IsInfinity(v);
         public void SetBloomProgress(float progress)
-        { if(!Finite(progress)) return; autoPlay=false; bloomProgress=Mathf.Clamp01(progress); ApplyPose(); }
-        public void PlayBloom() { bloomProgress=0; frozen=false; autoPlay=true; ApplyPose(); }
+        { if(!Finite(progress)) return; LeaveArt(); autoPlay=false; bloomProgress=Mathf.Clamp01(progress); ApplyPose(); }
+        public void PlayBloom() { LeaveArt(); bloomProgress=0; frozen=false; autoPlay=true; ApplyPose(); }
         public void SetFrozen(bool value)=>frozen=value;
         [ContextMenu("Rebuild Flower / 重建缓存与组装")]
         public void RebuildFlower()
@@ -152,6 +152,7 @@ namespace MindState
             long start=System.Diagnostics.Stopwatch.GetTimestamp(),bytes=GC.GetAllocatedBytesForCurrentThread();
             if(autoPlay&&!frozen) bloomProgress=Mathf.Min(1,bloomProgress+Time.deltaTime/BloomDuration);
             InterpolateMs=UploadMs=TransformMs=MaterialMs=0;
+            if(artActive) { UpdateArt(Time.deltaTime); LastUpdateAllocation=GC.GetAllocatedBytesForCurrentThread()-bytes; LastUpdateMilliseconds=Milliseconds(start); return; }
             ApplyPose();
             long materialStart=System.Diagnostics.Stopwatch.GetTimestamp();
             if(materialBreathing)
@@ -163,10 +164,11 @@ namespace MindState
             LastUpdateAllocation=GC.GetAllocatedBytesForCurrentThread()-bytes;
             LastUpdateMilliseconds=(System.Diagnostics.Stopwatch.GetTimestamp()-start)*1000.0/System.Diagnostics.Stopwatch.Frequency;
         }
-        void ApplyPose()
+        void ApplyPose()=>ApplyPose(bloomProgress);
+        void ApplyPose(float globalProgress,bool applyTransforms=true)
         {
             if(layers==null) return;
-            float elapsed=Mathf.Clamp01(bloomProgress)*BloomDuration;
+            float elapsed=Mathf.Clamp01(globalProgress)*BloomDuration;
             foreach(var l in layers)
             {
                 float progress=Mathf.Clamp01((elapsed-l.config.delay)/Mathf.Max(1,l.config.duration));
@@ -183,19 +185,29 @@ namespace MindState
                     g.mesh.SetVertexBufferData(g.data,0,0,g.data.Length,0,MeshUpdateFlags.DontRecalculateBounds);
                     Bounds bounds=p0.bounds; bounds.Encapsulate(p1.bounds); g.mesh.bounds=bounds; MeshUpdates++; UploadMs+=Milliseconds(uploadStart);
                 }
+                if(!applyTransforms) continue;
                 long transformStart=System.Diagnostics.Stopwatch.GetTimestamp();
-                float tilt=Mathf.Lerp(l.config.closedTilt,l.config.openTilt,Mathf.SmoothStep(0,1,progress));
-                float weight=l.config.OffsetWeight(progress),layerRoll=l.config.RollAt(progress);
                 for(int petalIndex=0;petalIndex<l.petals.Length;petalIndex++)
                 {
                     var p=l.petals[petalIndex];
-                    PetalFrame(l.config,p.azimuth,tilt+p.tilt+p.authoredTilt*weight,p.roll,p.heightOffset*weight,petalIndex,l.petals.Length,progress,out var position,out var rotation,layerRoll);
-                    p.anchor.SetLocalPositionAndRotation(position,rotation);
-                    p.scale=PetalScale(l.config,p,petalIndex,progress,weight); p.body.localScale=p.scale;
-                    p.body.localPosition=-Vector3.Scale(SurfaceFor(l,petalIndex).root,p.scale);
+                    PathPetalPose(l,p,petalIndex,progress,out var position,out var rotation,out var scale);
+                    ApplyPetalPose(l,p,petalIndex,position,rotation,scale);
                 }
                 TransformMs+=Milliseconds(transformStart);
             }
+        }
+        static void PathPetalPose(Layer l,Petal p,int index,float progress,out Vector3 position,out Quaternion rotation,out Vector3 scale)
+        {
+            var c=l.config; float weight=c.OffsetWeight(progress);
+            float tilt=Mathf.Lerp(c.closedTilt,c.openTilt,Mathf.SmoothStep(0,1,progress));
+            PetalFrame(c,p.azimuth,tilt+p.tilt+p.authoredTilt*weight,p.roll,p.heightOffset*weight,index,l.petals.Length,progress,out position,out rotation,c.RollAt(progress));
+            scale=PetalScale(c,p,index,progress,weight);
+        }
+        static void ApplyPetalPose(Layer l,Petal p,int index,Vector3 position,Quaternion rotation,Vector3 scale)
+        {
+            p.anchor.SetLocalPositionAndRotation(position,rotation);
+            p.scale=scale; p.body.localScale=scale;
+            p.body.localPosition=-Vector3.Scale(SurfaceFor(l,index).root,scale);
         }
         static Vertex Interpolate(Vertex a,Vertex b,float f) { Vertex r; Interpolate(ref a,ref b,f,out r); return r; }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

@@ -12,6 +12,9 @@ Shader "MindState/Radial Pearl Silk"
         _Smoothness ("Silk polish", Range(0,1)) = 0.30
         _SmoothnessVariation ("Local polish variation", Range(0,0.1)) = 0.06
         _GrayMode ("Gray geometry preview", Float) = 0
+        _ArtWeights ("Art weights", Vector) = (0,0,0,0)
+        _ArtClock ("Art clock", Float) = 0
+        _ArtPhase ("Art phase", Float) = 0
         _Breath ("Breathing", Float) = 0
     }
     SubShader
@@ -24,6 +27,7 @@ Shader "MindState/Radial Pearl Silk"
         sampler2D _BumpMap,_DetailMask;
         fixed4 _Color,_RootColor,_PinkColor;
         half _BumpStrength,_Smoothness,_SmoothnessVariation,_FineCount,_GrayMode,_Breath;
+        float4 _ArtWeights; float _ArtClock,_ArtPhase;
         struct Input { float2 uv_BumpMap; float3 viewDir; float3 worldPos; float3 worldNormal; INTERNAL_DATA };
         void surf(Input IN,inout SurfaceOutputStandardSpecular o)
         {
@@ -53,6 +57,13 @@ Shader "MindState/Radial Pearl Silk"
             // A bounded ambient lift plus light-dependent backscatter, not alpha transparency.
             o.Emission=base*0.08+half3(0.38,0.35,0.49)*sheen*(0.035+0.003*_Breath)
                        +base*_LightColor0.rgb*back*thin;
+            float outward=pow(.5+.5*cos(uv.y*6.283-_ArtClock*.65),4);
+            float inward=pow(.5+.5*cos(uv.y*6.283+_ArtClock*1.256-_ArtPhase*.2),4);
+            float drifting=.5+.5*sin(uv.x*3+uv.y*2-_ArtClock*.45+_ArtPhase);
+            float quiet=.5+.5*sin(_ArtClock*.448-_ArtPhase);
+            float sheenMask=dot(_ArtWeights,float4(outward,inward,drifting,quiet*.5));
+            o.Smoothness=clamp(o.Smoothness+.04*sheenMask,.18,.44);
+            o.Emission+=base*.025*sheenMask;
             if(_GrayMode>0.5)
             {
                 o.Normal=half3(0,0,1); o.Albedo=half3(0.52,0.52,0.52);

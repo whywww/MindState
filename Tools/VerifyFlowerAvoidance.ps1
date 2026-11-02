@@ -1,7 +1,7 @@
-﻿param(
+param(
     [switch]$Baseline,[switch]$Tune,[switch]$Refine,[switch]$Geometry,[switch]$Stagger,[switch]$Fold,[switch]$Natural,[switch]$Stress,[switch]$Coarse,[switch]$NoScreens,
     [string]$Seeds='731,17,42,137,2026',[int]$Steps=201,[int]$Budget=120,
-    [string]$LayoutJson='', [string]$Output='Evidence/FlowerPerformance/Contacts',[string]$ProjectPath='',
+    [string]$LayoutJson='', [string]$Output='Evidence/FlowerArt/Contacts',[string]$ProjectPath='',
     [string]$NaturalBaselineJson=''
 )
 $ErrorActionPreference='Stop'

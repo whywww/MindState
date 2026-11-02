@@ -4,4 +4,4 @@
 
 bloomRoll为可选平滑扭转曲线，stagedOffsets使逐瓣高度、俯仰和长度错落随展开显现。原单片参数不变。全部数据以ExhibitionPeony资产为准。
 
-操作与验收见[整花说明](README.zh-CN.md)及[最新报告](../../Evidence/FlowerPerformance/报告.md)。历史候选与回滚快照已清理。
+操作与验收见[整花说明](README.zh-CN.md)及[最新报告](../../Evidence/FlowerArt/报告.md)。历史候选与回滚快照已清理。

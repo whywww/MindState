@@ -25,7 +25,7 @@ namespace MindState.Editor
         [MenuItem("MindState/Flower Avoidance/Apply layout JSON to current Preset")]
         static void ApplyLayout()
         {
-            string path=EditorUtility.OpenFilePanel("Layout JSON (requires new validation after edits)","Evidence/FlowerPerformance","json");
+            string path=EditorUtility.OpenFilePanel("Layout JSON (requires new validation after edits)","Evidence/FlowerArt","json");
             if(string.IsNullOrEmpty(path)) return;
             ApplyLayoutFile(path,true);
         }
