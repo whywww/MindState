@@ -19,6 +19,7 @@ namespace MindState
             new FlowerArtProfile(new Vector3(65,59,34),1.5f,14)};
         public FlowerArtInput ArtInput { get; private set; }
         public Vector4 ArtWeights { get; private set; }=new Vector4(1,0,0,0);
+        public Vector4 ArtLightWeights { get; private set; }=new Vector4(1,0,0,0);
         public bool ArtActive=>artActive;
         public float ArtTime=>artTime;
         public string ArtStatus=>!artActive?"开合预览":ArtInput==FlowerArtInput.Preview?"单态预览":ArtInput==FlowerArtInput.Simulation?"模拟脑电":Time.realtimeSinceStartup-lastValid>5?"正在重新感知":"外部脑电";
@@ -52,12 +53,13 @@ namespace MindState
         {
             if(!artActive) return;
             artActive=false; generated.localRotation=Quaternion.identity; generated.localScale=Vector3.one;
-            foreach(var l in layers) { l.progress=-1; foreach(var p in l.petals) { p.block.SetVector(ArtWeightsId,Vector4.zero); p.renderer.SetPropertyBlock(p.block); } }
+            foreach(var l in layers) { l.progress=-1; foreach(var p in l.petals) { p.block.SetVector(ArtWeightsId,Vector4.zero); p.block.SetVector("_ArtLightWeights",Vector4.zero); p.renderer.SetPropertyBlock(p.block); } }
         }
         public void ResetArt()
-        { artTime=artYaw=0; frozen=false; ArtWeights=new Vector4(1,0,0,0); SetArtState(FlowerArtState.Clarity); }
+        { artTime=artYaw=0; ResetFlowPhase(); frozen=false; ArtWeights=ArtLightWeights=new Vector4(1,0,0,0); SetArtState(FlowerArtState.Clarity); }
         public void SetArtPreviewImmediate(FlowerArtState state)
-        { SetArtState(state); ArtWeights=artTarget; artTime=artYaw=0; UpdateArt(0); }
+        { SetArtState(state); ArtWeights=ArtLightWeights=artTarget; artTime=artYaw=0; ResetFlowPhase(); UpdateArt(0); }
+        float FlowSpeed(){var periods=appearance!=null?appearance.flowPeriods:new Vector4(12,10,9,18);float speed=0;for(int i=0;i<4;i++)speed+=ArtLightWeights[i]/Mathf.Max(1,periods[i]);return speed;}
         void UpdateArt(float dt)
         {
             if(!frozen)
@@ -66,8 +68,11 @@ namespace MindState
                 if(ArtInput==FlowerArtInput.Simulation) artTarget=BrainArtWeights(.5f+.48f*Mathf.Sin(artTime*.19f),.5f+.48f*Mathf.Sin(artTime*.11f));
                 if(ArtInput==FlowerArtInput.External&&Time.realtimeSinceStartup-lastValid>5) artTarget=new Vector4(0,0,0,1);
                 ArtWeights=Vector4.Lerp(ArtWeights,artTarget,1-Mathf.Exp(-dt/4));
+                ArtLightWeights=Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/3f));
                 artYaw=Mathf.Repeat(artYaw+4*ArtWeights.x*dt,360);
+                ArtFlowPhase=Mathf.Repeat(ArtFlowPhase+dt*FlowSpeed(),1);
             }
+            UpdateNaturalLights();
             generated.localRotation=Quaternion.Euler(0,artYaw,0);
             generated.localScale=Vector3.one;
             float gathering=ArtWeights.y;
@@ -102,7 +107,12 @@ namespace MindState
                         scale=Vector3.Lerp(PetalScale(l.config,p,j,1),pathScale,gathering);
                     }
                     ApplyPetalPose(l,p,j,position,rotation,scale);
-                    p.block.SetVector(ArtWeightsId,ArtWeights); p.block.SetFloat(ArtClockId,artTime); p.block.SetFloat(ArtPhaseId,az+k*.5f);
+                    if(appearance!=null) {
+                        float v=Mathf.Repeat((j+1)*.618034f+k*.37f+appearance.seed*.013f,1);
+                        if(!frozen) p.flowPhase=Mathf.Repeat(p.flowPhase+dt*FlowSpeed()/(1+(v*2-1)*appearance.periodVariation),1);
+                        p.block.SetVector("_FlowSettings",new Vector4(p.flowPhase,appearance.bandWidth,v*appearance.phaseSpread,0));
+                    }
+                    p.block.SetVector("_ArtLightWeights",ArtLightWeights); p.block.SetVector(ArtWeightsId,ArtWeights); p.block.SetFloat(ArtClockId,artTime); p.block.SetFloat(ArtPhaseId,az+k*.5f);
                     p.renderer.SetPropertyBlock(p.block);
                 }
             }

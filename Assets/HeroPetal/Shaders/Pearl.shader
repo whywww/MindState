@@ -2,6 +2,7 @@ Shader "MindState/Radial Pearl Silk"
 {
     Properties
     {
+        _TargetAppearance ("Target palette enabled", Float) = 0
         _Color ("Pearl white", Color) = (0.88,0.89,0.94,1)
         _RootColor ("Root lavender", Color) = (0.73,0.65,0.79,1)
         _PinkColor ("Petal blush", Color) = (0.95,0.78,0.85,1)
@@ -25,10 +26,11 @@ Shader "MindState/Radial Pearl Silk"
         CGPROGRAM
         #pragma surface surf StandardSpecular fullforwardshadows addshadow
         #pragma target 3.0
-        sampler2D _BumpMap,_DetailMask;
+        sampler2D _BumpMap,_DetailMask,_FlowPalette; float4 _FlowSettings;
         fixed4 _Color,_RootColor,_PinkColor;
         half _BumpStrength,_Smoothness,_SmoothnessVariation,_FineCount,_GrayMode,_Breath;
         float4 _RootTrim; float4x4 _RootTrimWorldToFlower;
+        float _TargetAppearance; float4 _RoseLinear,_PeachLinear,_LavenderLinear,_PearlLinear,_CyanLinear,_AppearancePlacement,_AppearanceSurface,_ArtLightWeights;
         float4 _ArtWeights; float _ArtClock,_ArtPhase;
         struct Input { float2 uv_BumpMap; float3 viewDir; float3 worldPos; float3 worldNormal; INTERNAL_DATA };
         void surf(Input IN,inout SurfaceOutputStandardSpecular o)
@@ -72,6 +74,18 @@ Shader "MindState/Radial Pearl Silk"
             float sheenMask=dot(_ArtWeights,float4(outward,inward,drifting,quiet*.5));
             o.Smoothness=clamp(o.Smoothness+.04*sheenMask,.18,.44);
             o.Emission+=base*.025*sheenMask;
+            if(_TargetAppearance>.5)
+            {
+                // Neutral satin receives overlapping real colored spotlights.
+                // No UV hue conveyor, painted color bands or emissive rainbow.
+                float3 satin=lerp(_PearlLinear.rgb,lerp(_LavenderLinear.rgb,_PeachLinear.rgb,.5),.12);
+                o.Albedo=satin*lerp(.94,1,detail.g);
+                o.Smoothness=clamp(_AppearanceSurface.x+.09+(detail.r*2-1)*.035,.28,.55);
+                o.Specular=half3(.048,.046,.05);
+                o.Emission=satin*.025+_PearlLinear.rgb*sheen*.018
+                    +satin*_LightColor0.rgb*back*_AppearanceSurface.y*.5;
+
+            }
             if(_GrayMode>0.5)
             {
                 o.Normal=half3(0,0,1); o.Albedo=half3(0.52,0.52,0.52);

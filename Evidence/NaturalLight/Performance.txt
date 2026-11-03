@@ -1,0 +1,2 @@
+appearance=0 CPU_component_P95_ms=11.2995 frameIntervalP95ms=13.1479 maxUpdateGC=0 GPU_ms=unavailable
+appearance=1 CPU_component_P95_ms=12.7874 frameIntervalP95ms=15.3456 maxUpdateGC=0 GPU_ms=unavailable

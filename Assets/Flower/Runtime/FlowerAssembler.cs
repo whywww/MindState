@@ -37,7 +37,7 @@ namespace MindState
         static readonly int BreathId=Shader.PropertyToID("_Breath");
         [StructLayout(LayoutKind.Sequential)] struct Vertex { public Vector3 p,n; public Vector4 t; }
         sealed class Pose { public Vertex[] data; public Vector3 root; public Bounds bounds; }
-        sealed class Petal { public Transform anchor,body; public MeshRenderer renderer; public MaterialPropertyBlock block; public Color originalColor; public float azimuth,tilt,roll,heightOffset,authoredTilt,widthFactor,lengthFactor; public Vector3 scale; public Matrix4x4 fullMatrix; }
+        sealed class Petal { public Transform anchor,body; public MeshRenderer renderer; public MaterialPropertyBlock block; public Color originalColor; public float flowPhase; public float azimuth,tilt,roll,heightOffset,authoredTilt,widthFactor,lengthFactor; public Vector3 scale; public Matrix4x4 fullMatrix; }
         sealed class Variant { public Pose[] poses=new Pose[PoseCount]; public Vertex[] data; public Mesh mesh; public Vector3 root; }
         sealed class Layer { public FlowerLayer config; public Variant[] variants; public Petal[] petals; public float progress=-1; }
         static Variant SurfaceFor(Layer layer,int petal)=>layer.variants[petal%layer.variants.Length];
@@ -136,7 +136,7 @@ namespace MindState
                     body.localScale=p.scale;
                 }
             }
-            Destroy(source.gameObject); BuildHeart();
+            Destroy(source.gameObject); BuildHeart(); RefreshAppearance();
             float discRadius=0;foreach(var layer in layers)discRadius=Mathf.Max(discRadius,layer.config.rootRadius);
             foreach(var layer in layers)foreach(var petal in layer.petals)petal.block.SetVector("_RootTrim",new Vector4(1,layers[0].config.rootHeight,(discRadius+.04f)*.92f,layers[0].config.rootHeight+.012f));
             float initialProgress=bloomProgress; bloomProgress=1; ApplyPose(); FullBloomBounds=WorldBounds;
@@ -350,7 +350,7 @@ namespace MindState
             if(coreMesh!=null) Destroy(coreMesh); if(stamenMesh!=null) Destroy(stamenMesh);
             layers=null;
         }
-        void OnDestroy() { Release(); if(qualitySaved) QualitySettings.shadowCascades=previousCascades; }
+        void OnDestroy() { ReleaseFlowPalette(); Release(); if(qualitySaved) QualitySettings.shadowCascades=previousCascades; }
     }
 }
 

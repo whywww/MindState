@@ -1,0 +1,22 @@
+{
+  "longStates": {
+    "pass": 75,
+    "fail": 0
+  },
+  "naturalLights": {
+    "pass": 26,
+    "fail": 0
+  },
+  "art": {
+    "pass": 40,
+    "fail": 0
+  },
+  "flower": {
+    "pass": 50,
+    "fail": 0
+  },
+  "petal": {
+    "pass": 97,
+    "fail": 0
+  }
+}

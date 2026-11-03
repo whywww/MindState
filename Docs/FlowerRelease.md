@@ -1,3 +1,7 @@
+# 当前版本：自然混色彩光
+
+自然彩光已并入 main，正式入口 Builds/Windows/MindState.exe。详见 [集成说明](NaturalLight.md)。以下为此前发布记录。
+
 # 已批准的根部裁切与花丝连接
 
 2026-11-02：用户批准集成到main并提交推送。
