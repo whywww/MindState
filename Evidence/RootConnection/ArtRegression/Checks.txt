@@ -1,0 +1,40 @@
+PASS Brain corner 0
+PASS Brain corner 1
+PASS Brain corner 2
+PASS Brain corner 3
+PASS Balanced blend
+PASS Frozen clock
+PASS Invalid data does not map to low attention
+PASS Legacy API exits art
+PASS Legacy replay
+PASS Original cached path equality at bud progress 0
+PASS Original cached path equality at bud progress 0.02
+PASS Original cached path equality at bud progress 0.04
+PASS No art mesh uploads 0
+PASS Attached roots 0
+PASS Gathering breath uses cached mesh uploads
+PASS Attached roots 1
+PASS No art mesh uploads 2
+PASS Attached roots 2
+PASS No art mesh uploads 3
+PASS Attached roots 3
+PASS Frozen bud has no mesh uploads or clock change
+PASS Full clarity revolution duration
+PASS Normalized transition 0 to 1
+PASS Normalized transition 0 to 2
+PASS Normalized transition 0 to 3
+PASS Normalized transition 1 to 0
+PASS Normalized transition 1 to 2
+PASS Normalized transition 1 to 3
+PASS Normalized transition 2 to 0
+PASS Normalized transition 2 to 1
+PASS Normalized transition 2 to 3
+PASS Normalized transition 3 to 0
+PASS Normalized transition 3 to 1
+PASS Normalized transition 3 to 2
+PASS Stale external signal
+PASS External reconnect
+PASS Cached path uploads during blend soak
+PASS Stable mesh count
+PASS Stable material count
+PASS Art update zero GC

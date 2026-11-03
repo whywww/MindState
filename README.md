@@ -7,3 +7,5 @@
 当前记录：Evidence/NaturalLight/报告.md。历史色带截图保留于 Evidence/NaturalLight/PreviousBands.jpg。
 
 构建：Tools/Build.ps1 -Validation；场景配置：MindState.Editor.ConfigureColorVariant.Build。采集：验证程序 -verifyColor；编码：python Tools/EncodeNaturalEvidence.py。
+
+花瓣根部连接修正已并入 main：14 片花瓣统一平移接入底部圆盘，保留开合与四态动作。验收见 Evidence/RootConnection/报告.md。

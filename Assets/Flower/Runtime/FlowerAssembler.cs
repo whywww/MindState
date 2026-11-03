@@ -42,6 +42,7 @@ namespace MindState
         sealed class Layer { public FlowerLayer config; public Variant[] variants; public Petal[] petals; public float progress=-1; }
         static Variant SurfaceFor(Layer layer,int petal)=>layer.variants[petal%layer.variants.Length];
         Layer[] layers;
+        readonly bool rootBaseline=Array.IndexOf(Environment.GetCommandLineArgs(),"-rootBaseline")>=0;
         Transform generated;
         Mesh coreMesh,stamenMesh;
         int previousCascades;
@@ -205,8 +206,10 @@ namespace MindState
             PetalFrame(c,p.azimuth,tilt+p.tilt+p.authoredTilt*weight,p.roll,p.heightOffset*weight,index,l.petals.Length,progress,out position,out rotation,c.RollAt(progress));
             scale=PetalScale(c,p,index,progress,weight);
         }
-        static void ApplyPetalPose(Layer l,Petal p,int index,Vector3 position,Quaternion rotation,Vector3 scale)
+        void ApplyPetalPose(Layer l,Petal p,int index,Vector3 position,Quaternion rotation,Vector3 scale)
         {
+            // A common embedded root height applies to legacy and all art-state poses.
+            if(!rootBaseline) position.y=layers[0].config.rootHeight+.0045f;
             p.anchor.SetLocalPositionAndRotation(position,rotation);
             p.scale=scale; p.body.localScale=scale;
             p.body.localPosition=-Vector3.Scale(SurfaceFor(l,index).root,scale);
