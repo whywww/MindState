@@ -76,14 +76,20 @@ Shader "MindState/Radial Pearl Silk"
             o.Emission+=base*.025*sheenMask;
             if(_TargetAppearance>.5)
             {
-                // Neutral satin receives overlapping real colored spotlights.
-                // No UV hue conveyor, painted color bands or emissive rainbow.
-                float3 satin=lerp(_PearlLinear.rgb,lerp(_LavenderLinear.rgb,_PeachLinear.rgb,.5),.12);
-                o.Albedo=satin*lerp(.94,1,detail.g);
-                o.Smoothness=clamp(_AppearanceSurface.x+.09+(detail.r*2-1)*.035,.28,.55);
-                o.Specular=half3(.048,.046,.05);
-                o.Emission=satin*.025+_PearlLinear.rgb*sheen*.018
-                    +satin*_LightColor0.rgb*back*_AppearanceSurface.y*.5;
+                // Natural root-to-rim gradient with a soft pearl edge and subtle fresnel iridescence.
+                float3 rootCol=lerp(_RoseLinear.rgb,_PeachLinear.rgb,saturate(.40+.35*detail.g+.15*(1-uv.x))*.65);
+                float3 bodyCol=lerp(_RoseLinear.rgb,_PeachLinear.rgb,.18+.38*_AppearancePlacement.x);
+                float3 col=lerp(rootCol,bodyCol,smoothstep(.05,.50,uv.y));
+                col=lerp(col,_PearlLinear.rgb,smoothstep(.66,.99,uv.y)*(.30+.14*_AppearancePlacement.y));
+                col*=lerp(.94,1.06,detail.r);
+                col=lerp(col,_LavenderLinear.rgb,.08*saturate(_AppearancePlacement.z*.5));
+                o.Albedo=col*1.04;
+                o.Smoothness=clamp(_AppearanceSurface.x+.06+(detail.r*2-1)*.035,.30,.52);
+                o.Specular=half3(.040,.038,.044);
+                float fres=pow(1-saturate(dot(normalize(IN.viewDir),o.Normal)),3);
+                float irid=fres*(.30+.70*detail.b)*_AppearanceSurface.z;
+                float3 iridCol=lerp(_CyanLinear.rgb,_LavenderLinear.rgb,.35+.35*sin(uv.x*6.283+_ArtClock*.10));
+                o.Emission=col*.055+iridCol*irid*.12+col*_LightColor0.rgb*back*_AppearanceSurface.y*.35;
 
             }
             if(_GrayMode>0.5)

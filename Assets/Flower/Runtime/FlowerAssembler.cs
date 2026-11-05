@@ -77,7 +77,7 @@ namespace MindState
                     int foldSeed=unchecked(preset.randomSeed*486187739+i*104729+variant*15485863);
                     for(int j=0;j<PoseCount;j++)
                     {
-                        source.SetShapeImmediateLimited(l.config.openingAngle,l.config.curl,l.config.softness,j/(float)(PoseCount-1),l.config.maximumCurl,l.config.edgeFoldScale,l.config.surfaceProfile,foldSeed);
+                        source.SetShapeImmediateLimited(l.config.openingAngle,l.config.curl,l.config.softness,j/(float)(PoseCount-1),l.config.maximumCurl,l.config.edgeFoldScale,l.config.surfaceProfile,foldSeed,l.config.WaveRoom(j/(float)(PoseCount-1)));
                         var m=source.RuntimeMesh;
                         var positions=m.vertices; var normals=m.normals; var tangents=m.tangents;
                         var p=new Pose { data=new Vertex[positions.Length],bounds=m.bounds };
@@ -89,7 +89,7 @@ namespace MindState
                     // Midpoint comparisons against the unchanged generator, during initialization only.
                     for(int j=0;j<PoseCount-1;j++)
                     {
-                        source.SetShapeImmediateLimited(l.config.openingAngle,l.config.curl,l.config.softness,(j+.5f)/(PoseCount-1),l.config.maximumCurl,l.config.edgeFoldScale,l.config.surfaceProfile,foldSeed);
+                        source.SetShapeImmediateLimited(l.config.openingAngle,l.config.curl,l.config.softness,(j+.5f)/(PoseCount-1),l.config.maximumCurl,l.config.edgeFoldScale,l.config.surfaceProfile,foldSeed,l.config.WaveRoom((j+.5f)/(PoseCount-1)));
                         var exact=source.RuntimeMesh.vertices; var normals=source.RuntimeMesh.normals;
                         for(int k=0;k<exact.Length;k++)
                         {
@@ -209,7 +209,7 @@ namespace MindState
         void ApplyPetalPose(Layer l,Petal p,int index,Vector3 position,Quaternion rotation,Vector3 scale)
         {
             // A common embedded root height applies to legacy and all art-state poses.
-            if(!rootBaseline) position.y=layers[0].config.rootHeight+.0045f;
+            if(!rootBaseline) position.y=layers[0].config.rootHeight+.0045f+l.config.rootStagger*RootStaggerSign(index,l.petals.Length);
             p.anchor.SetLocalPositionAndRotation(position,rotation);
             p.scale=scale; p.body.localScale=scale;
             p.body.localPosition=-Vector3.Scale(SurfaceFor(l,index).root,scale);
@@ -295,16 +295,16 @@ namespace MindState
             {
                 float a=j*2.39996323f;
                 float r=.025f+.105f*Mathf.Sqrt((j+.5f)/30f);
-                float height=.87f+.075f*(float)random.NextDouble();
+                float height=.95f+.06f*(float)random.NextDouble();
                 var tip=new Vector3(Mathf.Cos(a)*r,height,Mathf.Sin(a)*r);
-                if(anthers) ellipsoid(tip,new Vector3(.008f,.028f,.006f),12,20,.16f);
+                if(anthers) ellipsoid(tip,new Vector3(.013f,.037f,.0095f),12,20,.16f);
                 else
                 {
                     int start=vertices.Count; const int steps=8,sides=8;
                     for(int y=0;y<=steps;y++)
                     {
                         float t=y/(float)steps; var c=new Vector3(tip.x*(.65f+.35f*t*t),Mathf.Lerp(floorY+.004f,height,t),tip.z*(.65f+.35f*t*t));
-                        for(int x=0;x<=sides;x++) { float angle=x*Mathf.PI*2/sides; vertices.Add(c+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*.005f);uv.Add(new Vector2(x/(float)sides,t)); }
+                        for(int x=0;x<=sides;x++) { float angle=x*Mathf.PI*2/sides; vertices.Add(c+new Vector3(Mathf.Cos(angle),0,Mathf.Sin(angle))*.0065f);uv.Add(new Vector2(x/(float)sides,t)); }
                     }
                     for(int y=0;y<steps;y++) for(int x=0;x<sides;x++) { int q=start+y*(sides+1)+x;triangles.Add(q);triangles.Add(q+sides+1);triangles.Add(q+1);triangles.Add(q+1);triangles.Add(q+sides+1);triangles.Add(q+sides+2); }
                 }

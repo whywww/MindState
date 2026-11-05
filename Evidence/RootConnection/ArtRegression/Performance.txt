@@ -1,1 +1,0 @@
-samples=4069 updateP95ms=15.1547 maxUpdateGc=0 interpolationMeanMs=6.74925219955763 uploadMeanMs=0.973077955271566 meshUploads=13186

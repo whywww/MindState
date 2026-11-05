@@ -47,7 +47,7 @@ public class RootConnectionValidation:MonoBehaviour {
   f.SetArtPreviewImmediate((FlowerArtState)a);f.SetArtState((FlowerArtState)b);string name="Transition"+a+"_"+b;Directory.CreateDirectory(Path.Combine(dir,name));
   for(int frame=0;frame<240;frame++){f.RootValidationStep(.05f);check();if(frame%4==0)shot(name+"/"+(frame/4).ToString("0000"));if(frame%20==0)yield return null;}
  }
- File.WriteAllText(Path.Combine(dir,"Checks.txt"),"PASS samples="+samples+"; physical visible shell overlaps unchanged disc for all 14 petals (baseline excluded="+baseline+")");
+ File.WriteAllText(Path.Combine(dir,"Checks.txt"),"PASS samples="+samples+"; physical visible shell overlaps unchanged disc for all 18 petals (baseline excluded="+baseline+")");
  File.WriteAllText(Path.Combine(dir,"Complete.txt"),"Complete");rt.Release();Destroy(rt);Destroy(tex);Application.Quit();
  }
 }

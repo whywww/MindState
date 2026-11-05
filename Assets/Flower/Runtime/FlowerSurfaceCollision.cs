@@ -24,6 +24,7 @@ namespace MindState
             public Vector3 point;
             public float lengthA,lengthB;
             public bool rootRegion;
+            public float widthA,widthB;
         }
         readonly Node[] nodes;
         readonly Vector3[][] local;
@@ -175,8 +176,9 @@ namespace MindState
                 if(a==b&&(ia==ib||Adjacent(a0,a1,a2,b0,b1,b2))) continue;
                 if(!Triangle(sa.v[a0],sa.v[a1],sa.v[a2],sb.v[b0],sb.v[b1],sb.v[b2],out Vector3 point)) continue;
                 float la=LengthAt(point,sa.v[a0],sa.v[a1],sa.v[a2],a0,a1,a2),lb=LengthAt(point,sb.v[b0],sb.v[b1],sb.v[b2],b0,b1,b2);
+                float wa=WidthAt(point,sa.v[a0],sa.v[a1],sa.v[a2],a0,a1,a2),wb=WidthAt(point,sb.v[b0],sb.v[b1],sb.v[b2],b0,b1,b2);
                 bool root=IsRoot(la,lb); if(root!=roots) continue;
-                contact=new Contact { point=point,lengthA=la,lengthB=lb,rootRegion=root }; return true;
+                contact=new Contact { point=point,lengthA=la,lengthB=lb,widthA=wa,widthB=wb,rootRegion=root }; return true;
             }
             return false;
         }
@@ -188,6 +190,13 @@ namespace MindState
             if(Mathf.Abs(den)<1e-20f) return ia/Cols/(float)(Rows-1);
             float s=(vv*wu-uv*wv)/den,t=(uu*wv-uv*wu)/den;
             return ((ia/Cols)*(1-s-t)+(ib/Cols)*s+(ic/Cols)*t)/(Rows-1);
+        }
+        static float WidthAt(Vector3 p,Vector3 a,Vector3 b,Vector3 c,int ia,int ib,int ic)
+        {
+            Vector3 u=b-a,v=c-a,w=p-a; float uu=Vector3.Dot(u,u),uv=Vector3.Dot(u,v),vv=Vector3.Dot(v,v),wu=Vector3.Dot(w,u),wv=Vector3.Dot(w,v),den=uu*vv-uv*uv;
+            if(Mathf.Abs(den)<1e-20f) return (ia%Cols)/(float)(Cols-1)*2-1;
+            float s=(vv*wu-uv*wv)/den,t=(uu*wv-uv*wu)/den;
+            return (((ia%Cols)*(1-s-t)+(ib%Cols)*s+(ic%Cols)*t)/(Cols-1))*2-1;
         }
         public static bool Triangle(Vector3 a,Vector3 b,Vector3 c,Vector3 d,Vector3 e,Vector3 f,out Vector3 point)
         {

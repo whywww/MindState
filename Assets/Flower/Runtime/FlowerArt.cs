@@ -7,16 +7,16 @@ namespace MindState
     [Serializable] public sealed class FlowerArtProfile
     {
         public Vector3 tilt;
-        public float amplitude,period;
-        public FlowerArtProfile(Vector3 t,float a,float p) { tilt=t; amplitude=a; period=p; }
+        public float amplitude,period,openness;
+        public FlowerArtProfile(Vector3 t,float a,float p,float o=1f) { tilt=t; amplitude=a; period=p; openness=o; }
     }
     public sealed partial class FlowerAssembler
     {
         public FlowerArtProfile[] artProfiles={
-            new FlowerArtProfile(new Vector3(70,64,37),.2f,1),
-            new FlowerArtProfile(Vector3.zero,0,5), // Gathering uses the original cached path.
-            new FlowerArtProfile(new Vector3(82,76,52),3,9),
-            new FlowerArtProfile(new Vector3(65,59,34),1.5f,14)};
+            new FlowerArtProfile(new Vector3(84,64,40),.2f,1,.88f),
+            new FlowerArtProfile(Vector3.zero,0,5,0f), // Gathering uses the original cached path.
+            new FlowerArtProfile(new Vector3(92,74,48),2.4f,9,1f),
+            new FlowerArtProfile(new Vector3(72,54,32),1.2f,14,.70f)};
         public FlowerArtInput ArtInput { get; private set; }
         public Vector4 ArtWeights { get; private set; }=new Vector4(1,0,0,0);
         public Vector4 ArtLightWeights { get; private set; }=new Vector4(1,0,0,0);
@@ -76,8 +76,11 @@ namespace MindState
             generated.localRotation=Quaternion.Euler(0,artYaw,0);
             generated.localScale=Vector3.one;
             float gathering=ArtWeights.y;
-            float bud=.02f*(1-Mathf.Cos(artTime*Mathf.PI*2/5));
-            bloomProgress=1-gathering*(1-bud);
+            float bud=.04f+.03f*(1-Mathf.Cos(artTime*Mathf.PI*2/5));
+            float pathProgress=1-gathering*(1-bud);
+            float other=ArtWeights.x+ArtWeights.z+ArtWeights.w;
+            float open=other>1e-6f?(ArtWeights.x*artProfiles[0].openness+ArtWeights.z*artProfiles[2].openness+ArtWeights.w*artProfiles[3].openness)/other:1f;
+            bloomProgress=gathering>=1f?pathProgress:Mathf.Lerp(open,pathProgress,gathering);
             ApplyPose(bloomProgress,false);
             for(int k=0;k<layers.Length;k++)
             {
@@ -98,9 +101,9 @@ namespace MindState
                     Vector3 position=pathPosition,scale=pathScale; Quaternion rotation=pathRotation;
                     if(gathering<1)
                     {
-                        float other=ArtWeights.x+ArtWeights.z+ArtWeights.w;
-                        tilt/=Mathf.Max(other,1e-6f);
-                        float authored=p.authoredTilt*(1-.75f*ArtWeights.x/Mathf.Max(other,1e-6f));
+                        float otherWeight=ArtWeights.x+ArtWeights.z+ArtWeights.w;
+                        tilt/=Mathf.Max(otherWeight,1e-6f);
+                        float authored=p.authoredTilt*(1-.75f*ArtWeights.x/Mathf.Max(otherWeight,1e-6f));
                         PetalFrame(l.config,p.azimuth,tilt+p.tilt+authored,p.roll,p.heightOffset,j,l.petals.Length,1,out var artPosition,out var artRotation);
                         position=Vector3.Lerp(artPosition,pathPosition,gathering);
                         rotation=Quaternion.Slerp(artRotation,pathRotation,gathering);

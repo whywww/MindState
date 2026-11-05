@@ -4,6 +4,8 @@
 /Obj/
 /Logs/
 /UserSettings/
+/Evidence/
+/EvidenceShingleFixContacts/
 /Builds/
 /*.log
 /*.csproj

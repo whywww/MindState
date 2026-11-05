@@ -21,7 +21,7 @@ namespace MindState.Editor
             RenderSettings.ambientSkyColor=new Color(.32f,.33f,.44f); RenderSettings.ambientEquatorColor=new Color(.22f,.21f,.29f); RenderSettings.ambientGroundColor=new Color(.11f,.09f,.15f);
             RenderSettings.defaultReflectionMode=DefaultReflectionMode.Custom;
             RenderSettings.customReflectionTexture=AssetDatabase.LoadAssetAtPath<Cubemap>("Assets/HeroPetal/Art/StudioReflection.asset"); RenderSettings.reflectionIntensity=.65f;
-            var go=new GameObject("Pearl Peony · 14 petals / 3 shared layers");
+            var go=new GameObject("Pearl Peony · 18 petals / 3 shared layers");
             var flower=go.AddComponent<FlowerAssembler>(); flower.preset=preset; flower.petalPrefab=AssetDatabase.LoadAssetAtPath<HeroPetal>("Assets/HeroPetal/Prefabs/HeroPetal.prefab"); flower.coreMaterial=blush; flower.stamenMaterial=champagne;
             PrefabUtility.SaveAsPrefabAssetAndConnect(go,Root+"/Prefabs/PearlPeony.prefab",InteractionMode.AutomatedAction);
             Light("01 · broad neutral key",new Vector3(38,-28,0),new Color(1,.95f,.92f),.95f,true);

@@ -67,6 +67,7 @@ namespace MindState
             float tilt=Mathf.Lerp(c.closedTilt,c.openTilt,Mathf.SmoothStep(0,1,progress));
             var offset=c.OffsetAt(index);
             PetalFrame(c,p.azimuth+c.azimuth-l.config.azimuth,tilt+p.tilt+(offset?.tilt??0)*c.OffsetWeight(progress),p.roll,(offset?.height??0)*c.OffsetWeight(progress),index,l.petals.Length,progress,out var position,out var rotation);
+            if(!rootBaseline) position.y=layers[0].config.rootHeight+.0045f+c.rootStagger*RootStaggerSign(index,l.petals.Length);
             var scale=PetalScale(c,p,index,progress);
             return transform.localToWorldMatrix*Matrix4x4.TRS(position,rotation,Vector3.one)*Matrix4x4.TRS(-Vector3.Scale(root,scale),Quaternion.identity,scale);
         }

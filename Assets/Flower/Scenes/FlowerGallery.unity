@@ -577,7 +577,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 092e621bc6dcea94198e6bbdbaa43399, type: 2}
     - target: {fileID: 4230859924537013886, guid: 4019bd42b0ac58b44a937e115d119077, type: 3}
       propertyPath: m_Name
-      value: "Pearl Peony \xB7 14 petals / 3 shared layers"
+      value: "Pearl Peony \xB7 18 petals / 3 shared layers"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

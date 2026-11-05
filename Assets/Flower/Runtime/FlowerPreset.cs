@@ -46,6 +46,22 @@ namespace MindState
             float frame=Mathf.Clamp01(progress)*(bloomRoll.Length-1); int a=Mathf.Min((int)frame,bloomRoll.Length-2);
             return Mathf.Lerp(bloomRoll[a],bloomRoll[a+1],Mathf.SmoothStep(0,1,frame-a));
         }
+        // Tangential clearance between adjacent petal tips at the current pose. Each
+        // layer's own travel and delay turn it into an outer-to-inner wave cue.
+        public float WaveRoom(float progress)
+        {
+            progress=Mathf.Clamp01(progress);
+            float closed=TipGap(0),open=TipGap(1);
+            return open>closed+1e-4f?Mathf.Clamp01(Mathf.InverseLerp(closed,open,TipGap(progress))):progress;
+        }
+        float TipGap(float progress)
+        {
+            float tilt=Mathf.Lerp(closedTilt,openTilt,Mathf.SmoothStep(0,1,progress))*Mathf.Deg2Rad;
+            float reach=rootRadius+2.55f*size*Mathf.Sin(tilt);
+            float centers=2f*reach*Mathf.Sin(Mathf.PI/Mathf.Max(1,count));
+            float petalWidth=5.15f*size*width*Mathf.Sin(openingAngle*Mathf.Deg2Rad*.5f);
+            return centers-petalWidth;
+        }
         public float tangentOffset,depthOffset;
         [Tooltip("Small, static alternating root-height offsets; radial facing is unchanged.")]
         [Range(0,.12f)] public float rootStagger;

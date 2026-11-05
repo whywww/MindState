@@ -51,7 +51,7 @@ namespace MindState
             Check(Application.unityVersion=="2022.3.62f3c1","Exact Unity version");
             Check(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline==null,"Built-in pipeline");
             int expectedMeshes=0; foreach(var layer in flower.preset.layers) expectedMeshes+=layer.surfaceProfile.softFolds&&layer.count>1?2:1;
-            Check(flower.PetalCount==14&&flower.LayerCount==3&&flower.SharedMeshCount==expectedMeshes,"14 petals, three layers, expected shared surface variants");
+            Check(flower.PetalCount==18&&flower.LayerCount==3&&flower.SharedMeshCount==expectedMeshes,"18 petals, three layers, expected shared surface variants");
             Check(flower.CacheBytes<172*1024*1024,"Pose cache under 172 MiB");
             Check(flower.GeometryBytes<220*1024*1024,"Cache plus working geometry under 220 MiB");
             Check(flower.MaxCachePositionError<=.00255f,"Midpoint cache position error <= 0.1% petal length");
@@ -61,11 +61,48 @@ namespace MindState
             bool distinct=false; var firstVariant=flower.PetalMesh(0,0).vertices; var secondVariant=flower.PetalMesh(0,1).vertices;
             for(int k=0;k<firstVariant.Length;k++) distinct|=(firstVariant[k]-secondVariant[k]).sqrMagnitude>1e-8f;
             Check(flower.preset.layers[0].surfaceProfile.softFolds?distinct&&flower.PetalMesh(0,0)==flower.PetalMesh(0,2)&&flower.PetalMesh(0,0)!=flower.PetalMesh(0,1):!distinct,"Surface variants match the selected fold mode");
+            if(Arg("-flowerIdColors","")=="1") { flower.diagnosticColors=true; flower.ApplyDiagnosticColors(); }
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-flowerContacts")>=0)
+            {
+                var scan=new FlowerSurfaceCollision(flower,1);
+                var hits=new List<FlowerSurfaceCollision.Contact>();
+                var csv=new StringBuilder("progress,petalA,petalB,layerA,layerB,kind,lengthA,lengthB,sA,sB,x,y,z"+Environment.NewLine);
+                var summary=new StringBuilder();
+                var coverage=new StringBuilder("progress,layer,petalA,petalB,above,below,touching,status"+Environment.NewLine);
+                foreach(float phase in new[]{0f,.25f,.5f,.75f,1f})
+                {
+                    flower.SetBloomProgress(phase); scan.Sample(phase); scan.FindContacts(hits,parallel:true);
+                    int same=0,cross=0,self=0,roots=0;
+                    foreach(var h in hits)
+                    {
+                        var a=scan.Petals[h.petalA]; var b=scan.Petals[h.petalB];
+                        string kind=h.rootRegion?"root":h.petalA==h.petalB?"self":a.layer==b.layer?"same":"cross";
+                        if(kind=="root") roots++; else if(kind=="self") self++; else if(kind=="same") same++; else cross++;
+                        csv.AppendFormat(CultureInfo.InvariantCulture,"{0:F3},{1},{2},{3},{4},{5},{6:F5},{7:F5},{8:F4},{9:F4},{10:F4},{11:F4},{12:F4}"+Environment.NewLine,phase,a.id,b.id,a.layer,b.layer,kind,h.lengthA,h.lengthB,h.widthA,h.widthB,h.point.x,h.point.y,h.point.z);
+                    }
+                    summary.AppendFormat(CultureInfo.InvariantCulture,"progress={0} contacts={1} sameLayer={2} crossLayer={3} self={4} roots={5}"+Environment.NewLine,phase,hits.Count,same,cross,self,roots);
+                    for(int a=0;a<scan.Petals.Length;a++)
+                    {
+                        int layer=scan.Petals[a].layer;
+                        int next=(scan.Petals[a].index+1)%flower.preset.layers[layer].count,b=-1;
+                        for(int k=0;k<scan.Petals.Length;k++) if(scan.Petals[k].layer==layer&&scan.Petals[k].index==next) b=k;
+                        scan.NeighborCoverage(a,b,40,out int above,out int below,out int touch);
+                        coverage.AppendFormat(CultureInfo.InvariantCulture,"{0:F3},{1},{2},{3},{4},{5},{6},{7}"+Environment.NewLine,phase,layer,scan.Petals[a].id,scan.Petals[b].id,above,below,touch,above>0&&below==0?touch==0?"PASS":"TOUCH":"FAIL");
+                    }
+                    File.WriteAllText(Path.Combine(output,"ContactSummary.txt"),summary.ToString());
+                    File.WriteAllText(Path.Combine(output,"Contacts.csv"),csv.ToString());
+                    File.WriteAllText(Path.Combine(output,"NeighborCoverage.csv"),coverage.ToString());
+                    File.WriteAllText(Path.Combine(output,"Preset.json"),JsonUtility.ToJson(flower.preset,true));
+                    yield return null;
+                }
+                Debug.Log("MINDSTATE_FLOWER_CONTACTS_DONE "+output);
+                Application.Quit(0); yield break;
+            }
             yield return Capture("01_ThreeQuarter",22,55);
             yield return Capture("02_Front",0,90);
             yield return Capture("03_Side",22,8);
             yield return Capture("04_Closeup",40,48,5.6f);
-            for(int i=0;i<5;i++) { flower.SetBloomProgress(i*.25f); yield return Capture("05_Bloom_"+(i*25).ToString("000"),22,55); Check(flower.RootAnchorError()<.00001f,"Root attachment at progress "+i*.25f); ValidateMesh(); }
+            for(int i=0;i<5;i++) { flower.SetBloomProgress(i*.25f); yield return Capture("05_Bloom_"+(i*25).ToString("000"),22,55); if(i<3) yield return Capture("05_Bloom_"+(i*25).ToString("000")+"_Closeup",40,48,4.8f); Check(flower.RootAnchorError()<.00001f,"Root attachment at progress "+i*.25f); ValidateMesh(); }
             for(int i=0;i<8;i++) { flower.SetBloomProgress(1); yield return Capture("06_Orbit_"+(i*45).ToString("000"),i*45,40); }
             if(Arg("-flowerGrayScreens","")=="1")
             {
@@ -98,12 +135,21 @@ namespace MindState
                 yield return Capture("09_MiddleFixedTop_"+(phase*100).ToString("000"),0,90,6.2f);
             }
             foreach(var renderer in renderers) renderer.enabled=true;
+            for(int i=1;i<4;i++)
+            {
+                flower.SetBloomProgress(i*.25f);
+                yield return Capture("10_AllTop_"+(i*25).ToString("000"),0,90,6.2f);
+                yield return Capture("10_AllView_"+(i*25).ToString("000"),22,55,6.2f);
+            }
+            flower.SetBloomProgress(1);
+            yield return Capture("10_AllTop_100",0,90,6.2f);
+            yield return Capture("10_AllView_100",22,55,6.2f);
             flower.SetBloomProgress(.99f); flower.SetBloomProgress(1);
             File.WriteAllText(Path.Combine(output,"ClosureMetrics.csv"),closureMetrics.ToString());
             var report=new Report { unity=Application.unityVersion,device=SystemInfo.deviceModel,cpu=SystemInfo.processorType,gpu=SystemInfo.graphicsDeviceName,petals=flower.PetalCount,sharedMeshes=flower.SharedMeshCount,poseCacheBytes=flower.CacheBytes,geometryBytes=flower.GeometryBytes,initializationMs=flower.InitializationMilliseconds,interpolationMaxError=flower.MaxCachePositionError,normalMaxAngle=flower.MaxCacheNormalAngle,rootAnchorMaxError=flower.RootAnchorError(),renderers=flower.GetComponentsInChildren<MeshRenderer>().Length };
             Material shared=flower.petalPrefab.pearlMaterial; int petals=0;
             foreach(var r in flower.GetComponentsInChildren<MeshRenderer>()) if(r.sharedMaterial==shared) petals++;
-            Check(petals==14,"All 14 petals use existing shared Pearl material");
+            Check(petals==18,"All 18 petals use existing shared Pearl material");
             float original=flower.bloomProgress; flower.SetBloomProgress(float.NaN); Check(original==flower.bloomProgress,"Nonfinite progress ignored");
             flower.SetBloomProgress(2); Check(flower.bloomProgress==1,"Progress clamp");
             int updates=flower.MeshUpdates; flower.frozen=true; yield return new WaitForSeconds(.15f); Check(flower.MeshUpdates==updates,"Frozen hold performs zero mesh updates");
@@ -116,17 +162,17 @@ namespace MindState
                 // Clone the preset so count tests never modify production assets.
                 var originalPreset=flower.preset; var testPreset=Instantiate(originalPreset); flower.preset=testPreset;
                 flower.SetBloomProgress(1); var reference=flower.PetalMesh(0,0).vertices; var second=flower.PetalMesh(0,1).vertices; int materialCount=Resources.FindObjectsOfTypeAll<Material>().Length; int meshCount=Resources.FindObjectsOfTypeAll<Mesh>().Length;
-                var originalRenderers=flower.GetComponentsInChildren<MeshRenderer>(); var matrices=new Matrix4x4[14];
-                for(int k=0;k<14;k++) matrices[k]=originalRenderers[k].localToWorldMatrix;
-                for(int n=13;n<=15;n++)
+                var originalRenderers=flower.GetComponentsInChildren<MeshRenderer>(); var matrices=new Matrix4x4[18];
+                for(int k=0;k<18;k++) matrices[k]=originalRenderers[k].localToWorldMatrix;
+                for(int n=17;n<=19;n++)
                 {
-                    testPreset.layers[1].count=n==13?4:5; testPreset.layers[2].count=n==15?4:3;
+                    testPreset.layers[1].count=n==17?5:6; testPreset.layers[2].count=n==19?6:5;
                     flower.RebuildFlower(); yield return null; yield return null;
                     Check(flower.PetalCount==n&&flower.GetComponentsInChildren<MeshRenderer>().Length==n+2,"Count and resource rebuild "+n);
                     Vector3[] rebuilt=flower.PetalMesh(0,0).vertices,rebuiltSecond=flower.PetalMesh(0,1).vertices; bool equal=true; for(int k=0;k<rebuilt.Length;k++) if(rebuilt[k]!=reference[k]||rebuiltSecond[k]!=second[k]) { equal=false; break; }
                     Check(equal,"Same seed and source trajectory remain deterministic "+n);
                     var currentRenderers=flower.GetComponentsInChildren<MeshRenderer>(); bool sameAssembly=true;
-                    for(int k=0;k<(n==14?14:6);k++) sameAssembly&=currentRenderers[k].localToWorldMatrix==matrices[k];
+                    for(int k=0;k<(n==18?18:7);k++) sameAssembly&=currentRenderers[k].localToWorldMatrix==matrices[k];
                     Check(sameAssembly,"Seeded assembly transforms reproduce "+n);
                     Check(Resources.FindObjectsOfTypeAll<Material>().Length==materialCount,"Rebuild does not clone materials "+n);
                     Check(Resources.FindObjectsOfTypeAll<Mesh>().Length==meshCount,"Rebuild releases replaced runtime meshes "+n);
@@ -138,7 +184,7 @@ namespace MindState
                 report.performance=results.ToArray();
             }
             report.totalAllocatedMemory=Profiler.GetTotalAllocatedMemoryLong(); report.managedMemory=GC.GetTotalMemory(false); report.checks=checks.ToArray();
-            report.notes="Rendered vertices include light/shadow passes; each shared surface variant has 21730 vertices. Runtime caches and working meshes are shared across 14 renderers. CPU frame includes explicit offscreen camera rendering. Zero/unsupported GPU values are reported unavailable.";
+            report.notes="Rendered vertices include light/shadow passes; each shared surface variant has 21730 vertices. Runtime caches and working meshes are shared across 18 renderers. CPU frame includes explicit offscreen camera rendering. Zero/unsupported GPU values are reported unavailable.";
             File.WriteAllText(Path.Combine(output,"Validation.json"),JsonUtility.ToJson(report,true));
             File.WriteAllLines(Path.Combine(output,"Checks.txt"),checks);
             Debug.Log("MINDSTATE_FLOWER_VALIDATION_DONE "+output);

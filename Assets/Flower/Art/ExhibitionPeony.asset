@@ -16,34 +16,44 @@ MonoBehaviour:
   colorVariation: 0.035
   layers:
   - name: "Outer / \u73CD\u73E0\u5916\u88D9"
-    count: 6
+    count: 7
     size: 1
     azimuth: 0
-    rootRadius: 0.12728754
-    rootHeight: 0.040129438
-    closedTilt: 50
-    openTilt: 70
-    openingAngle: 125
-    curl: 0.14
-    softness: 0.82
+    rootRadius: 0.118
+    rootHeight: 0.028
+    closedTilt: 54
+    openTilt: 84
+    openingAngle: 142
+    curl: 0.18
+    softness: 0.86
     delay: 0
     duration: 12
-    pearl: {r: 0.9, g: 0.88, b: 0.95, a: 1}
-    root: {r: 0.71, g: 0.61, b: 0.77, a: 1}
-    pink: {r: 0.96, g: 0.81, b: 0.87, a: 1}
-    width: 0.6
-    maximumCurl: 0.4
-    edgeFoldScale: 0.425
+    pearl: {r: 0.93, g: 0.9, b: 0.95, a: 1}
+    root: {r: 0.68, g: 0.58, b: 0.8, a: 1}
+    pink: {r: 0.95, g: 0.74, b: 0.84, a: 1}
+    width: 0.82
+    maximumCurl: 0.42
+    edgeFoldScale: 0.55
     surfaceProfile:
-      widePleatCount: 3
-      surfaceDetail: 0.85
-      rimVariation: 0.75
-      closureBendDegrees: 45
+      widePleatCount: 4
+      surfaceDetail: 0.9
+      rimVariation: 0.9
+      closureBendDegrees: 55
       closureSideLeftDegrees: 50
-      closureSideRightDegrees: 40
+      closureSideRightDegrees: 35
       softFolds: 1
-      foldStrength: 0.45
-      edgeStrength: 0.65
+      foldStrength: 0.55
+      edgeStrength: 0.85
+      cup: 0.55
+      ruffle: 0.65
+      tipRoll: 0.45
+      waveNestEdge: 0.45
+      waveNestTip: 0.1
+      edgeTuck: 0.5
+      shingleLift: 0.15
+      rightCupRelease: 0.65
+      budNarrow: 0.22
+      tipRound: 0.75
     microNormalScale: 1
     roll: 12
     bloomRoll:
@@ -83,7 +93,7 @@ MonoBehaviour:
     stagedOffsets: 1
     tangentOffset: 0
     depthOffset: 0
-    rootStagger: 0
+    rootStagger: 0.012
     azimuthVariation: 0.3
     tiltVariation: 0.3
     rollVariation: 0.4
@@ -108,35 +118,48 @@ MonoBehaviour:
     - height: 0.0052500004
       tilt: -0.45000002
       lengthScale: 0.99549997
+    - height: -0.012
+      tilt: 1.35
+      lengthScale: 1.012
   - name: "Middle / \u6DE1\u7C89\u82B1\u51A0"
-    count: 5
-    size: 0.83943135
-    azimuth: 30
-    rootRadius: 0.13
-    rootHeight: 0.16435789
-    closedTilt: 50
-    openTilt: 50
-    openingAngle: 118
-    curl: 0.28
-    softness: 0.76
+    count: 6
+    size: 0.82
+    azimuth: 25.714
+    rootRadius: 0.112
+    rootHeight: 0.155
+    closedTilt: 52
+    openTilt: 72
+    openingAngle: 136
+    curl: 0.3
+    softness: 0.8
     delay: 1.8
     duration: 12
-    pearl: {r: 0.91, g: 0.85, b: 0.93, a: 1}
-    root: {r: 0.76, g: 0.59, b: 0.71, a: 1}
-    pink: {r: 0.98, g: 0.77, b: 0.84, a: 1}
-    width: 0.5
-    maximumCurl: 0.4
-    edgeFoldScale: 0.25
+    pearl: {r: 0.94, g: 0.89, b: 0.94, a: 1}
+    root: {r: 0.75, g: 0.58, b: 0.76, a: 1}
+    pink: {r: 0.98, g: 0.7, b: 0.8, a: 1}
+    width: 0.78
+    maximumCurl: 0.48
+    edgeFoldScale: 0.4
     surfaceProfile:
-      widePleatCount: 2
-      surfaceDetail: 0.5
-      rimVariation: 0.4
-      closureBendDegrees: 55
-      closureSideLeftDegrees: 65
-      closureSideRightDegrees: 50
+      widePleatCount: 3
+      surfaceDetail: 0.75
+      rimVariation: 0.8
+      closureBendDegrees: 60
+      closureSideLeftDegrees: 62
+      closureSideRightDegrees: 38
       softFolds: 1
-      foldStrength: 0.45
-      edgeStrength: 0.45
+      foldStrength: 0.55
+      edgeStrength: 0.7
+      cup: 0.65
+      ruffle: 0.6
+      tipRoll: 0.5
+      waveNestEdge: 0.9
+      waveNestTip: 0.6
+      edgeTuck: 0.7
+      shingleLift: 0.5
+      rightCupRelease: 0.6
+      budNarrow: 0.34
+      tipRound: 0.75
     microNormalScale: 0.7
     roll: 12
     bloomRoll:
@@ -162,11 +185,11 @@ MonoBehaviour:
     - 6
     - 6
     - 6
+    - 6
     - 8
     - 8
     - 8
     - 8
-    - 10
     - 10
     - 10
     - 10
@@ -176,7 +199,7 @@ MonoBehaviour:
     stagedOffsets: 1
     tangentOffset: 0
     depthOffset: 0
-    rootStagger: 0
+    rootStagger: 0.012
     azimuthVariation: 0.3
     tiltVariation: 0.3
     rollVariation: 0.4
@@ -198,39 +221,55 @@ MonoBehaviour:
     - height: -0.010500001
       tilt: 1.05
       lengthScale: 1.015
+    - height: -0.006
+      tilt: 0.9
+      lengthScale: 1.011
   - name: "Inner / \u6D45\u7D2B\u82B1\u676F"
-    count: 3
-    size: 0.56
-    azimuth: 12
-    rootRadius: 0.1
-    rootHeight: 0.32979265
-    closedTilt: 49.890434
-    openTilt: 37
-    openingAngle: 110
-    curl: 0.38
-    softness: 0.7
+    count: 5
+    size: 0.66
+    azimuth: 12.857
+    rootRadius: 0.095
+    rootHeight: 0.285
+    closedTilt: 50
+    openTilt: 56
+    openingAngle: 130
+    curl: 0.36
+    softness: 0.76
     delay: 3.6
     duration: 12
-    pearl: {r: 0.87, g: 0.83, b: 0.95, a: 1}
-    root: {r: 0.76, g: 0.61, b: 0.78, a: 1}
-    pink: {r: 0.96, g: 0.79, b: 0.86, a: 1}
-    width: 0.4
-    maximumCurl: 0.9
-    edgeFoldScale: 0.1
+    pearl: {r: 0.95, g: 0.9, b: 0.93, a: 1}
+    root: {r: 0.82, g: 0.62, b: 0.74, a: 1}
+    pink: {r: 1, g: 0.78, b: 0.8, a: 1}
+    width: 0.76
+    maximumCurl: 0.62
+    edgeFoldScale: 0.3
     surfaceProfile:
-      widePleatCount: 1
-      surfaceDetail: 0.25
-      rimVariation: 0.15
+      widePleatCount: 2
+      surfaceDetail: 0.6
+      rimVariation: 0.7
+      closureBendDegrees: 62
+      closureSideLeftDegrees: 66
+      closureSideRightDegrees: 42
       softFolds: 1
-      foldStrength: 0.45
-      edgeStrength: 0.25
+      foldStrength: 0.5
+      edgeStrength: 0.55
+      cup: 0.8
+      ruffle: 0.45
+      tipRoll: 0.62
+      waveNestEdge: 1
+      waveNestTip: 0.9
+      edgeTuck: 0.85
+      shingleLift: 1
+      rightCupRelease: 0.5
+      budNarrow: 0.42
+      tipRound: 0.75
     microNormalScale: 0.4
     roll: 5
     bloomRoll: []
-    stagedOffsets: 0
+    stagedOffsets: 1
     tangentOffset: 0
     depthOffset: 0
-    rootStagger: 0
+    rootStagger: 0.012
     azimuthVariation: 0.3
     tiltVariation: 0.3
     rollVariation: 0.4
@@ -246,3 +285,9 @@ MonoBehaviour:
     - height: -0.0015
       tilt: 0.22500001
       lengthScale: 1.00225
+    - height: -0.003
+      tilt: 0.55
+      lengthScale: 1.004
+    - height: 0.0045
+      tilt: -0.6
+      lengthScale: 0.994

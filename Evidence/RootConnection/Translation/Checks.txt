@@ -1,1 +1,0 @@
-PASS samples=4521; physical visible shell overlaps unchanged disc for all 14 petals (baseline excluded=False)

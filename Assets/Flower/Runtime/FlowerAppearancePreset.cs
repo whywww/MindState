@@ -40,14 +40,14 @@ namespace MindState {
      float pink=appearance.layerPink[Mathf.Min(k,2)]+(v-.5f)*appearance.variation;
      b.SetVector("_AppearancePlacement",new Vector4(pink,v,k,1));
      b.SetTexture("_FlowPalette",flowPalette);
-     b.SetVector("_AppearanceSurface",new Vector4(appearance.polish,appearance.transmission,0,0));
+     b.SetVector("_AppearanceSurface",new Vector4(appearance.polish,appearance.transmission,appearance.cyanStrength,0));
     }
     p.renderer.SetPropertyBlock(b);
    }
    foreach(var r in generated.GetComponentsInChildren<MeshRenderer>()) {
     if(r.sharedMaterial==coreMaterial||r.sharedMaterial==stamenMaterial) {
      var b=new MaterialPropertyBlock(); r.GetPropertyBlock(b);
-     b.SetColor("_Color",appearanceEnabled&&appearance!=null?(r.sharedMaterial==coreMaterial?new Color(.94f,.48f,.43f):new Color(1,.88f,.62f)):r.sharedMaterial.color); r.SetPropertyBlock(b);
+     b.SetColor("_Color",appearanceEnabled&&appearance!=null?(r.sharedMaterial==coreMaterial?new Color(.97f,.58f,.50f):new Color(1f,.86f,.52f)):r.sharedMaterial.color); r.SetPropertyBlock(b);
     }
    }
   }
