@@ -76,6 +76,12 @@ namespace MindState
             if(Button(168,535,108,"外部输入")) flower.WaitForArtBrain();
             if(Button(46,595,108,"开合重播")) flower.PlayBloom();
             if(Button(168,595,108,flower.frozen?"继续":"冻结")) flower.SetFrozen(!flower.frozen);
+            float shown=flower.bloomProgress;
+            GUI.Label(new Rect(46,658,54,24),"开合",text);
+            float manual=GUI.HorizontalSlider(new Rect(108,663,140,20),shown,0,1);
+            if(GUI.changed&&Mathf.Abs(manual-flower.bloomProgress)>.0005f) flower.SetBloomProgress(manual);
+            shown=flower.bloomProgress;
+            GUI.Label(new Rect(254,658,46,24),Mathf.RoundToInt(shown*100)+"%",small);
             GUI.Label(new Rect(46,710,230,30),"02   观察 / VIEW",small);
             if(Button(46,759,108,"正面")) SetView(0,90);
             if(Button(168,759,108,"3/4")) SetView(22,55);

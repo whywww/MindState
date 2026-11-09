@@ -26,6 +26,37 @@ namespace MindState
         bool artActive;
         float artTime,artYaw,lastValid=float.NegativeInfinity;
         Vector4 artTarget=new Vector4(1,0,0,0);
+        Vector4 artFrom=new Vector4(1,0,0,0),artDestination=new Vector4(1,0,0,0);
+        float artTransitionTime=18,artBud,artOpen;
+        const float ArtTransitionDuration=18;
+        float LegacyLayerProgress(FlowerLayer c,float global)=>Mathf.Clamp01((global*BloomDuration-c.delay)/c.duration);
+        float ArtLayerBlend(FlowerLayer c)
+        {
+            float u=1-ArtWeights.y;
+            // Small overlapping lead/lag; derivative stays positive across the whole interval.
+            float lead=.24f*(.5f-Mathf.Clamp01(c.delay/Mathf.Max(.001f,BloomDuration-c.duration)));
+            return u+lead*u*(1-u);
+        }
+        float ArtLayerProgress(FlowerLayer c)=>Mathf.Lerp(LegacyLayerProgress(c,artBud),LegacyLayerProgress(c,artOpen),ArtLayerBlend(c));
+        float ArtPatchProgress(FlowerLayer c)
+        {
+            float global=Mathf.Lerp(artBud,artOpen,ArtLayerBlend(c));
+            return Mathf.Clamp01(global+(ArtLayerProgress(c)-LegacyLayerProgress(c,global))*c.duration/BloomDuration);
+        }
+        void AdvanceArtWeights(float dt)
+        {
+            if(ArtInput!=FlowerArtInput.Preview)
+            {
+                // Streaming targets must not restart a timed transition every sample.
+                ArtWeights=Vector4.Lerp(ArtWeights,artTarget,1-Mathf.Exp(-dt/6f));
+                artDestination=ArtWeights; artTransitionTime=ArtTransitionDuration;
+                return;
+            }
+            if(artDestination!=artTarget)
+            { artFrom=ArtWeights; artDestination=artTarget; artTransitionTime=0; }
+            artTransitionTime=Mathf.Min(ArtTransitionDuration,artTransitionTime+dt);
+            ArtWeights=Vector4.Lerp(artFrom,artDestination,Mathf.SmoothStep(0,1,artTransitionTime/ArtTransitionDuration));
+        }
         static readonly int ArtWeightsId=Shader.PropertyToID("_ArtWeights"),ArtClockId=Shader.PropertyToID("_ArtClock"),ArtPhaseId=Shader.PropertyToID("_ArtPhase");
         static bool ArtDiagnosticsRequested()
         { foreach(var a in Environment.GetCommandLineArgs()) if(a=="-flowerAvoidance"||a=="-verifyFlower"||a=="-verifyPetal"||a=="-silkAB"||a=="-verifyArt") return true; return false; }
@@ -47,18 +78,18 @@ namespace MindState
         void EnterArt()
         {
             if(artActive) return;
-            autoPlay=false; bloomProgress=1; ApplyPose(); artActive=true;
+            autoPlay=false; bloomProgress=1; ApplyPose(); bottomProgress=-1; artActive=true;
         }
         void LeaveArt()
         {
             if(!artActive) return;
-            artActive=false; generated.localRotation=Quaternion.identity; generated.localScale=Vector3.one;
+            artActive=false; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localScale=Vector3.one;
             foreach(var l in layers) { l.progress=-1; foreach(var p in l.petals) { p.block.SetVector(ArtWeightsId,Vector4.zero); p.block.SetVector("_ArtLightWeights",Vector4.zero); p.renderer.SetPropertyBlock(p.block); } }
         }
         public void ResetArt()
-        { artTime=artYaw=0; ResetFlowPhase(); frozen=false; ArtWeights=ArtLightWeights=new Vector4(1,0,0,0); SetArtState(FlowerArtState.Clarity); }
+        { artTime=artYaw=0; ResetFlowPhase(); frozen=false; ArtWeights=ArtLightWeights=artFrom=artDestination=new Vector4(1,0,0,0); artTransitionTime=ArtTransitionDuration; SetArtState(FlowerArtState.Clarity); }
         public void SetArtPreviewImmediate(FlowerArtState state)
-        { SetArtState(state); ArtWeights=ArtLightWeights=artTarget; artTime=artYaw=0; ResetFlowPhase(); UpdateArt(0); }
+        { SetArtState(state); ArtWeights=ArtLightWeights=artTarget; artFrom=artDestination=artTarget; artTransitionTime=ArtTransitionDuration; artTime=artYaw=0; ResetFlowPhase(); UpdateArt(0); }
         float FlowSpeed(){var periods=appearance!=null?appearance.flowPeriods:new Vector4(12,10,9,18);float speed=0;for(int i=0;i<4;i++)speed+=ArtLightWeights[i]/Mathf.Max(1,periods[i]);return speed;}
         void UpdateArt(float dt)
         {
@@ -67,7 +98,7 @@ namespace MindState
                 artTime+=dt;
                 if(ArtInput==FlowerArtInput.Simulation) artTarget=BrainArtWeights(.5f+.48f*Mathf.Sin(artTime*.19f),.5f+.48f*Mathf.Sin(artTime*.11f));
                 if(ArtInput==FlowerArtInput.External&&Time.realtimeSinceStartup-lastValid>5) artTarget=new Vector4(0,0,0,1);
-                ArtWeights=Vector4.Lerp(ArtWeights,artTarget,1-Mathf.Exp(-dt/6f));
+                AdvanceArtWeights(dt);
                 ArtLightWeights=Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/3f));
                 artYaw=Mathf.Repeat(artYaw+4*ArtWeights.x*dt,360);
                 ArtFlowPhase=Mathf.Repeat(ArtFlowPhase+dt*FlowSpeed(),1);
@@ -79,7 +110,8 @@ namespace MindState
             float bud=.04f+.03f*(1-Mathf.Cos(artTime*Mathf.PI*2/5));
             float other=ArtWeights.x+ArtWeights.z+ArtWeights.w;
             float open=other>1e-6f?(ArtWeights.x*artProfiles[0].openness+ArtWeights.z*artProfiles[2].openness+ArtWeights.w*artProfiles[3].openness)/other:1f;
-            // Single linear blend keeps opening and closing symmetric in speed.
+            artBud=bud; artOpen=open;
+            // A shared layer phase drives geometry, transform and sparse correction sampling.
             bloomProgress=gathering>=1f?bud:Mathf.Lerp(open,bud,gathering);
             ApplyPose(bloomProgress,false);ApplyBottomPatches();
             for(int k=0;k<layers.Length;k++)
@@ -97,7 +129,7 @@ namespace MindState
                         float motion=profile.amplitude*Mathf.Sin(artTime*Mathf.PI*2/period+phase);
                         tilt+=ArtWeights[i]*(profile.tilt[k]+motion);
                     }
-                    PathPetalPose(l,p,j,l.progress,out var pathPosition,out var pathRotation,out var pathScale);
+                    PathPetalPose(l,p,j,LegacyLayerProgress(l.config,bud),out var pathPosition,out var pathRotation,out var pathScale);
                     Vector3 position=pathPosition,scale=pathScale; Quaternion rotation=pathRotation;
                     if(gathering<1)
                     {
@@ -105,9 +137,10 @@ namespace MindState
                         tilt/=Mathf.Max(otherWeight,1e-6f);
                         float authored=p.authoredTilt*(1-.75f*ArtWeights.x/Mathf.Max(otherWeight,1e-6f));
                         PetalFrame(l.config,p.azimuth,tilt+p.tilt+authored,p.roll,p.heightOffset,j,l.petals.Length,1,out var artPosition,out var artRotation);
-                        position=Vector3.Lerp(artPosition,pathPosition,gathering);
-                        rotation=Quaternion.Slerp(artRotation,pathRotation,gathering);
-                        scale=Vector3.Lerp(PetalScale(l.config,p,j,1),pathScale,gathering);
+                        float layerBlend=ArtLayerBlend(l.config);
+                        position=Vector3.Lerp(pathPosition,artPosition,layerBlend);
+                        rotation=Quaternion.Slerp(pathRotation,artRotation,layerBlend);
+                        scale=Vector3.Lerp(pathScale,PetalScale(l.config,p,j,1),layerBlend);
                     }
                     ApplyPetalPose(l,p,j,position,rotation,scale);
                     if(appearance!=null) {

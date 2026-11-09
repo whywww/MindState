@@ -177,7 +177,7 @@ namespace MindState
             float elapsed=Mathf.Clamp01(globalProgress)*BloomDuration;
             foreach(var l in layers)
             {
-                float progress=Mathf.Clamp01((elapsed-l.config.delay)/Mathf.Max(1,l.config.duration));
+                float progress=artActive?ArtLayerProgress(l.config):Mathf.Clamp01((elapsed-l.config.delay)/Mathf.Max(1,l.config.duration));
                 if(progress==l.progress) continue;
                 l.progress=progress; float frame=progress*(PoseCount-1); int a=Mathf.Min((int)frame,PoseCount-2); float f=frame-a;
                 foreach(var g in l.variants)
