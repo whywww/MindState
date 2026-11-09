@@ -2,6 +2,7 @@ param(
     [switch]$Quick,
     [switch]$Screens,
     [switch]$ContactsOnly,
+    [switch]$RebuildBottom,
     [string]$Output='Evidence/ShingleOverlap/ShapeSafeEdgeFinal',
     [string]$Baseline=''
 )
@@ -13,6 +14,7 @@ $taskArgs=@('-batchmode','-projectPath',('"'+$taskRoot+'"'),'-executeMethod','Mi
 if($Quick) { $taskArgs+=@('-shingleQuick','1') }
 if($Screens) { $taskArgs+=@('-shingleScreens','1') }
 if($ContactsOnly) { $taskArgs+=@('-shingleScanOnly','1') }
+if($RebuildBottom) { $taskArgs+=@('-rebuildBottom') }
 if($Baseline) {
     $taskBaseline=[IO.Path]::GetFullPath((Join-Path $taskRoot $Baseline))
     foreach($taskFile in @('FullBloom.bin','Roots.bin','FixedSurface.bin','Transforms.bin')) {

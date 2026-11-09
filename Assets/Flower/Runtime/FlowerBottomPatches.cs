@@ -172,6 +172,8 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bottomTrace")>=0)return;
   if(!Application.isEditor&&LoadBottomCache())return;
 #if UNITY_EDITOR
+  bool forceRebuild=Array.IndexOf(Environment.GetCommandLineArgs(),"-rebuildBottom")>=0;
+  if(!forceRebuild&&BottomCacheProvenanceMatches()&&LoadBottomCache())return;
   var outerBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/OuterFlow/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
   if(File.Exists(outerBaseline)&&LoadBottomCache(File.ReadAllBytes(outerBaseline))){SmoothOuterPatches();return;}
   var previous=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/LayerOverlap/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
@@ -256,6 +258,20 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
  }
  string BottomConfigHash(){using(var sha=SHA256.Create())return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(JsonUtility.ToJson(preset))));}
 #if UNITY_EDITOR
+ static string BottomCacheSignature()
+ {
+  var files=new[]{"Flower/Runtime/FlowerBottomPatches.cs","Flower/Runtime/FlowerLayerPatches.cs","HeroPetal/Runtime/HeroPetal.cs","Flower/Runtime/FlowerAssembler.cs","Flower/Runtime/FlowerPreset.cs","Flower/Art/ExhibitionPeony.asset","HeroPetal/Prefabs/HeroPetal.prefab"};
+  return string.Join("\n",Array.ConvertAll(files,path=>{using(var sha=SHA256.Create())return BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(Path.Combine(Application.dataPath,path)))).Replace("-","").ToLowerInvariant();}));
+ }
+ bool BottomCacheProvenanceMatches()
+ {
+  try
+  {
+   string path=Path.Combine(Application.dataPath,"Flower/Resources/BottomOverlapProvenance.txt");
+   return File.Exists(path)&&File.ReadAllText(path).Trim()==BottomCacheSignature();
+  }
+  catch(Exception) { return false; }
+ }
  internal void SaveBottomCache(){
   string directory=Path.Combine(Application.dataPath,"Flower/Resources");Directory.CreateDirectory(directory);
   using(var w=new BinaryWriter(File.Create(Path.Combine(directory,"BottomOverlap.bytes")))){
@@ -264,9 +280,7 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
     w.Write(p.upperIds.Length);foreach(int id in p.upperIds)w.Write(id);if(p.upper!=null)foreach(var pose in p.upper)foreach(var d in pose){w.Write(d.x);w.Write(d.y);w.Write(d.z);}
     w.Write(p.extraIds.Length);foreach(int id in p.extraIds)w.Write(id);if(p.extra!=null)foreach(var pose in p.extra)foreach(var d in pose){w.Write(d.x);w.Write(d.y);w.Write(d.z);}}
   }
-  var files=new[]{"Flower/Runtime/FlowerBottomPatches.cs","Flower/Runtime/FlowerLayerPatches.cs","HeroPetal/Runtime/HeroPetal.cs","Flower/Runtime/FlowerAssembler.cs","Flower/Runtime/FlowerPreset.cs","Flower/Art/ExhibitionPeony.asset","HeroPetal/Prefabs/HeroPetal.prefab"};
-  var signature=string.Join("\n",Array.ConvertAll(files,path=>{using(var sha=SHA256.Create())return BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(Path.Combine(Application.dataPath,path)))).Replace("-","").ToLowerInvariant();}));
-  File.WriteAllText(Path.Combine(directory,"BottomOverlapProvenance.txt"),signature);
+  File.WriteAllText(Path.Combine(directory,"BottomOverlapProvenance.txt"),BottomCacheSignature());
  }
 #endif
  bool LoadBottomCache(byte[] data=null,bool baseline=false,bool previous=false){

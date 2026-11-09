@@ -58,6 +58,13 @@ namespace MindState
         public float Growth=>OpeningProgress; // Compatibility: unfolding, never mesh truncation.
         public bool automatic { get=>inputMode==PetalInputMode.SimulatedBrain; set=>inputMode=value?PetalInputMode.SimulatedBrain:PetalInputMode.ExternalBrain; }
         public Mesh RuntimeMesh=>mesh;
+        internal Vector3[] RuntimeVertices=>vertices;
+        internal Vector3[] RuntimeNormals=>normals;
+        internal Vector4[] RuntimeTangents=>tangents;
+        internal Vector2[] RuntimeUV=>uv;
+        internal int[] RuntimeTriangles=>triangleCache;
+        internal Bounds LastBounds=>lastBounds;
+        internal static int SamplingInstances;
         public double LastUpdateMilliseconds { get; private set; }
         public long LastUpdateAllocation { get; private set; }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || FLOWER_VALIDATION
@@ -72,7 +79,8 @@ namespace MindState
         Vector3[] surface,vertices,normals;
         Vector4[] tangents;
         Vector2[] uv;
-        int[] boundary;
+        int[] boundary,triangleCache;
+        Bounds lastBounds;
         readonly float[] sinTheta=new float[Cols],cosTheta=new float[Cols],thetaColumn=new float[Cols],rimRadius=new float[Cols],widePleat=new float[Cols],rimWave=new float[Cols],leftFold=new float[Cols],rightFold=new float[Cols],nestEdge=new float[Cols];
         readonly float[] foldCenter=new float[7],foldWidth=new float[7],foldPower=new float[7],foldBend=new float[7];
         float edgePhase;
@@ -87,9 +95,13 @@ namespace MindState
 
         void Awake()
         {
-            mesh=new Mesh { name="Silk fan — closed thin shell" }; mesh.MarkDynamic();
-            GetComponent<MeshFilter>().sharedMesh=mesh;
-            meshRenderer=GetComponent<MeshRenderer>(); meshRenderer.sharedMaterial=pearlMaterial;
+            bool sampling=SamplingInstances>0;
+            if(!sampling)
+            {
+                mesh=new Mesh { name="Silk fan — closed thin shell" }; mesh.MarkDynamic();
+                GetComponent<MeshFilter>().sharedMesh=mesh;
+                meshRenderer=GetComponent<MeshRenderer>(); meshRenderer.sharedMaterial=pearlMaterial;
+            }
             properties=new MaterialPropertyBlock();
             surface=new Vector3[SurfaceCount]; boundary=new int[2*(LengthSegments+WidthSegments)];
             int b=0;
@@ -103,23 +115,24 @@ namespace MindState
             {
                 int i=y*Cols+x; uv[i]=uv[i+SurfaceCount]=new Vector2(x/(float)WidthSegments,y/(float)LengthSegments);
             }
-            var triangles=new int[LengthSegments*WidthSegments*12+boundary.Length*6]; int k=0;
+            triangleCache=new int[LengthSegments*WidthSegments*12+boundary.Length*6]; int k=0;
             for(int y=0;y<LengthSegments;y++) for(int x=0;x<WidthSegments;x++)
             {
                 int a=y*Cols+x,c=a+Cols;
-                triangles[k++]=a; triangles[k++]=c; triangles[k++]=a+1;
-                triangles[k++]=a+1; triangles[k++]=c; triangles[k++]=c+1;
+                triangleCache[k++]=a; triangleCache[k++]=c; triangleCache[k++]=a+1;
+                triangleCache[k++]=a+1; triangleCache[k++]=c; triangleCache[k++]=c+1;
                 a+=SurfaceCount; c+=SurfaceCount;
-                triangles[k++]=a; triangles[k++]=a+1; triangles[k++]=c;
-                triangles[k++]=a+1; triangles[k++]=c+1; triangles[k++]=c;
+                triangleCache[k++]=a; triangleCache[k++]=a+1; triangleCache[k++]=c;
+                triangleCache[k++]=a+1; triangleCache[k++]=c+1; triangleCache[k++]=c;
             }
             for(int i=0;i<boundary.Length;i++)
             {
                 int a=SurfaceCount*2+i*2,c=SurfaceCount*2+(i+1)%boundary.Length*2;
-                triangles[k++]=a; triangles[k++]=c; triangles[k++]=a+1;
-                triangles[k++]=c; triangles[k++]=c+1; triangles[k++]=a+1;
+                triangleCache[k++]=a; triangleCache[k++]=c; triangleCache[k++]=a+1;
+                triangleCache[k++]=c; triangleCache[k++]=c+1; triangleCache[k++]=a+1;
             }
-            mesh.vertices=vertices; mesh.uv=uv; mesh.triangles=triangles;
+            if(sampling) return;
+            mesh.vertices=vertices; mesh.uv=uv; mesh.triangles=triangleCache;
             Rebuild();
         }
 
@@ -166,6 +179,16 @@ namespace MindState
 
         public void SetShapeImmediateLimited(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile,int foldSeed,float waveRoom=1f)
         {
+            ApplyShapeState(angle,curl,softness,progress,maximumCurl,edgeFoldScale,profile,foldSeed,waveRoom);
+            if(mesh!=null) Rebuild();
+        }
+        internal void SetShapeImmediateSampling(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile,int foldSeed,float waveRoom=1f)
+        {
+            ApplyShapeState(angle,curl,softness,progress,maximumCurl,edgeFoldScale,profile,foldSeed,waveRoom);
+            Rebuild(false);
+        }
+        void ApplyShapeState(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile,int foldSeed,float waveRoom)
+        {
             SetShapeParameters(angle,curl,softness);
             surfaceProfile=profile.Constrained();
             if(surfaceProfile.softFolds) PrepareSoftFolds(foldSeed);
@@ -174,7 +197,6 @@ namespace MindState
             this.waveRoom=Finite(waveRoom)?Mathf.Clamp01(waveRoom):1f;
             OpeningAngle=targetOpeningAngle; CurlAmount=targetCurlAmount; PleatSoftness=targetPleatSoftness;
             OpeningProgress=Finite(progress)?Mathf.Clamp01(progress):1; frozen=false;
-            if(mesh!=null) Rebuild();
         }
         public void SetImmediate(float attention,float relaxation,float growth=1)
         {
@@ -269,7 +291,7 @@ namespace MindState
             }
         }
         static float ClosureAngle(float distance,float bend)=>bend*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.2575f,2.575f,distance));
-        void Rebuild()
+        void Rebuild(bool uploadMesh=true)
         {
             float curl=Mathf.Lerp(trajectoryCurlLimit,Mathf.Min(CurlAmount,trajectoryCurlLimit),Mathf.SmoothStep(0,1,OpeningProgress));
             float openEnvelope=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.12f,1f,OpeningProgress));
@@ -486,8 +508,12 @@ namespace MindState
                 normals[a]=normals[a+1]=n; tangents[a]=tangents[a+1]=new Vector4(edge.x,edge.y,edge.z,1);
                 uv[a]=uv[a+1]=uv[source];
             }
-            mesh.vertices=vertices; mesh.normals=normals; mesh.tangents=tangents; mesh.uv=uv;
-            mesh.bounds=new Bounds((min+max)*0.5f,max-min+Vector3.one*0.015f);
+            lastBounds=new Bounds((min+max)*0.5f,max-min+Vector3.one*0.015f);
+            if(uploadMesh&&mesh!=null)
+            {
+                mesh.vertices=vertices; mesh.normals=normals; mesh.tangents=tangents; mesh.uv=uv;
+                mesh.bounds=lastBounds;
+            }
         }
         // The cache sampler supplies the horizontal radial direction in petal space.
         internal Matrix4x4 overlapToFlower=Matrix4x4.identity,overlapFromFlower=Matrix4x4.identity;

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Profiling;
 using UnityEngine.Rendering;
@@ -61,54 +62,79 @@ namespace MindState
             long initStarted=System.Diagnostics.Stopwatch.GetTimestamp();
             Release(); CacheBytes=0; MaxCachePositionError=0; MaxCacheNormalAngle=0; BloomDuration=1;
             generated=new GameObject("Generated · shared layer meshes").transform; generated.SetParent(transform,false);
-            var source=Instantiate(petalPrefab,generated); source.name="Temporary pose sampler";
-            source.GetComponent<MeshRenderer>().enabled=false; source.enabled=false;
             var random=new System.Random(preset.randomSeed);
             layers=new Layer[preset.layers.Length];
+            var foldSeeds=new int[layers.Length][];
             for(int i=0;i<layers.Length;i++)
             {
                 var l=new Layer { config=JsonUtility.FromJson<FlowerLayer>(JsonUtility.ToJson(preset.layers[i])) }; layers[i]=l;
                 l.config.Constrain();
                 BloomDuration=Mathf.Max(BloomDuration,l.config.delay+l.config.duration);
                 l.variants=new Variant[l.config.surfaceProfile.softFolds&&l.config.count>1?2:1];
+                foldSeeds[i]=new int[l.variants.Length];
                 for(int variant=0;variant<l.variants.Length;variant++)
                 {
-                    var g=new Variant(); l.variants[variant]=g;
-                    int foldSeed=unchecked(preset.randomSeed*486187739+i*104729+variant*15485863);
-                    for(int j=0;j<PoseCount;j++)
+                    l.variants[variant]=new Variant();
+                    foldSeeds[i][variant]=unchecked(preset.randomSeed*486187739+i*104729+variant*15485863);
+                }
+            }
+            bool verifyPoses=PoseCacheVerificationRequested();
+            var samplers=CreatePoseSamplers();
+            var variantBytes=new long[layers.Length][];
+            var variantMaxPosition=new float[layers.Length][];
+            var variantMaxAngle=new float[layers.Length][];
+            for(int i=0;i<layers.Length;i++)
+            {
+                variantBytes[i]=new long[layers[i].variants.Length];
+                variantMaxPosition[i]=new float[layers[i].variants.Length];
+                variantMaxAngle[i]=new float[layers[i].variants.Length];
+            }
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-flowerSingleThread")<0)
+            {
+                var tasks=new System.Collections.Generic.List<Task>();
+                for(int i=0;i<layers.Length;i++)
+                {
+                    var config=layers[i].config;
+                    for(int variant=0;variant<layers[i].variants.Length;variant++)
                     {
-                        SetOverlapEdgeFrame(source,l.config,j/(float)(PoseCount-1));
-                        source.SetShapeImmediateLimited(l.config.openingAngle,l.config.curl,l.config.softness,j/(float)(PoseCount-1),l.config.maximumCurl,l.config.edgeFoldScale,l.config.surfaceProfile,foldSeed,l.config.WaveRoom(j/(float)(PoseCount-1)));
-                        var m=source.RuntimeMesh;
-                        var positions=m.vertices; var normals=m.normals; var tangents=m.tangents;
-                        var p=new Pose { data=new Vertex[positions.Length],bounds=m.bounds };
-                        for(int k=0;k<positions.Length;k++) p.data[k]=new Vertex { p=positions[k],n=normals[k],t=tangents[k] };
-                        int center=HeroPetal.WidthSegments/2,surface=(HeroPetal.WidthSegments+1)*(HeroPetal.LengthSegments+1);
-                        p.root=(p.data[center].p+p.data[center+surface].p)*.5f; g.poses[j]=p;
-                        CacheBytes+=p.data.Length*40L;
+                        int layer=i,variantIndex=variant; var g=layers[i].variants[variant]; var sampler=samplers[i][variant]; int foldSeed=foldSeeds[i][variant];
+                        tasks.Add(Task.Factory.StartNew(()=>SampleVariant(sampler,config,g,foldSeed,verifyPoses,out variantBytes[layer][variantIndex],out variantMaxPosition[layer][variantIndex],out variantMaxAngle[layer][variantIndex]),TaskCreationOptions.LongRunning));
                     }
-                    // Midpoint comparisons against the unchanged generator, during initialization only.
-                    for(int j=0;j<PoseCount-1;j++)
-                    {
-                        SetOverlapEdgeFrame(source,l.config,(j+.5f)/(PoseCount-1));
-                        source.SetShapeImmediateLimited(l.config.openingAngle,l.config.curl,l.config.softness,(j+.5f)/(PoseCount-1),l.config.maximumCurl,l.config.edgeFoldScale,l.config.surfaceProfile,foldSeed,l.config.WaveRoom((j+.5f)/(PoseCount-1)));
-                        var exact=source.RuntimeMesh.vertices; var normals=source.RuntimeMesh.normals;
-                        for(int k=0;k<exact.Length;k++)
-                        {
-                            MaxCachePositionError=Mathf.Max(MaxCachePositionError,Vector3.Distance(exact[k],(g.poses[j].data[k].p+g.poses[j+1].data[k].p)*.5f));
-                            // Boundary normals at a narrow shell seam are not a visible surface crease.
-                            if(k<2*(HeroPetal.WidthSegments+1)*(HeroPetal.LengthSegments+1))
-                                MaxCacheNormalAngle=Mathf.Max(MaxCacheNormalAngle,Vector3.Angle(normals[k],(g.poses[j].data[k].n+g.poses[j+1].data[k].n).normalized));
-                        }
-                    }
+                }
+                try { Task.WaitAll(tasks.ToArray()); }
+                catch(AggregateException exception)
+                {
+                    Debug.LogWarning("Flower variant sampling failed; retrying sequentially. "+exception.GetBaseException().Message);
+                    DestroyPoseSamplers(samplers); samplers=CreatePoseSamplers();
+                    SampleAllVariants(samplers,layers,foldSeeds,verifyPoses,variantBytes,variantMaxPosition,variantMaxAngle);
+                }
+            }
+            else SampleAllVariants(samplers,layers,foldSeeds,verifyPoses,variantBytes,variantMaxPosition,variantMaxAngle);
+            for(int i=0;i<layers.Length;i++) for(int variant=0;variant<layers[i].variants.Length;variant++)
+            {
+                CacheBytes+=variantBytes[i][variant];
+                MaxCachePositionError=Mathf.Max(MaxCachePositionError,variantMaxPosition[i][variant]);
+                MaxCacheNormalAngle=Mathf.Max(MaxCacheNormalAngle,variantMaxAngle[i][variant]);
+            }
+            for(int i=0;i<layers.Length;i++)
+            {
+                var l=layers[i];
+                for(int variant=0;variant<l.variants.Length;variant++)
+                {
+                    var g=l.variants[variant]; var sampler=samplers[i][variant];
                     int count=g.poses[0].data.Length;
                     g.data=new Vertex[count];
                     g.mesh=new Mesh { name="Flower shared layer "+i+" variant "+variant }; g.mesh.MarkDynamic();
                     g.mesh.SetVertexBufferParams(count,new VertexAttributeDescriptor(VertexAttribute.Position,VertexAttributeFormat.Float32,3,0),new VertexAttributeDescriptor(VertexAttribute.Normal,VertexAttributeFormat.Float32,3,0),new VertexAttributeDescriptor(VertexAttribute.Tangent,VertexAttributeFormat.Float32,4,0),new VertexAttributeDescriptor(VertexAttribute.TexCoord0,VertexAttributeFormat.Float32,2,1));
                     g.mesh.SetVertexBufferData(g.poses[0].data,0,0,count,0,MeshUpdateFlags.DontRecalculateBounds);
-                    g.mesh.SetVertexBufferData(source.RuntimeMesh.uv,0,0,count,1,MeshUpdateFlags.DontRecalculateBounds);
-                    g.mesh.triangles=source.RuntimeMesh.triangles;
+                    g.mesh.SetVertexBufferData(sampler.RuntimeUV,0,0,count,1,MeshUpdateFlags.DontRecalculateBounds);
+                    g.mesh.triangles=sampler.RuntimeTriangles;
                 }
+            }
+            DestroyPoseSamplers(samplers);
+            for(int i=0;i<layers.Length;i++)
+            {
+                var l=layers[i];
                 l.petals=new Petal[Mathf.Clamp(l.config.count,1,10)];
                 var variation=new float[l.petals.Length,6]; var mean=new float[6];
                 for(int p=0;p<l.petals.Length;p++) for(int q=0;q<6;q++)
@@ -139,7 +165,7 @@ namespace MindState
                     body.localScale=p.scale;
                 }
             }
-            Destroy(source.gameObject); BuildHeart(); RefreshAppearance();
+            BuildHeart(); RefreshAppearance();
             float discRadius=0;foreach(var layer in layers)discRadius=Mathf.Max(discRadius,layer.config.rootRadius);
             foreach(var layer in layers)foreach(var petal in layer.petals)petal.block.SetVector("_RootTrim",new Vector4(1,layers[0].config.rootHeight,(discRadius+.04f)*.92f,layers[0].config.rootHeight+.012f));
             float initialProgress=bloomProgress; bloomProgress=1; ApplyPose(); FullBloomBounds=WorldBounds;
@@ -150,6 +176,84 @@ namespace MindState
             ApplyDiagnosticColors();
 #endif
             InitializationMilliseconds=(System.Diagnostics.Stopwatch.GetTimestamp()-initStarted)*1000.0/System.Diagnostics.Stopwatch.Frequency;
+        }
+        static bool PoseCacheVerificationRequested()
+        {
+#if FLOWER_VALIDATION
+            return true;
+#else
+            if(Application.isBatchMode) return true;
+            foreach(var argument in Environment.GetCommandLineArgs())
+            {
+                if(argument.StartsWith("-verify",StringComparison.Ordinal)) return true;
+                if(argument=="-shingleRegression"||argument=="-flowerAvoidance"||argument=="-silkAB"||argument=="-heartRegression") return true;
+            }
+            return false;
+#endif
+        }
+        HeroPetal[][] CreatePoseSamplers()
+        {
+            var grid=new HeroPetal[layers.Length][];
+            HeroPetal.SamplingInstances++;
+            try
+            {
+                for(int i=0;i<layers.Length;i++)
+                {
+                    grid[i]=new HeroPetal[layers[i].variants.Length];
+                    for(int variant=0;variant<grid[i].Length;variant++)
+                    {
+                        var sampler=Instantiate(petalPrefab,generated);
+                        sampler.name="Pose sampler "+i+"-"+variant;
+                        sampler.GetComponent<MeshRenderer>().enabled=false;
+                        sampler.enabled=false;
+                        grid[i][variant]=sampler;
+                    }
+                }
+            }
+            finally { HeroPetal.SamplingInstances--; }
+            return grid;
+        }
+        void DestroyPoseSamplers(HeroPetal[][] grid)
+        {
+            if(grid==null) return;
+            foreach(var row in grid) if(row!=null) foreach(var sampler in row) if(sampler!=null) Destroy(sampler.gameObject);
+        }
+        static void SampleAllVariants(HeroPetal[][] samplers,Layer[] layers,int[][] foldSeeds,bool verify,long[][] bytes,float[][] maxPosition,float[][] maxAngle)
+        {
+            for(int i=0;i<layers.Length;i++) for(int variant=0;variant<layers[i].variants.Length;variant++)
+                SampleVariant(samplers[i][variant],layers[i].config,layers[i].variants[variant],foldSeeds[i][variant],verify,out bytes[i][variant],out maxPosition[i][variant],out maxAngle[i][variant]);
+        }
+        static void SampleVariant(HeroPetal sampler,FlowerLayer config,Variant g,int foldSeed,bool verify,out long bytes,out float maxPosition,out float maxAngle)
+        {
+            bytes=0; maxPosition=0; maxAngle=0;
+            int center=HeroPetal.WidthSegments/2,surface=(HeroPetal.WidthSegments+1)*(HeroPetal.LengthSegments+1);
+            for(int j=0;j<PoseCount;j++)
+            {
+                float phase=j/(float)(PoseCount-1);
+                SetOverlapEdgeFrame(sampler,config,phase);
+                sampler.SetShapeImmediateSampling(config.openingAngle,config.curl,config.softness,phase,config.maximumCurl,config.edgeFoldScale,config.surfaceProfile,foldSeed,config.WaveRoom(phase));
+                var positions=sampler.RuntimeVertices; var normals=sampler.RuntimeNormals; var tangents=sampler.RuntimeTangents;
+                var p=new Pose { data=new Vertex[positions.Length],bounds=sampler.LastBounds };
+                for(int k=0;k<positions.Length;k++) p.data[k]=new Vertex { p=positions[k],n=normals[k],t=tangents[k] };
+                p.root=(p.data[center].p+p.data[center+surface].p)*.5f; g.poses[j]=p;
+                bytes+=p.data.Length*40L;
+            }
+            // Midpoint comparisons against the unchanged generator, during initialization only.
+            if(!verify) return;
+            for(int j=0;j<PoseCount-1;j++)
+            {
+                float phase=(j+.5f)/(PoseCount-1);
+                SetOverlapEdgeFrame(sampler,config,phase);
+                sampler.SetShapeImmediateSampling(config.openingAngle,config.curl,config.softness,phase,config.maximumCurl,config.edgeFoldScale,config.surfaceProfile,foldSeed,config.WaveRoom(phase));
+                var exact=sampler.RuntimeVertices; var normals=sampler.RuntimeNormals;
+                for(int k=0;k<exact.Length;k++)
+                {
+                    maxPosition=Mathf.Max(maxPosition,Vector3.Distance(exact[k],(g.poses[j].data[k].p+g.poses[j+1].data[k].p)*.5f));
+                    // Boundary normals at a narrow shell seam are not a visible surface crease.
+                    if(k<2*(HeroPetal.WidthSegments+1)*(HeroPetal.LengthSegments+1))
+                        maxAngle=Mathf.Max(maxAngle,Vector3.Angle(normals[k],(g.poses[j].data[k].n+g.poses[j+1].data[k].n).normalized));
+                }
+            }
         }
         void Update()
         {
