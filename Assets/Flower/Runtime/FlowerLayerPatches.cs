@@ -7,10 +7,49 @@ namespace MindState {
 public sealed partial class FlowerAssembler {
  Vector3 UpperDeltaAt(int layer,int index,float phase,int id){foreach(var patch in bottomPatches)if(patch.layer==layer&&patch.index==index){int k=Array.BinarySearch(patch.upperIds,id);if(k<0||patch.upper==null)return Vector3.zero;float q=phase*32;int a=Mathf.Min((int)q,31);return Vector3.Lerp(patch.upper[a][k],patch.upper[a+1][k],q-a);}return Vector3.zero;}
  internal void LayerPatchPreview(bool enabled){extraPreview=enabled;bottomProgress=-1;ApplyBottomPatches();}
+ Vector3 ExtraDeltaAt(int layer,int index,float phase,int id){foreach(var p in bottomPatches)if(p.layer==layer&&p.index==index){int k=Array.BinarySearch(p.extraIds,id);if(k<0||p.extra==null)return Vector3.zero;float q=phase*32;int a=Mathf.Min((int)q,31);return Vector3.Lerp(p.extra[a][k],p.extra[a+1][k],q-a);}return Vector3.zero;}
 #if UNITY_EDITOR
  Vector3 LayerBase(int l,int i,float phase,int id)=>BottomPoint(l,i,phase,(id/129)/80f,(id%129)/64f-1)+BottomDeltaAt(l,i,phase,id)+UpperDeltaAt(l,i,phase,id);
  // Fair the complete accepted outer surface. The obstacle constraint retains the
  // existing outward clearance instead of flattening a raised edge back into its neighbour.
+ // Add clearance to the accepted, already faired surface; keep the earlier caches intact.
+ void BuildOuterResidualPatches(){
+  var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();
+  var report=new StringBuilder("petal,phase,contacts,maxAddedOffset\n");
+  var additions=new Dictionary<int,Vector3[][]>();
+  foreach(var patch in bottomPatches)if(patch.layer==0){
+   int i=patch.index,neighbor=(i+1)%7;var frames=new Vector3[33][];additions[i]=frames;
+   for(int pose=0;pose<33;pose++){
+    frames[pose]=new Vector3[BottomSurface];float phase=pose/32f;
+    float gate=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.4375f,.53125f,phase))*(1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.65625f,.78125f,phase)));if(gate<=0)continue;
+    scan.Sample(phase,null,0);scan.FindPairContacts(i,neighbor,hits);
+    var mask=new bool[BottomSurface];int contacts=0;
+    foreach(var h in hits){if(h.rootRegion||h.lengthA<.3f)continue;contacts++;int sx=Mathf.RoundToInt((h.widthA+1)*64),sy=Mathf.RoundToInt(h.lengthA*80);
+     for(int y=Mathf.Max(24,sy-24);y<=Mathf.Min(80,sy+24);y++)for(int x=Mathf.Max(0,sx-24);x<=Mathf.Min(128,sx+24);x++)mask[y*129+x]=true;
+    }
+    var matrix=BottomMatrix(0,i,phase);var inverse=matrix.inverse;var other=BottomMatrix(0,neighbor,phase);var tree=new BottomTree(this,0,neighbor,phase,other,true,true);
+    var required=new float[BottomSurface];var height=new float[BottomSurface];
+    // Lift the covering sheet rather than pushing the underlying sheet through it.
+    var direction=Vector3.up;
+    for(int id=24*129;id<BottomSurface;id++)if(mask[id]){
+     var point=matrix.MultiplyPoint3x4(LayerBase(0,i,phase,id)+ExtraDeltaAt(0,i,phase,id));float d=tree.OutsideDistance(point,direction);
+     if(d>-.015f&&d<.16f)required[id]=Mathf.Min(.16f,Mathf.Max(0,d+.018f));height[id]=required[id];
+    }
+    for(int pass=0;pass<140;pass++){var next=(float[])height.Clone();for(int y=24;y<=80;y++)for(int x=0;x<129;x++){
+     int id=y*129+x;float sum=height[id]*2;int count=2;foreach(int n in new[]{y>24?id-129:-1,y<80?id+129:-1,x>0?id-1:-1,x<128?id+1:-1})if(n>=0){sum+=height[n];count++;}
+     next[id]=Mathf.Max(required[id],sum/count);
+    }height=next;}
+    float maximum=0;for(int id=24*129;id<BottomSurface;id++){float h=height[id]*gate*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.3f,.4f,(id/129)/80f));frames[pose][id]=inverse.MultiplyVector(direction*h);maximum=Mathf.Max(maximum,frames[pose][id].magnitude);}
+    report.AppendFormat(System.Globalization.CultureInfo.InvariantCulture,"{0},{1},{2},{3}\n",i,phase,contacts,maximum);
+   }
+  }
+  // Commit together so all pairs are fitted against the same accepted surface.
+  foreach(var patch in bottomPatches)if(patch.layer==0){var frames=additions[patch.index];for(int pose=0;pose<33;pose++)for(int k=0;k<patch.extraIds.Length;k++)frames[pose][patch.extraIds[k]]+=patch.extra[pose][k];
+   CacheBytes-=patch.extraIds.Length*33L*12;var ids=new List<int>();for(int id=0;id<BottomSurface;id++){bool used=false;for(int pose=0;pose<33;pose++)used|=frames[pose][id].sqrMagnitude>1e-12f;if(used)ids.Add(id);}patch.extraIds=ids.ToArray();patch.extra=new Vector3[33][];
+   for(int pose=0;pose<33;pose++){patch.extra[pose]=new Vector3[ids.Count];float radius=0;for(int k=0;k<ids.Count;k++){patch.extra[pose][k]=frames[pose][ids[k]];radius=Mathf.Max(radius,patch.extra[pose][k].magnitude);}patch.radius[pose]+=radius;}CacheBytes+=ids.Count*33L*12;
+  }
+  string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Outer58/Bake"));Directory.CreateDirectory(path);File.WriteAllText(Path.Combine(path,"Regions.csv"),report.ToString());
+ }
  void SmoothOuterPatches(){
   var report=new StringBuilder("petal,phase,maxAddedOffset,vertices\n");
   foreach(var patch in bottomPatches)if(patch.layer==0){

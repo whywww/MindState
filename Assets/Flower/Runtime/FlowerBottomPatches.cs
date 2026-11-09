@@ -174,6 +174,8 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
 #if UNITY_EDITOR
   bool forceRebuild=Array.IndexOf(Environment.GetCommandLineArgs(),"-rebuildBottom")>=0;
   if(!forceRebuild&&BottomCacheProvenanceMatches()&&LoadBottomCache())return;
+  var residualBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Outer58/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
+  if(File.Exists(residualBaseline)&&LoadBottomCache(File.ReadAllBytes(residualBaseline))){BuildOuterResidualPatches();return;}
   var outerBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/OuterFlow/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
   if(File.Exists(outerBaseline)&&LoadBottomCache(File.ReadAllBytes(outerBaseline))){SmoothOuterPatches();return;}
   var previous=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/LayerOverlap/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
@@ -307,7 +309,7 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
  sealed class BottomTree {
   struct Node { public Bounds bounds;public int x0,x1,y0,y1,left,right; }
   readonly Vector3[] v=new Vector3[BottomSurface];readonly List<Node> nodes=new List<Node>();
-  public BottomTree(FlowerAssembler f,int layer,int index,float phase,Matrix4x4 matrix,bool corrected=false){for(int y=0;y<=80;y++)for(int x=0;x<129;x++)v[y*129+x]=matrix.MultiplyPoint3x4(f.BottomPoint(layer,index,phase,y/80f,x/64f-1)+(corrected?(f.BottomDeltaAt(layer,index,phase,y*129+x)+f.UpperDeltaAt(layer,index,phase,y*129+x)):Vector3.zero));Build(0,128,0,80);}
+  public BottomTree(FlowerAssembler f,int layer,int index,float phase,Matrix4x4 matrix,bool corrected=false,bool complete=false){for(int y=0;y<=80;y++)for(int x=0;x<129;x++)v[y*129+x]=matrix.MultiplyPoint3x4(f.BottomPoint(layer,index,phase,y/80f,x/64f-1)+(corrected?(f.BottomDeltaAt(layer,index,phase,y*129+x)+f.UpperDeltaAt(layer,index,phase,y*129+x)+(complete?f.ExtraDeltaAt(layer,index,phase,y*129+x):Vector3.zero)):Vector3.zero));Build(0,128,0,80);}
   int Build(int x0,int x1,int y0,int y1){int id=nodes.Count;var n=new Node{x0=x0,x1=x1,y0=y0,y1=y1,left=-1,right=-1};nodes.Add(n);
    if(x1-x0>4||y1-y0>4){if(x1-x0>=y1-y0){int m=(x0+x1)/2;n.left=Build(x0,m,y0,y1);n.right=Build(m,x1,y0,y1);}else{int m=(y0+y1)/2;n.left=Build(x0,x1,y0,m);n.right=Build(x0,x1,m,y1);}n.bounds=nodes[n.left].bounds;n.bounds.Encapsulate(nodes[n.right].bounds);}
    else{n.bounds=new Bounds(v[y0*129+x0],Vector3.zero);for(int y=y0;y<=y1;y++)for(int x=x0;x<=x1;x++)n.bounds.Encapsulate(v[y*129+x]);}n.bounds.Expand(.00001f);nodes[id]=n;return id;

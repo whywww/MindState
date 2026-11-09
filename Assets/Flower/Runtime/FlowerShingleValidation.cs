@@ -52,6 +52,25 @@ public sealed class FlowerShingleValidation : MonoBehaviour {
   gallery.showInterface=false; flower.materialBreathing=false; flower.SetFrozen(true);
   cam=GetComponent<Camera>(); cam.enabled=false; rt=new RenderTexture(960,960,24){antiAliasing=4}; rt.Create(); cam.targetTexture=rt;
   image=new Texture2D(960,960,TextureFormat.RGB24,false); QualitySettings.vSyncCount=0;
+  if(Arg("-outer58","0")=="1") {
+   var scan=new FlowerSurfaceCollision(flower);var hits=new List<FlowerSurfaceCollision.Contact>();
+   var csv=new StringBuilder("phase,petal,neighbor,contacts\n");
+   foreach(float phase in new[]{.45f,.5f,.53125f,.55f,.5625f,.58f,.59375f,.6f,.625f,.65f,.6875f,.72f,.75f,1f}) {
+    flower.SetBloomProgress(phase);scan.Sample(phase,null,0);
+    for(int i=0;i<7;i++){scan.FindPairContacts(i,(i+6)%7,hits);csv.AppendFormat(Inv,"{0},{1},{2},{3}\n",phase,i,(i+6)%7,hits.FindAll(h=>!h.rootRegion&&h.lengthA>.25f).Count);}
+    if(phase==.55f||phase==.58f||phase==.6f||phase==.65f){Shot("Pose_"+phase,0,90,10);Shot("Oblique_"+phase,22,55,10);}
+    if(phase==.58f){for(int az=0;az<360;az+=45)Shot("Orbit_"+az,az,55,10);for(int i=0;i<7;i++){flower.SoloPetal(0,i);flower.SetPetalVisible(0,(i+6)%7,true);Shot("Pair_"+i,0,90,10);flower.ShowAllPetals();}}
+    Check(flower.RootAnchorError()<1e-5f,"Root attachment "+phase);Check(flower.BottomIsolationCheck(),"Protected vertices "+phase);yield return null;
+   }
+   File.WriteAllText(Path.Combine(output,"OuterContacts.csv"),csv.ToString());
+   flower.SetBloomProgress(1);Snapshot("FullBloom");
+#if UNITY_EDITOR
+   flower.SaveBottomCache();UnityEditor.EditorApplication.Exit(0);
+#else
+   Application.Quit(0);
+#endif
+   yield break;
+  }
   if(Arg("-bottomTrace","0")=="1") {
    var trace=new FlowerSurfaceCollision(flower);var contacts=new List<FlowerSurfaceCollision.Contact>();var csv=new StringBuilder("progress,petalA,petalB,lengthA,lengthB,sA,sB,x,y,z\n");
    foreach(float p in new[]{0f,.1f,.25f,.5f,.75f,1f}){
