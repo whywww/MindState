@@ -24,7 +24,7 @@ namespace MindState
         public long LastUpdateAllocation { get; private set; }
         public long CacheBytes { get; private set; }
         public double InitializationMilliseconds { get; private set; }
-        public long GeometryBytes { get { long bytes=CacheBytes; if(layers!=null) foreach(var l in layers) foreach(var g in l.variants) bytes+=g.data.Length*40L+UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(g.mesh); if(coreMesh!=null) bytes+=UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(coreMesh); if(stamenMesh!=null) bytes+=UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(stamenMesh); return bytes; } }
+        public long GeometryBytes { get { long bytes=CacheBytes+BottomWorkingBytes; if(layers!=null) foreach(var l in layers) foreach(var g in l.variants) bytes+=g.data.Length*40L+UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(g.mesh); if(coreMesh!=null) bytes+=UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(coreMesh); if(stamenMesh!=null) bytes+=UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(stamenMesh); return bytes; } }
         public float MaxCachePositionError { get; private set; }
         public float MaxCacheNormalAngle { get; private set; }
         public int LayerCount=>layers==null?0:layers.Length;
@@ -51,7 +51,7 @@ namespace MindState
         void Start() { previousCascades=QualitySettings.shadowCascades; qualitySaved=true; QualitySettings.shadowCascades=0; RebuildFlower(); if(!ArtDiagnosticsRequested()) SetArtState(FlowerArtState.Clarity); }
         static bool Finite(float v)=>!float.IsNaN(v)&&!float.IsInfinity(v);
         public void SetBloomProgress(float progress)
-        { if(!Finite(progress)) return; LeaveArt(); autoPlay=false; bloomProgress=Mathf.Clamp01(progress); ApplyPose(); }
+        { if(!Finite(progress)) return; LeaveArt(); autoPlay=false; bloomProgress=Mathf.Clamp01(progress); ApplyPose();ApplyBottomPatches(); }
         public void PlayBloom() { LeaveArt(); bloomProgress=0; frozen=false; autoPlay=true; ApplyPose(); }
         public void SetFrozen(bool value)=>frozen=value;
         [ContextMenu("Rebuild Flower / 重建缓存与组装")]
@@ -77,6 +77,7 @@ namespace MindState
                     int foldSeed=unchecked(preset.randomSeed*486187739+i*104729+variant*15485863);
                     for(int j=0;j<PoseCount;j++)
                     {
+                        SetOverlapEdgeFrame(source,l.config,j/(float)(PoseCount-1));
                         source.SetShapeImmediateLimited(l.config.openingAngle,l.config.curl,l.config.softness,j/(float)(PoseCount-1),l.config.maximumCurl,l.config.edgeFoldScale,l.config.surfaceProfile,foldSeed,l.config.WaveRoom(j/(float)(PoseCount-1)));
                         var m=source.RuntimeMesh;
                         var positions=m.vertices; var normals=m.normals; var tangents=m.tangents;
@@ -89,6 +90,7 @@ namespace MindState
                     // Midpoint comparisons against the unchanged generator, during initialization only.
                     for(int j=0;j<PoseCount-1;j++)
                     {
+                        SetOverlapEdgeFrame(source,l.config,(j+.5f)/(PoseCount-1));
                         source.SetShapeImmediateLimited(l.config.openingAngle,l.config.curl,l.config.softness,(j+.5f)/(PoseCount-1),l.config.maximumCurl,l.config.edgeFoldScale,l.config.surfaceProfile,foldSeed,l.config.WaveRoom((j+.5f)/(PoseCount-1)));
                         var exact=source.RuntimeMesh.vertices; var normals=source.RuntimeMesh.normals;
                         for(int k=0;k<exact.Length;k++)
@@ -143,6 +145,7 @@ namespace MindState
             float initialProgress=bloomProgress; bloomProgress=1; ApplyPose(); FullBloomBounds=WorldBounds;
             foreach(var l in layers) foreach(var p in l.petals) p.fullMatrix=p.body.localToWorldMatrix;
             bloomProgress=initialProgress; ApplyPose();
+            BuildBottomPatches();ApplyBottomPatches();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || FLOWER_VALIDATION
             ApplyDiagnosticColors();
 #endif
@@ -156,7 +159,7 @@ namespace MindState
             if(autoPlay&&!frozen) bloomProgress=Mathf.Min(1,bloomProgress+Time.deltaTime/BloomDuration);
             InterpolateMs=UploadMs=TransformMs=MaterialMs=0;
             if(artActive) { UpdateArt(Time.deltaTime); LastUpdateAllocation=GC.GetAllocatedBytesForCurrentThread()-bytes; LastUpdateMilliseconds=Milliseconds(start); return; }
-            ApplyPose();
+            ApplyPose();ApplyBottomPatches();
             long materialStart=System.Diagnostics.Stopwatch.GetTimestamp();
             if(materialBreathing)
             {
@@ -247,6 +250,13 @@ namespace MindState
         }
         static float DirectionError(Vector3 a,Vector3 b)=>(float)(Math.Atan2(Vector3.Cross(a,b).magnitude,Vector3.Dot(a,b))*180/Math.PI);
 #endif
+        static void SetOverlapEdgeFrame(HeroPetal source,FlowerLayer c,float progress)
+        {
+            float tilt=Mathf.Lerp(c.closedTilt,c.openTilt,Mathf.SmoothStep(0,1,progress));
+            PetalFrame(c,0,tilt,0,0,0,c.count,progress,out _,out var rotation);
+            source.overlapToFlower=Matrix4x4.TRS(Vector3.forward*(c.rootRadius/c.size),rotation,new Vector3(c.width,1,1));
+            source.overlapFromFlower=source.overlapToFlower.inverse;
+        }
         static Vector3 PetalScale(FlowerLayer c,Petal p,int index,float progress=1,float? cachedWeight=null)=>c.size*new Vector3(Mathf.Clamp(c.width*p.widthFactor,.4f,1.08f),p.lengthFactor*Mathf.Lerp(1,c.OffsetAt(index)?.lengthScale??1,(cachedWeight??c.OffsetWeight(progress))),1);
         static void PetalFrame(FlowerLayer c,float azimuth,float tilt,float roll,float heightOffset,int index,int count,float progress,out Vector3 position,out Quaternion rotation,float? cachedRoll=null)
         {
@@ -334,7 +344,7 @@ namespace MindState
         }
         // Compatibility: the original layer query returns its first shared variant.
         public Mesh LayerMesh(int index)=>layers[index].variants[0].mesh;
-        public Mesh PetalMesh(int layer,int index)=>SurfaceFor(layers[layer],index).mesh;
+        public Mesh PetalMesh(int layer,int index){foreach(var patch in bottomPatches)if(patch.layer==layer&&patch.index==index)return patch.mesh;return SurfaceFor(layers[layer],index).mesh;}
         public Mesh SharedMesh(int index)
         {
             foreach(var l in layers) { if(index<l.variants.Length) return l.variants[index].mesh; index-=l.variants.Length; }
@@ -348,6 +358,7 @@ namespace MindState
         }
         void Release()
         {
+            ReleaseBottomPatches();
             if(generated!=null) { generated.gameObject.SetActive(false); Destroy(generated.gameObject); }
             if(layers!=null) foreach(var l in layers) if(l?.variants!=null) foreach(var g in l.variants) if(g?.mesh!=null) Destroy(g.mesh);
             if(coreMesh!=null) Destroy(coreMesh); if(stamenMesh!=null) Destroy(stamenMesh);

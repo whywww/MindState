@@ -67,7 +67,7 @@ namespace MindState
                 artTime+=dt;
                 if(ArtInput==FlowerArtInput.Simulation) artTarget=BrainArtWeights(.5f+.48f*Mathf.Sin(artTime*.19f),.5f+.48f*Mathf.Sin(artTime*.11f));
                 if(ArtInput==FlowerArtInput.External&&Time.realtimeSinceStartup-lastValid>5) artTarget=new Vector4(0,0,0,1);
-                ArtWeights=Vector4.Lerp(ArtWeights,artTarget,1-Mathf.Exp(-dt/4));
+                ArtWeights=Vector4.Lerp(ArtWeights,artTarget,1-Mathf.Exp(-dt/6f));
                 ArtLightWeights=Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/3f));
                 artYaw=Mathf.Repeat(artYaw+4*ArtWeights.x*dt,360);
                 ArtFlowPhase=Mathf.Repeat(ArtFlowPhase+dt*FlowSpeed(),1);
@@ -77,11 +77,11 @@ namespace MindState
             generated.localScale=Vector3.one;
             float gathering=ArtWeights.y;
             float bud=.04f+.03f*(1-Mathf.Cos(artTime*Mathf.PI*2/5));
-            float pathProgress=1-gathering*(1-bud);
             float other=ArtWeights.x+ArtWeights.z+ArtWeights.w;
             float open=other>1e-6f?(ArtWeights.x*artProfiles[0].openness+ArtWeights.z*artProfiles[2].openness+ArtWeights.w*artProfiles[3].openness)/other:1f;
-            bloomProgress=gathering>=1f?pathProgress:Mathf.Lerp(open,pathProgress,gathering);
-            ApplyPose(bloomProgress,false);
+            // Single linear blend keeps opening and closing symmetric in speed.
+            bloomProgress=gathering>=1f?bud:Mathf.Lerp(open,bud,gathering);
+            ApplyPose(bloomProgress,false);ApplyBottomPatches();
             for(int k=0;k<layers.Length;k++)
             {
                 var l=layers[k];

@@ -18,6 +18,8 @@ namespace MindState
         [Range(0,1)] public float shingleLift;
         [Range(0,1)] public float rightCupRelease;
         [Range(0,1)] public float budNarrow;
+        [Range(0,1)] public float budSpanNarrow;
+        [Range(-1,1)] public float budRightOut;
         [Range(0,1)] public float tipRound;
         public static PetalSurfaceProfile Legacy=>new PetalSurfaceProfile { widePleatCount=7,surfaceDetail=1,rimVariation=1 };
         public PetalSurfaceProfile Constrained()=>new PetalSurfaceProfile {
@@ -27,11 +29,12 @@ namespace MindState
             foldStrength=Clean(foldStrength),edgeStrength=Clean(edgeStrength),
             cup=Clean(cup),ruffle=Clean(ruffle),tipRoll=Clean(tipRoll),
             waveNestEdge=Clean(waveNestEdge),waveNestTip=Clean(waveNestTip),
-            edgeTuck=Clean(edgeTuck),shingleLift=Clean(shingleLift),rightCupRelease=Clean(rightCupRelease),budNarrow=Clean(budNarrow),tipRound=Clean(tipRound),
+            edgeTuck=Clean(edgeTuck),shingleLift=Clean(shingleLift),rightCupRelease=Clean(rightCupRelease),budNarrow=Clean(budNarrow),budSpanNarrow=Clean(budSpanNarrow),budRightOut=CleanSigned(budRightOut),tipRound=Clean(tipRound),
             surfaceDetail=float.IsNaN(surfaceDetail)||float.IsInfinity(surfaceDetail)?1:Mathf.Clamp01(surfaceDetail),
             rimVariation=float.IsNaN(rimVariation)||float.IsInfinity(rimVariation)?1:Mathf.Clamp01(rimVariation) };
         static float Angle(float value)=>float.IsNaN(value)||float.IsInfinity(value)?0:Mathf.Clamp(value,0,90);
         static float Clean(float value)=>float.IsNaN(value)||float.IsInfinity(value)?0:Mathf.Clamp01(value);
+        static float CleanSigned(float value)=>float.IsNaN(value)||float.IsInfinity(value)?0:Mathf.Clamp(value,-1,1);
     }
 
     [RequireComponent(typeof(MeshFilter),typeof(MeshRenderer))]
@@ -240,13 +243,13 @@ namespace MindState
         }
 
         static float SideAngle(float q,float left,float right)=>q*Mathf.Lerp(left,right,Mathf.SmoothStep(0,1,Mathf.InverseLerp(-.35f,.35f,q)));
-        void PrepareSideSection(float t,float radius,float left,float right,float tipAngleScale,float tipPull)
+        void PrepareSideSection(float t,float radius,float left,float right,float tipAngleScale,float spanScale,float tipPull)
         {
             float flare=.72f+.28f*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.05f,.8f,t));
             for(int x=0;x<Cols;x++)
             {
                 float sinSection=sinTheta[x];
-                if(tipAngleScale!=1f) sinSection=Mathf.Sin(thetaColumn[x]*tipAngleScale);
+                if(tipAngleScale!=1f||spanScale!=1f) sinSection=Mathf.Sin(thetaColumn[x]*tipAngleScale*spanScale);
                 if(tipPull!=0)
                 {
                     float s=x/(float)WidthSegments*2-1;
@@ -319,11 +322,16 @@ namespace MindState
             float closureRelease=1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(0f,.7f,OpeningProgress));
             float closure=surfaceProfile.closureBendDegrees*Mathf.Deg2Rad*closureRelease;
             float nestFade=1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.15f,1f,OpeningProgress));
+            float budRightOutGate=1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(0f,.5f,OpeningProgress));
             // A bud is a young, not-yet-grown petal: narrow the sheet while closed and let
             // it widen out as it opens, so side corners clear their neighbours.
             // Linear recovery with the knot on a cached pose (28/32) keeps midpoint error low.
             float budGrow=Mathf.InverseLerp(0f,.875f,OpeningProgress);
             float budWidth=1-surfaceProfile.budNarrow*(1-budGrow);
+            // Narrowing the chord alone leaves the sheet flatter and does not separate the
+            // overlapping edges. Pulling the fan angle in during closure narrows the sheet
+            // while keeping its cup, and is fully released exactly at full bloom.
+            float spanNarrow=surfaceProfile.budSpanNarrow*(1-Mathf.InverseLerp(0f,1f,OpeningProgress));
             if(closure>0)
             {
                 closureY[0]=closureZ[0]=0;
@@ -350,7 +358,8 @@ namespace MindState
                 float tipU=Mathf.Clamp01((t-.5f)/.5f),tipRampValue=Mathf.SmoothStep(0,1,tipU);
                 float tipAngleScale=1-surfaceProfile.tipRound*.40f*tipRampValue;
                 float tipPull=surfaceProfile.tipRound*.05f*tipRampValue;
-                if(sideActive) PrepareSideSection(t,radius,leftSide,rightSide,tipAngleScale,tipPull);
+                float spanScale=1-spanNarrow*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.12f,.85f,t));
+                if(sideActive) PrepareSideSection(t,radius,leftSide,rightSide,tipAngleScale,spanScale,tipPull);
                 for(int x=0;x<Cols;x++)
                 {
                     float s=x/(float)WidthSegments*2-1;
@@ -363,7 +372,7 @@ namespace MindState
                     rho*=1-edgeInset*.1f;
                     rho*=1-tipPull*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.5f,1f,Mathf.Abs(s)));
                     float sinTip=sinTheta[x],cosTip=cosTheta[x];
-                    if(tipAngleScale!=1f) { float th=thetaColumn[x]*tipAngleScale; sinTip=Mathf.Sin(th); cosTip=Mathf.Cos(th); }
+                    if(tipAngleScale!=1f||spanScale!=1f) { float th=thetaColumn[x]*tipAngleScale*spanScale; sinTip=Mathf.Sin(th); cosTip=Mathf.Cos(th); }
                     float flare=0.72f+0.28f*Mathf.SmoothStep(0,1,Mathf.InverseLerp(0.05f,0.8f,t));
                     float flatX=rho*sinTip*flare;
                     flatX+=0.075f*t2*Mathf.Sin(t*4.2f+0.2f)*surfaceProfile.surfaceDetail;
@@ -408,6 +417,15 @@ namespace MindState
                         height-=surfaceProfile.shingleLift*shingleBand*.14f*bloomGate;
                         height-=edgeInset;
                     }
+                    // Bud only: lift the sheet outward from the centreline to the right rim
+                    // so the next petal's left rim stays outside instead of crossing through.
+                    float budRightOutOffset=0;
+                    if(surfaceProfile.budRightOut!=0f&&budRightOutGate>0f)
+                    {
+                        float budRightBand=Mathf.SmoothStep(0,1,Mathf.InverseLerp(-.9f,.1f,s));
+                        float budRightTip=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.15f,.45f,t));
+                        budRightOutOffset=surfaceProfile.budRightOut*.40f*budRightBand*budRightTip*budRightOutGate;
+                    }
                     if(sideActive) flatX+=sectionX[x]-sectionRest[x];
                     // Keep the fixed root tenth untouched; only the free sheet narrows.
                     float budWidthGrow=Mathf.Lerp(1f,budWidth,Mathf.SmoothStep(0,1,Mathf.InverseLerp(.12f,.85f,t)));
@@ -440,10 +458,11 @@ namespace MindState
                     }
                     float crossRadius=1/rowCup+radialZ;
                     float px=Mathf.Sin(rowCup*flatX)*crossRadius;
-                    float pz=Mathf.Cos(rowCup*flatX)*crossRadius-1/rowCup;
+                    float pz=Mathf.Cos(rowCup*flatX)*crossRadius-1/rowCup+budRightOutOffset;
                     surface[y*Cols+x]=new Vector3(px,py,pz);
                 }
             }
+            FoldOverlapEdges();
             Vector3 min=Vector3.one*float.MaxValue,max=-min;
             for(int y=0;y<Rows;y++) for(int x=0;x<Cols;x++)
             {
@@ -469,6 +488,37 @@ namespace MindState
             }
             mesh.vertices=vertices; mesh.normals=normals; mesh.tangents=tangents; mesh.uv=uv;
             mesh.bounds=new Bounds((min+max)*0.5f,max-min+Vector3.one*0.015f);
+        }
+        // The cache sampler supplies the horizontal radial direction in petal space.
+        internal Matrix4x4 overlapToFlower=Matrix4x4.identity,overlapFromFlower=Matrix4x4.identity;
+        void FoldOverlapEdges()
+        {
+            if(!surfaceProfile.softFolds||surfaceProfile.budRightOut<=0) return;
+            float closing=1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.1f,.8f,OpeningProgress));
+            if(closing<=0) return;
+            // Release only the over-curled overlap band. Its tip and lower hinge
+            // return to the original sheet, retaining the closed bud silhouette.
+            const int band=WidthSegments/5;
+            for(int y=LengthSegments/2+1;y<Rows;y++)
+            {
+                float t=y/(float)LengthSegments;
+                float along=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.5f,.75f,t))*(1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.88f,1f,t)))*closing;
+                for(int side=0;side<2;side++)
+                {
+                    int hinge=side==0?band:WidthSegments-band;
+                    float leftRelease=.25f+.25f*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.1f,.4f,OpeningProgress));
+                    float amount=surfaceProfile.budRightOut*(side==0?leftRelease:.04f)*along;
+                    for(int k=1;k<=band;k++)
+                    {
+                        int x=hinge+(side==0?-k:k);
+                        float edge=Mathf.SmoothStep(0,1,Mathf.Clamp01(k/(band*.65f)));
+                        int index=y*Cols+x;
+                        Vector3 radial=overlapToFlower.MultiplyPoint3x4(surface[index]-surface[WidthSegments/2]);
+                        radial.y=0;
+                        surface[index]+=overlapFromFlower.MultiplyVector(radial.normalized)*(amount*edge);
+                    }
+                }
+            }
         }
         void OnDestroy() { if(mesh!=null) Destroy(mesh); }
     }

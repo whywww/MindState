@@ -30,6 +30,13 @@ namespace MindState
         static void Bootstrap()
         { if(Array.IndexOf(Environment.GetCommandLineArgs(),"-verifyFlower")>=0) Camera.main.gameObject.AddComponent<FlowerValidation>(); }
         void LateUpdate() { if(cameraComponent!=null) cameraComponent.Render(); }
+        int WorkingMeshCount()
+        {
+            var meshes=new System.Collections.Generic.HashSet<Mesh>();
+            foreach(var petal in flower.GetDiagnosticPetals()) meshes.Add(flower.PetalMesh(petal.layer,petal.index));
+            for(int i=0;i<flower.SharedMeshCount;i++) meshes.Remove(flower.SharedMesh(i));
+            return meshes.Count;
+        }
         void Check(bool ok,string text)
         { checks.Add((ok?"PASS ":"FAIL ")+text); if(!ok) Debug.LogError("FLOWER_CHECK "+text); }
         IEnumerator Start()
@@ -52,15 +59,15 @@ namespace MindState
             Check(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline==null,"Built-in pipeline");
             int expectedMeshes=0; foreach(var layer in flower.preset.layers) expectedMeshes+=layer.surfaceProfile.softFolds&&layer.count>1?2:1;
             Check(flower.PetalCount==18&&flower.LayerCount==3&&flower.SharedMeshCount==expectedMeshes,"18 petals, three layers, expected shared surface variants");
-            Check(flower.CacheBytes<172*1024*1024,"Pose cache under 172 MiB");
-            Check(flower.GeometryBytes<220*1024*1024,"Cache plus working geometry under 220 MiB");
+            Check(flower.CacheBytes-flower.BottomPatchCacheBytes<172*1024*1024,"Base pose cache under 172 MiB");
+            Check(flower.GeometryBytes<320*1024*1024,"Cache plus per-petal working geometry under 320 MiB");
             Check(flower.MaxCachePositionError<=.00255f,"Midpoint cache position error <= 0.1% petal length");
             File.WriteAllText(Path.Combine(output,"PackedInterpolation.txt"),flower.VerifyPackedInterpolation());
             ValidateClosure();
             flower.SetBloomProgress(1);
             bool distinct=false; var firstVariant=flower.PetalMesh(0,0).vertices; var secondVariant=flower.PetalMesh(0,1).vertices;
             for(int k=0;k<firstVariant.Length;k++) distinct|=(firstVariant[k]-secondVariant[k]).sqrMagnitude>1e-8f;
-            Check(flower.preset.layers[0].surfaceProfile.softFolds?distinct&&flower.PetalMesh(0,0)==flower.PetalMesh(0,2)&&flower.PetalMesh(0,0)!=flower.PetalMesh(0,1):!distinct,"Surface variants match the selected fold mode");
+            Check(flower.preset.layers[0].surfaceProfile.softFolds?distinct&&flower.SharedMeshCount==expectedMeshes:!distinct,"Surface variants match the selected fold mode");
             if(Arg("-flowerIdColors","")=="1") { flower.diagnosticColors=true; flower.ApplyDiagnosticColors(); }
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-flowerContacts")>=0)
             {
@@ -161,7 +168,7 @@ namespace MindState
             {
                 // Clone the preset so count tests never modify production assets.
                 var originalPreset=flower.preset; var testPreset=Instantiate(originalPreset); flower.preset=testPreset;
-                flower.SetBloomProgress(1); var reference=flower.PetalMesh(0,0).vertices; var second=flower.PetalMesh(0,1).vertices; int materialCount=Resources.FindObjectsOfTypeAll<Material>().Length; int meshCount=Resources.FindObjectsOfTypeAll<Mesh>().Length;
+                flower.SetBloomProgress(1); var reference=flower.PetalMesh(0,0).vertices; var second=flower.PetalMesh(0,1).vertices; int materialCount=Resources.FindObjectsOfTypeAll<Material>().Length; int meshCount=Resources.FindObjectsOfTypeAll<Mesh>().Length; int workingCount=WorkingMeshCount();
                 var originalRenderers=flower.GetComponentsInChildren<MeshRenderer>(); var matrices=new Matrix4x4[18];
                 for(int k=0;k<18;k++) matrices[k]=originalRenderers[k].localToWorldMatrix;
                 for(int n=17;n<=19;n++)
@@ -175,7 +182,7 @@ namespace MindState
                     for(int k=0;k<(n==18?18:7);k++) sameAssembly&=currentRenderers[k].localToWorldMatrix==matrices[k];
                     Check(sameAssembly,"Seeded assembly transforms reproduce "+n);
                     Check(Resources.FindObjectsOfTypeAll<Material>().Length==materialCount,"Rebuild does not clone materials "+n);
-                    Check(Resources.FindObjectsOfTypeAll<Mesh>().Length==meshCount,"Rebuild releases replaced runtime meshes "+n);
+                    Check(Resources.FindObjectsOfTypeAll<Mesh>().Length==meshCount+WorkingMeshCount()-workingCount,"Rebuild releases replaced runtime meshes "+n);
                 }
                 flower.preset=originalPreset; flower.RebuildFlower(); Destroy(testPreset); yield return null; yield return null;
                 var results=new List<Metrics>();

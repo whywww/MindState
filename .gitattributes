@@ -1,0 +1,9 @@
+
+# Preserve exact bytes used by the baked mesh cache provenance.
+Assets/Flower/Runtime/FlowerBottomPatches.cs -text
+Assets/HeroPetal/Runtime/HeroPetal.cs -text
+Assets/Flower/Runtime/FlowerAssembler.cs -text
+Assets/Flower/Runtime/FlowerPreset.cs -text
+Assets/Flower/Art/ExhibitionPeony.asset -text
+Assets/HeroPetal/Prefabs/HeroPetal.prefab -text
+Assets/Flower/Resources/BottomOverlapProvenance.txt -text

@@ -39,7 +39,7 @@ MonoBehaviour:
       surfaceDetail: 0.9
       rimVariation: 0.9
       closureBendDegrees: 55
-      closureSideLeftDegrees: 50
+      closureSideLeftDegrees: 35
       closureSideRightDegrees: 35
       softFolds: 1
       foldStrength: 0.55
@@ -53,6 +53,8 @@ MonoBehaviour:
       shingleLift: 0.15
       rightCupRelease: 0.65
       budNarrow: 0.22
+      budSpanNarrow: 0.35
+      budRightOut: 0.3
       tipRound: 0.75
     microNormalScale: 1
     roll: 12
@@ -145,7 +147,7 @@ MonoBehaviour:
       surfaceDetail: 0.75
       rimVariation: 0.8
       closureBendDegrees: 60
-      closureSideLeftDegrees: 62
+      closureSideLeftDegrees: 40
       closureSideRightDegrees: 38
       softFolds: 1
       foldStrength: 0.55
@@ -159,6 +161,8 @@ MonoBehaviour:
       shingleLift: 0.5
       rightCupRelease: 0.6
       budNarrow: 0.34
+      budSpanNarrow: 0.38
+      budRightOut: 0.35
       tipRound: 0.75
     microNormalScale: 0.7
     roll: 12
@@ -248,7 +252,7 @@ MonoBehaviour:
       surfaceDetail: 0.6
       rimVariation: 0.7
       closureBendDegrees: 62
-      closureSideLeftDegrees: 66
+      closureSideLeftDegrees: 45
       closureSideRightDegrees: 42
       softFolds: 1
       foldStrength: 0.5
@@ -262,6 +266,8 @@ MonoBehaviour:
       shingleLift: 1
       rightCupRelease: 0.5
       budNarrow: 0.42
+      budSpanNarrow: 0.4
+      budRightOut: 0.2
       tipRound: 0.75
     microNormalScale: 0.4
     roll: 5

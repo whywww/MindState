@@ -46,7 +46,7 @@ public sealed class FlowerArtValidation:MonoBehaviour {
  Require(i==1 ? (Array.IndexOf(Environment.GetCommandLineArgs(),"-artScreensOnly")>=0||f.MeshUpdates>before) : before==f.MeshUpdates,i==1?"Gathering breath uses cached mesh uploads":"No art mesh uploads "+i); Require(f.RootAnchorError()<.0001f,"Attached roots "+i);
  }
  if(Array.IndexOf(Environment.GetCommandLineArgs(),"-artScreensOnly")>=0) { Application.Quit(); yield break; }
- // Record entry and all three exits with the actual four-second weight smoothing.
+ // Record entry and all three exits with the actual six-second weight smoothing.
  for(int clip=0;clip<4;clip++) {
  if(clip==0) { f.SetArtPreviewImmediate(FlowerArtState.Clarity); f.SetArtState(FlowerArtState.Gathering); }
  else { f.SetArtPreviewImmediate(FlowerArtState.Gathering); f.SetArtState(clip==1?FlowerArtState.Clarity:clip==2?FlowerArtState.Wandering:FlowerArtState.Quiet); }

@@ -87,6 +87,68 @@ namespace MindState
                 if(ha-hb>.001f) above++; else if(hb-ha>.001f) below++; else touching++;
             }
         }
+        // Radial ordering of the upper free sheet, unlike the top-down height
+        // coverage metric which reverses meaning when petals stand upright.
+        internal void NeighborRadialOrder(int a,int b,out int covered,out int reversed)
+        {
+            covered=reversed=0;
+            float low=Mathf.Max(instances[a].bounds[0].min.y,instances[b].bounds[0].min.y);
+            float high=Mathf.Min(instances[a].bounds[0].max.y,instances[b].bounds[0].max.y);
+            for(int y=0;y<16;y++) for(int angle=0;angle<96;angle++)
+            {
+                float az=(angle+.5f)*Mathf.PI*2/96;
+                var origin=flower.transform.position; origin.y=Mathf.Lerp(low,high,(y+.5f)/16);
+                var ray=new Ray(origin,new Vector3(Mathf.Sin(az),0,Mathf.Cos(az)));
+                float ra=-1,rb=-1,sa=0,sb=0;
+                RadialHit(a,0,ray,ref ra,ref sa); RadialHit(b,0,ray,ref rb,ref sb);
+                if(ra<0||rb<0||sa<.1f||sb>-.1f) continue;
+                covered++; if(ra<rb+.001f) reversed++;
+            }
+        }
+        void RadialHit(int petal,int node,Ray ray,ref float radius,ref float width)
+        {
+            var n=nodes[node]; if(n.y1<LengthSegmentsUpper||!instances[petal].bounds[node].IntersectRay(ray)) return;
+            if(n.left>=0) { RadialHit(petal,n.left,ray,ref radius,ref width); RadialHit(petal,n.right,ray,ref radius,ref width); return; }
+            var v=instances[petal].v;
+            for(int y=n.y0;y<n.y1;y++) for(int x=n.x0;x<n.x1;x++) for(int triangle=0;triangle<2;triangle++)
+            {
+                int a=y*Cols+x,b=a+Cols,c=a+1; if(triangle==1) { a=c;c=b+1; }
+                if(!Segment(ray.origin,ray.origin+ray.direction*20,v[a],v[b],v[c],out var hit)||LengthAt(hit,v[a],v[b],v[c],a,b,c)<.55f) continue;
+                float r=Vector3.Dot(hit-ray.origin,ray.direction); if(r<=radius) continue;
+                radius=r; width=WidthAt(hit,v[a],v[b],v[c],a,b,c);
+            }
+        }
+        // Test the actual neighbouring left rim from the capture camera, rather
+        // than treating every hidden surface contact as a visible defect.
+        internal void NeighborVisibleLeftEdge(Camera camera,int a,int b,out int exposed,out int covered)
+        {
+            exposed=covered=0;
+            for(int y=Rows/2;y<Rows;y++)
+            {
+                Vector3 point=instances[b].v[y*Cols],delta=point-camera.transform.position;
+                var ray=new Ray(camera.transform.position,delta.normalized);float distance=float.PositiveInfinity;
+                NearestHit(a,0,ray,ref distance);
+                if(float.IsPositiveInfinity(distance)) continue;
+                if(distance>delta.magnitude+.002f) {
+                    float foreground=float.PositiveInfinity;
+                    for(int other=0;other<instances.Length;other++) if(other!=a) NearestHit(other,0,ray,ref foreground);
+                    if(foreground>=delta.magnitude-.002f) exposed++;
+                } else covered++;
+            }
+        }
+        void NearestHit(int petal,int node,Ray ray,ref float distance)
+        {
+            if(!instances[petal].bounds[node].IntersectRay(ray)) return;
+            var n=nodes[node];
+            if(n.left>=0) { NearestHit(petal,n.left,ray,ref distance);NearestHit(petal,n.right,ray,ref distance);return; }
+            var v=instances[petal].v;
+            for(int y=n.y0;y<n.y1;y++) for(int x=n.x0;x<n.x1;x++) for(int triangle=0;triangle<2;triangle++)
+            {
+                int a=y*Cols+x,b=a+Cols,c=a+1;if(triangle==1){a=c;c=b+1;}
+                if(Segment(ray.origin,ray.origin+ray.direction*40,v[a],v[b],v[c],out var hit)) distance=Mathf.Min(distance,Vector3.Dot(hit-ray.origin,ray.direction));
+            }
+        }
+        const int LengthSegmentsUpper=(int)(HeroPetal.LengthSegments*.55f);
         static int Build(List<Node> list,int x0,int x1,int y0,int y1,int step)
         {
             int index=list.Count; var n=new Node { x0=x0,x1=x1,y0=y0,y1=y1,left=-1,right=-1 }; list.Add(n);
@@ -98,15 +160,22 @@ namespace MindState
             }
             return index;
         }
-        public void Sample(float progress,FlowerLayer[] layout=null,int focusLayer=-1)
+        public void Sample(float progress,FlowerLayer[] layout=null,int focusLayer=-1)=>SampleGeometry(progress,layout,focusLayer,false);
+        internal void SampleRendered()=>SampleGeometry(flower.bloomProgress,null,-1,true);
+        void SampleGeometry(float progress,FlowerLayer[] layout,int focusLayer,bool rendered)
         {
             for(int p=0;p<petals.Length;p++) if(focusLayer<0||petals[p].layer==focusLayer)
-                flower.SampleDiagnosticSurface(petals[p].layer,petals[p].index,progress,local[p]);
+            {
+                if(rendered) {
+                    var v=flower.PetalMesh(petals[p].layer,petals[p].index).vertices;
+                    for(int k=0;k<Count;k++) local[p][k]=(v[k]+v[k+Count])*.5f;
+                } else flower.SampleDiagnosticSurface(petals[p].layer,petals[p].index,progress,local[p]);
+            }
             for(int p=0;p<instances.Length;p++)
             {
                 var s=instances[p]; int layer=petals[p].layer;
                 if(focusLayer>=0&&layer!=focusLayer) continue;
-                var matrix=flower.DiagnosticMatrix(layer,petals[p].index,progress,layout==null?null:layout[layer]);
+                var matrix=rendered?petals[p].body.localToWorldMatrix:flower.DiagnosticMatrix(layer,petals[p].index,progress,layout==null?null:layout[layer]);
                 for(int k=0;k<Count;k++) s.v[k]=matrix.MultiplyPoint3x4(local[p][k]);
                 for(int k=nodes.Length-1;k>=0;k--)
                 {
@@ -154,6 +223,23 @@ namespace MindState
             if(parallel) Parallel.For(0,instances.Length,new ParallelOptions { MaxDegreeOfParallelism=4 },inspect);
             else for(int a=0;a<instances.Length;a++) inspect(a);
             result.Sort((a,b)=>a.petalA!=b.petalA?a.petalA.CompareTo(b.petalA):a.petalB!=b.petalB?a.petalB.CompareTo(b.petalB):a.rootRegion.CompareTo(b.rootRegion));
+        }
+        internal void FindPairContacts(int a,int b,List<Contact> output){output.Clear();Collect(a,0,b,0,output);}
+        internal void FindAllPairContacts(List<Contact> output) {
+            output.Clear();for(int a=0;a<instances.Length;a++)for(int b=a+1;b<instances.Length;b++)Collect(a,0,b,0,output);
+        }
+        void Collect(int a,int ia,int b,int ib,List<Contact> output) {
+            var sa=instances[a];var sb=instances[b];if(!sa.bounds[ia].Intersects(sb.bounds[ib]))return;
+            var na=nodes[ia];var nb=nodes[ib];
+            if(na.left>=0&&(nb.left<0||sa.bounds[ia].size.sqrMagnitude>=sb.bounds[ib].size.sqrMagnitude)){Collect(a,na.left,b,ib,output);Collect(a,na.right,b,ib,output);return;}
+            if(nb.left>=0){Collect(a,ia,b,nb.left,output);Collect(a,ia,b,nb.right,output);return;}
+            for(int ta=0;ta<2;ta++)for(int tb=0;tb<2;tb++){
+                int a0=na.y0*Cols+na.x0,a1=na.y1*Cols+na.x0,a2=na.y0*Cols+na.x1;if(ta==1){a0=a2;a2=na.y1*Cols+na.x1;}
+                int b0=nb.y0*Cols+nb.x0,b1=nb.y1*Cols+nb.x0,b2=nb.y0*Cols+nb.x1;if(tb==1){b0=b2;b2=nb.y1*Cols+nb.x1;}
+                if(!Triangle(sa.v[a0],sa.v[a1],sa.v[a2],sb.v[b0],sb.v[b1],sb.v[b2],out var point))continue;
+                float la=LengthAt(point,sa.v[a0],sa.v[a1],sa.v[a2],a0,a1,a2),lb=LengthAt(point,sb.v[b0],sb.v[b1],sb.v[b2],b0,b1,b2);
+                output.Add(new Contact{petalA=a,petalB=b,point=point,lengthA=la,lengthB=lb,widthA=WidthAt(point,sa.v[a0],sa.v[a1],sa.v[a2],a0,a1,a2),widthB=WidthAt(point,sb.v[b0],sb.v[b1],sb.v[b2],b0,b1,b2),rootRegion=IsRoot(la,lb)});
+            }
         }
         bool Cross(int a,int ia,int b,int ib,bool roots,out Contact contact)
         {
