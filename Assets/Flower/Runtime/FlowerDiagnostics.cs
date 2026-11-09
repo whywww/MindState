@@ -57,7 +57,7 @@ namespace MindState
             float frame=p*(PoseCount-1); int a=Mathf.Min((int)frame,PoseCount-2); float f=frame-a;
             int surface=(HeroPetal.WidthSegments+1)*(HeroPetal.LengthSegments+1);
             for(int k=0;k<surface;k++) destination[k]=(Vector3.LerpUnclamped(g.poses[a].data[k].p,g.poses[a+1].data[k].p,f)+Vector3.LerpUnclamped(g.poses[a].data[k+surface].p,g.poses[a+1].data[k+surface].p,f))*.5f;
-            foreach(var patch in bottomPatches)if(patch.layer==layer&&patch.index==index){float q=Mathf.Clamp01(globalProgress)*32;int a0=Mathf.Min((int)q,31);for(int k=0;k<patch.ids.Length;k++)destination[patch.ids[k]]+=Vector3.Lerp(patch.delta[a0][k],patch.delta[a0+1][k],q-a0);if(upperPreview&&patch.upper!=null)for(int k=0;k<patch.upperIds.Length;k++)destination[patch.upperIds[k]]+=Vector3.Lerp(patch.upper[a0][k],patch.upper[a0+1][k],q-a0);}
+            foreach(var patch in bottomPatches)if(patch.layer==layer&&patch.index==index){float q=Mathf.Clamp01(globalProgress)*32;int a0=Mathf.Min((int)q,31);for(int k=0;k<patch.ids.Length;k++)destination[patch.ids[k]]+=Vector3.Lerp(patch.delta[a0][k],patch.delta[a0+1][k],q-a0);if(upperPreview&&patch.upper!=null)for(int k=0;k<patch.upperIds.Length;k++)destination[patch.upperIds[k]]+=Vector3.Lerp(patch.upper[a0][k],patch.upper[a0+1][k],q-a0);if(extraPreview&&patch.extra!=null)for(int k=0;k<patch.extraIds.Length;k++)destination[patch.extraIds[k]]+=Vector3.Lerp(patch.extra[a0][k],patch.extra[a0+1][k],q-a0);}
 
         }
         public Matrix4x4 DiagnosticMatrix(int layer,int index,float globalProgress,FlowerLayer overrideLayout=null)

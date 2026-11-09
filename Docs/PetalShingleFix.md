@@ -10,3 +10,12 @@
 
 
 2026-11-09，随后完成外层 7 片花瓣内壁尖角的局部外推，当前 Windows 程序包含该修正。前后近景、逐瓣记录及测试见 [上部尖角修正报告](UpperCornerFix.zh-CN.md)。此前底部补偿数据逐字节保留。
+
+
+本轮另加入中层小角与外层中段的局部补偿：外层有改善，中层仍有达到限幅后保留的残余，当前程序不是两类问题全部解决的版本。见 [局部修正与残余报告](LayerOverlapFix.zh-CN.md)。修改前完整缓存保留于 Evidence/LayerOverlap/Baseline。
+
+
+当前用户已选择保留第三轮弧度试验，并在此基础上减轻中层左右不对称内凹。当前状态、选定版备份及程序见 [非对称减凹报告](AsymmetricCupRelaxation.zh-CN.md)。旧报告的未采用状态为历史记录。
+
+
+在已认可中层减凹版基础上，当前另加入外层 7 片的连续弧度平滑，中层与内层保持该版本。见 [外层弧度报告](OuterPetalFlow.zh-CN.md)。本轮开始前版本保留于 Evidence/OuterFlow/Baseline。

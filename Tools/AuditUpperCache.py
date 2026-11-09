@@ -25,10 +25,13 @@ def read_cache(path):
         layer, index, count = integer(), integer(), integer()
         ids, delta = stream.read(count * 4), stream.read(count * 33 * 12)
         upper_ids, upper_delta = b'', b''
-        if version == b'BottomOverlap/2':
+        if version in (b'BottomOverlap/2', b'BottomOverlap/3'):
             count = integer()
             upper_ids = stream.read(count * 4)
             upper_delta = stream.read(count * 33 * 12)
+        if version == b'BottomOverlap/3':
+            extra_count = integer()
+            stream.read(extra_count * (4 + 33 * 12))
         patches[layer, index] = ids, delta, upper_ids, upper_delta
     assert not stream.read(), 'Unconsumed cache bytes'
     return config, band, patches

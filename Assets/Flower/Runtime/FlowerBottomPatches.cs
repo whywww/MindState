@@ -146,12 +146,12 @@ new BottomSeed(1,1,1,0,1.0f,0.36397605f,-0.4316846f,0.07159315f,0.09515309999999
 new BottomSeed(2,1,2,0,1.0f,0.42092745f,-0.7238798f,0.15633695f,0.1931914f),
 new BottomSeed(2,3,2,2,1.0f,0.39151265f,-0.6038996f,0.06983225000000001f,0.11768259999999997f),
 new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961704999999998f)};
- sealed class BottomPatch { public int layer,index; public Mesh mesh; public Vertex[] work; public int[] ids,wall;public float[] radius;public bool[] dirty; public Vector3[][] delta; public int[] upperIds=new int[0];public Vector3[][] upper; }
+ sealed class BottomPatch { public int layer,index; public Mesh mesh; public Vertex[] work; public int[] ids,wall;public float[] radius;public bool[] dirty; public Vector3[][] delta; public int[] upperIds=new int[0];public Vector3[][] upper; public int[] extraIds=new int[0];public Vector3[][] extra; }
  readonly List<BottomPatch> bottomPatches=new List<BottomPatch>();
  const int BottomCols=129,BottomSurface=129*81;
  bool bottomPreviewEnabled=true;
  float bottomProgress=-1,bottomLow,bottomHigh;
- bool upperPreview=true;
+ bool upperPreview=true,extraPreview=true;
  Vector3 BottomPoint(int l,int i,float p,float t,float s) {
   var layer=layers[l];var g=SurfaceFor(layer,i);float q=Mathf.Clamp01((p*BloomDuration-layer.config.delay)/layer.config.duration)*32;
   int a=Mathf.Min((int)q,31);float fx=Mathf.Clamp((s+1)*64,0,128),fy=Mathf.Clamp(t*80,0,80);
@@ -172,6 +172,10 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bottomTrace")>=0)return;
   if(!Application.isEditor&&LoadBottomCache())return;
 #if UNITY_EDITOR
+  var outerBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/OuterFlow/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
+  if(File.Exists(outerBaseline)&&LoadBottomCache(File.ReadAllBytes(outerBaseline))){SmoothOuterPatches();return;}
+  var previous=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/LayerOverlap/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
+  if(File.Exists(previous)&&LoadBottomCache(File.ReadAllBytes(previous),false,true)){BuildLayerPatches();return;}
   var baseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/UpperCorner/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
   if(File.Exists(baseline)&&LoadBottomCache(File.ReadAllBytes(baseline),true)){BuildUpperCorners();return;}
 #endif
@@ -238,35 +242,37 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
   BuildUpperCorners();
 #endif
  }
- internal long BottomPatchCacheBytes {get{long bytes=0;foreach(var p in bottomPatches)bytes+=(p.ids.Length+p.upperIds.Length)*33L*12;return bytes;}}
- internal long BottomWorkingBytes {get{long bytes=0;foreach(var p in bottomPatches)bytes+=p.work.Length*40L+p.wall.Length*4L+p.dirty.Length+(p.ids.Length+p.upperIds.Length)*4L+UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(p.mesh);return bytes;}}
+ internal long BottomPatchCacheBytes {get{long bytes=0;foreach(var p in bottomPatches)bytes+=(p.ids.Length+p.upperIds.Length+p.extraIds.Length)*33L*12;return bytes;}}
+ internal long BottomWorkingBytes {get{long bytes=0;foreach(var p in bottomPatches)bytes+=p.work.Length*40L+p.wall.Length*4L+p.dirty.Length+(p.ids.Length+p.upperIds.Length+p.extraIds.Length)*4L+UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(p.mesh);return bytes;}}
  void AttachBottomPatch(BottomPatch patch){
   patch.radius=new float[33];for(int pose=0;pose<33;pose++)foreach(var d in patch.delta[pose])patch.radius[pose]=Mathf.Max(patch.radius[pose],d.magnitude);
   if(patch.upper!=null)for(int pose=0;pose<33;pose++){float upperRadius=0;foreach(var d in patch.upper[pose])upperRadius=Mathf.Max(upperRadius,d.magnitude);patch.radius[pose]+=upperRadius;}
+  if(patch.extra!=null)for(int pose=0;pose<33;pose++){float radius=0;foreach(var d in patch.extra[pose])radius=Mathf.Max(radius,d.magnitude);patch.radius[pose]+=radius;}
   var g=SurfaceFor(layers[patch.layer],patch.index);patch.mesh=Instantiate(g.mesh);patch.mesh.name="Local bottom overlap "+patch.layer+"-"+patch.index;patch.mesh.MarkDynamic();patch.work=new Vertex[g.data.Length];patch.dirty=new bool[BottomSurface];
   var uv=patch.mesh.uv;patch.wall=new int[uv.Length-BottomSurface*2];
   for(int k=BottomSurface*2;k<uv.Length;k++)patch.wall[k-BottomSurface*2]=Mathf.RoundToInt(uv[k].y*80)*129+Mathf.RoundToInt(uv[k].x*128)+(k%2==0?0:BottomSurface);
   layers[patch.layer].petals[patch.index].body.GetComponent<MeshFilter>().sharedMesh=patch.mesh;bottomPatches.Add(patch);
-  CacheBytes+=(patch.ids.Length+patch.upperIds.Length)*33L*12;
+  CacheBytes+=(patch.ids.Length+patch.upperIds.Length+patch.extraIds.Length)*33L*12;
  }
  string BottomConfigHash(){using(var sha=SHA256.Create())return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(JsonUtility.ToJson(preset))));}
 #if UNITY_EDITOR
  internal void SaveBottomCache(){
   string directory=Path.Combine(Application.dataPath,"Flower/Resources");Directory.CreateDirectory(directory);
   using(var w=new BinaryWriter(File.Create(Path.Combine(directory,"BottomOverlap.bytes")))){
-   w.Write("BottomOverlap/2");w.Write(BottomConfigHash());w.Write(bottomLow);w.Write(bottomHigh);w.Write(bottomPatches.Count);
+   w.Write("BottomOverlap/3");w.Write(BottomConfigHash());w.Write(bottomLow);w.Write(bottomHigh);w.Write(bottomPatches.Count);
    foreach(var p in bottomPatches){w.Write(p.layer);w.Write(p.index);w.Write(p.ids.Length);foreach(int id in p.ids)w.Write(id);foreach(var pose in p.delta)foreach(var d in pose){w.Write(d.x);w.Write(d.y);w.Write(d.z);}
-    w.Write(p.upperIds.Length);foreach(int id in p.upperIds)w.Write(id);if(p.upper!=null)foreach(var pose in p.upper)foreach(var d in pose){w.Write(d.x);w.Write(d.y);w.Write(d.z);}}
+    w.Write(p.upperIds.Length);foreach(int id in p.upperIds)w.Write(id);if(p.upper!=null)foreach(var pose in p.upper)foreach(var d in pose){w.Write(d.x);w.Write(d.y);w.Write(d.z);}
+    w.Write(p.extraIds.Length);foreach(int id in p.extraIds)w.Write(id);if(p.extra!=null)foreach(var pose in p.extra)foreach(var d in pose){w.Write(d.x);w.Write(d.y);w.Write(d.z);}}
   }
-  var files=new[]{"Flower/Runtime/FlowerBottomPatches.cs","HeroPetal/Runtime/HeroPetal.cs","Flower/Runtime/FlowerAssembler.cs","Flower/Runtime/FlowerPreset.cs","Flower/Art/ExhibitionPeony.asset","HeroPetal/Prefabs/HeroPetal.prefab"};
+  var files=new[]{"Flower/Runtime/FlowerBottomPatches.cs","Flower/Runtime/FlowerLayerPatches.cs","HeroPetal/Runtime/HeroPetal.cs","Flower/Runtime/FlowerAssembler.cs","Flower/Runtime/FlowerPreset.cs","Flower/Art/ExhibitionPeony.asset","HeroPetal/Prefabs/HeroPetal.prefab"};
   var signature=string.Join("\n",Array.ConvertAll(files,path=>{using(var sha=SHA256.Create())return BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(Path.Combine(Application.dataPath,path)))).Replace("-","").ToLowerInvariant();}));
   File.WriteAllText(Path.Combine(directory,"BottomOverlapProvenance.txt"),signature);
  }
 #endif
- bool LoadBottomCache(byte[] data=null,bool baseline=false){
+ bool LoadBottomCache(byte[] data=null,bool baseline=false,bool previous=false){
   if(data==null){var asset=Resources.Load<TextAsset>("BottomOverlap");if(asset==null)return false;data=asset.bytes;}
   using(var r=new BinaryReader(new MemoryStream(data))){
-   if(r.ReadString()!=(baseline?"BottomOverlap/1":"BottomOverlap/2")||r.ReadString()!=BottomConfigHash())return false;
+   if(r.ReadString()!=(baseline?"BottomOverlap/1":previous?"BottomOverlap/2":"BottomOverlap/3")||r.ReadString()!=BottomConfigHash())return false;
    bottomLow=r.ReadSingle();bottomHigh=r.ReadSingle();int count=r.ReadInt32();if(count<0||count>PetalCount)return false;
    var pending=new List<BottomPatch>();
    for(int i=0;i<count;i++){
@@ -274,20 +280,20 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
     if(layer<0||layer>=layers.Length||index<0||index>=layers[layer].petals.Length||length<0||length>BottomSurface)return false;
     var p=new BottomPatch{layer=layer,index=index,ids=new int[length],delta=new Vector3[33][]};
     for(int k=0;k<length;k++){p.ids[k]=r.ReadInt32();if(p.ids[k]<0||p.ids[k]>=BottomSurface)return false;}
-    for(int pose=0;pose<33;pose++){p.delta[pose]=new Vector3[length];for(int k=0;k<length;k++)p.delta[pose][k]=new Vector3(r.ReadSingle(),r.ReadSingle(),r.ReadSingle());}int n=baseline?0:r.ReadInt32();if(n<0||n>BottomSurface)return false;p.upperIds=new int[n];p.upper=new Vector3[33][];for(int k=0;k<n;k++){p.upperIds[k]=r.ReadInt32();if(p.upperIds[k]<0||p.upperIds[k]>=BottomSurface)return false;}for(int pose=0;pose<33;pose++){p.upper[pose]=new Vector3[n];for(int k=0;k<n;k++)p.upper[pose][k]=new Vector3(r.ReadSingle(),r.ReadSingle(),r.ReadSingle());}pending.Add(p);
+    for(int pose=0;pose<33;pose++){p.delta[pose]=new Vector3[length];for(int k=0;k<length;k++)p.delta[pose][k]=new Vector3(r.ReadSingle(),r.ReadSingle(),r.ReadSingle());}int n=baseline?0:r.ReadInt32();if(n<0||n>BottomSurface)return false;p.upperIds=new int[n];p.upper=new Vector3[33][];for(int k=0;k<n;k++){p.upperIds[k]=r.ReadInt32();if(p.upperIds[k]<0||p.upperIds[k]>=BottomSurface)return false;}for(int pose=0;pose<33;pose++){p.upper[pose]=new Vector3[n];for(int k=0;k<n;k++)p.upper[pose][k]=new Vector3(r.ReadSingle(),r.ReadSingle(),r.ReadSingle());}if(!baseline&&!previous){int e=r.ReadInt32();p.extraIds=new int[e];p.extra=new Vector3[33][];for(int k=0;k<e;k++)p.extraIds[k]=r.ReadInt32();for(int pose=0;pose<33;pose++){p.extra[pose]=new Vector3[e];for(int k=0;k<e;k++)p.extra[pose][k]=new Vector3(r.ReadSingle(),r.ReadSingle(),r.ReadSingle());}}pending.Add(p);
    }
    foreach(var p in pending)AttachBottomPatch(p);return true;
   }
  }
  internal bool BottomIsolationCheck(){
-  foreach(var p in bottomPatches){var g=SurfaceFor(layers[p.layer],p.index);var mask=new bool[BottomSurface];foreach(int id in p.ids)mask[id]=true;foreach(int id in p.upperIds)mask[id]=true;
+  foreach(var p in bottomPatches){var g=SurfaceFor(layers[p.layer],p.index);var mask=new bool[BottomSurface];foreach(int id in p.ids)mask[id]=true;foreach(int id in p.upperIds)mask[id]=true;foreach(int id in p.extraIds)mask[id]=true;
    for(int id=0;id<BottomSurface;id++)if(id/129<8||!mask[id])if(p.work[id].p!=g.data[id].p||p.work[id+BottomSurface].p!=g.data[id+BottomSurface].p)return false;
   }return true;
  }
  sealed class BottomTree {
   struct Node { public Bounds bounds;public int x0,x1,y0,y1,left,right; }
   readonly Vector3[] v=new Vector3[BottomSurface];readonly List<Node> nodes=new List<Node>();
-  public BottomTree(FlowerAssembler f,int layer,int index,float phase,Matrix4x4 matrix,bool corrected=false){for(int y=0;y<=80;y++)for(int x=0;x<129;x++)v[y*129+x]=matrix.MultiplyPoint3x4(f.BottomPoint(layer,index,phase,y/80f,x/64f-1)+(corrected?f.BottomDeltaAt(layer,index,phase,y*129+x):Vector3.zero));Build(0,128,0,80);}
+  public BottomTree(FlowerAssembler f,int layer,int index,float phase,Matrix4x4 matrix,bool corrected=false){for(int y=0;y<=80;y++)for(int x=0;x<129;x++)v[y*129+x]=matrix.MultiplyPoint3x4(f.BottomPoint(layer,index,phase,y/80f,x/64f-1)+(corrected?(f.BottomDeltaAt(layer,index,phase,y*129+x)+f.UpperDeltaAt(layer,index,phase,y*129+x)):Vector3.zero));Build(0,128,0,80);}
   int Build(int x0,int x1,int y0,int y1){int id=nodes.Count;var n=new Node{x0=x0,x1=x1,y0=y0,y1=y1,left=-1,right=-1};nodes.Add(n);
    if(x1-x0>4||y1-y0>4){if(x1-x0>=y1-y0){int m=(x0+x1)/2;n.left=Build(x0,m,y0,y1);n.right=Build(m,x1,y0,y1);}else{int m=(y0+y1)/2;n.left=Build(x0,x1,y0,m);n.right=Build(x0,x1,m,y1);}n.bounds=nodes[n.left].bounds;n.bounds.Encapsulate(nodes[n.right].bounds);}
    else{n.bounds=new Bounds(v[y0*129+x0],Vector3.zero);for(int y=y0;y<=y1;y++)for(int x=x0;x<=x1;x++)n.bounds.Encapsulate(v[y*129+x]);}n.bounds.Expand(.00001f);nodes[id]=n;return id;
@@ -308,6 +314,7 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
    var g=SurfaceFor(layers[patch.layer],patch.index);Array.Copy(g.data,patch.work,g.data.Length);Array.Clear(patch.dirty,0,patch.dirty.Length);
    for(int k=0;k<patch.ids.Length;k++){int id=patch.ids[k];var d=Vector3.Lerp(patch.delta[a][k],patch.delta[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}
    if(upperPreview&&patch.upper!=null)for(int k=0;k<patch.upperIds.Length;k++){int id=patch.upperIds[k];var d=Vector3.Lerp(patch.upper[a][k],patch.upper[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}
+   if(extraPreview&&patch.extra!=null)for(int k=0;k<patch.extraIds.Length;k++){int id=patch.extraIds[k];var d=Vector3.Lerp(patch.extra[a][k],patch.extra[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}
    for(int y=8;y<=80;y++)for(int x=0;x<129;x++) {
     int id=y*129+x;if(!patch.dirty[id])continue;Vector3 across=patch.work[y*129+Mathf.Min(x+1,128)].p-patch.work[y*129+Mathf.Max(x-1,0)].p;
     Vector3 along=patch.work[Mathf.Min(y+1,80)*129+x].p-patch.work[Mathf.Max(y-1,0)*129+x].p;

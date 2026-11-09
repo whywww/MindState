@@ -7,3 +7,5 @@ Assets/Flower/Runtime/FlowerPreset.cs -text
 Assets/Flower/Art/ExhibitionPeony.asset -text
 Assets/HeroPetal/Prefabs/HeroPetal.prefab -text
 Assets/Flower/Resources/BottomOverlapProvenance.txt -text
+
+Assets/Flower/Runtime/FlowerLayerPatches.cs -text

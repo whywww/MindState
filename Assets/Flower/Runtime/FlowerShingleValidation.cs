@@ -26,8 +26,8 @@ public sealed class FlowerShingleValidation : MonoBehaviour {
  FlowerSurfaceCollision rimScan; StringBuilder rimCsv;
  string output; readonly List<string> checks=new List<string>();
  void Check(bool ok,string message) { checks.Add((ok?"PASS ":"FAIL ")+message); File.WriteAllLines(Path.Combine(output,"Checks.txt"),checks); }
- void Shot(string name,float az=22,float el=55) {
-  gallery.SetView(az,el,6.2f); cam.Render(); var old=RenderTexture.active; RenderTexture.active=rt;
+ void Shot(string name,float az=22,float el=55,float distance=6.2f) {
+  gallery.SetView(az,el,distance); cam.Render(); var old=RenderTexture.active; RenderTexture.active=rt;
   image.ReadPixels(new Rect(0,0,rt.width,rt.height),0,0); image.Apply(); RenderTexture.active=old;
   File.WriteAllBytes(Path.Combine(output,name+".png"),image.EncodeToPNG());
   if(rimScan!=null&&!name.Contains("_IDs")&&!name.Contains("_WrapPair")) {
@@ -66,10 +66,10 @@ public sealed class FlowerShingleValidation : MonoBehaviour {
 #endif
    yield break;
   }
-  if(Arg("-bottomPerf","0")=="1"||Arg("-upperPerf","0")=="1") {
+  if(Arg("-bottomPerf","0")=="1"||Arg("-upperPerf","0")=="1"||Arg("-layerPerf","0")=="1") {
    var report=new StringBuilder();
    foreach(bool enabled in new[]{false,true}){
-    if(Arg("-upperPerf","0")=="1"){flower.BottomPatchPreview(true);flower.UpperCornerPreview(enabled);}else flower.BottomPatchPreview(enabled);flower.SetBloomProgress(.03f);long maxGc=0;double total=0,max=0;
+    if(Arg("-layerPerf","0")=="1"){flower.BottomPatchPreview(true);flower.LayerPatchPreview(enabled);}else if(Arg("-upperPerf","0")=="1"){flower.BottomPatchPreview(true);flower.UpperCornerPreview(enabled);}else flower.BottomPatchPreview(enabled);flower.SetBloomProgress(.03f);long maxGc=0;double total=0,max=0;
     for(int i=0;i<120;i++){long gc=GC.GetAllocatedBytesForCurrentThread(),start=System.Diagnostics.Stopwatch.GetTimestamp();flower.SetBloomProgress(i/119f*.25f);double ms=(System.Diagnostics.Stopwatch.GetTimestamp()-start)*1000.0/System.Diagnostics.Stopwatch.Frequency;maxGc=Math.Max(maxGc,GC.GetAllocatedBytesForCurrentThread()-gc);total+=ms;max=Math.Max(max,ms);}
     report.AppendLine((enabled?"Patched":"Baseline")+" update CPU meanMs="+total/120+" maxMs="+max+" maxGc="+maxGc);
    }
@@ -88,6 +88,9 @@ public sealed class FlowerShingleValidation : MonoBehaviour {
   for(int i=0;i<7;i++){flower.SampleDiagnosticSurface(0,i,0,vertices);var matrix=flower.DiagnosticMatrix(0,i,0);for(int y=60;y<=80;y++)for(int x=0;x<129;x++){var world=matrix.MultiplyPoint3x4(vertices[y*129+x]);var screen=cam.WorldToScreenPoint(world);debug.AppendFormat(Inv,"{0},{1},{2},{3},{4},{5},{6},{7}\n",i,y/80f,x/64f-1,world.x,world.y,world.z,screen.x,960-screen.y);}}
   File.WriteAllText(Path.Combine(output,"UpperGeometry.csv"),debug.ToString());flower.UpperCornerPreview(true);
   flower.diagnosticMaterial=DiagnosticMaterial();flower.diagnosticColors=true;flower.ApplyDiagnosticColors();Shot("Upper_IDs");flower.diagnosticColors=false;flower.ApplyDiagnosticColors();Destroy(flower.diagnosticMaterial);
+  foreach(float p in new[]{.25f,.4f,.5f,.6f,.75f,1f}){flower.SetBloomProgress(p);foreach(float el in new[]{90f,55f}){flower.LayerPatchPreview(false);Shot("Layer_Before_"+p+"_"+el,0,el,10);flower.LayerPatchPreview(true);Shot("Layer_After_"+p+"_"+el,0,el,10);}}
+  flower.SetBloomProgress(.4f);for(int az=0;az<360;az+=45){flower.LayerPatchPreview(false);Shot("Layer_Orbit_Before_"+az,az,55,10);flower.LayerPatchPreview(true);Shot("Layer_Orbit_After_"+az,az,55,10);}
+  for(int l=0;l<2;l++)for(int i=0;i<flower.preset.layers[l].count;i++){flower.SoloPetal(l,i);flower.SetPetalVisible(l,(i+flower.preset.layers[l].count-1)%flower.preset.layers[l].count,true);Shot("Layer_Pair_"+l+"_"+i,0,90,10);flower.ShowAllPetals();}
   foreach(float phase in new[]{0f,.04f,.1f,.2f,.25f}){flower.SetBloomProgress(phase);flower.UpperCornerPreview(false);Shot("Upper_Before_"+(phase*1000).ToString("0000"));flower.UpperCornerPreview(true);Shot("Upper_After_"+(phase*1000).ToString("0000"));}
   flower.SetBloomProgress(0);
   for(int i=0;i<7;i++){
