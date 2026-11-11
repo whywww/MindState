@@ -29,8 +29,8 @@ namespace MindState
         float artTime,artYaw,lastValid=float.NegativeInfinity;
         Vector4 artTarget=new Vector4(1,0,0,0);
         Vector4 artFrom=new Vector4(1,0,0,0),artDestination=new Vector4(1,0,0,0);
-        float artTransitionTime=18;
-        const float ArtTransitionDuration=18;
+        float artTransitionTime=9;
+        const float ArtTransitionDuration=9,ArtStreamSmoothing=3;
         // All modes share the standard opening path and global correction clock.
         float StandardLayerProgress(FlowerLayer c,float global)=>Mathf.Clamp01((global*BloomDuration-c.delay)/Mathf.Max(1,c.duration));
         void AdvanceArtWeights(float dt)
@@ -38,7 +38,7 @@ namespace MindState
             if(ArtInput!=FlowerArtInput.Preview)
             {
                 // Streaming targets must not restart a timed transition every sample.
-                ArtWeights=Vector4.Lerp(ArtWeights,artTarget,1-Mathf.Exp(-dt/6f));
+                ArtWeights=Vector4.Lerp(ArtWeights,artTarget,1-Mathf.Exp(-dt/ArtStreamSmoothing));
                 artDestination=ArtWeights; artTransitionTime=ArtTransitionDuration;
                 return;
             }
@@ -89,7 +89,7 @@ namespace MindState
                 if(ArtInput==FlowerArtInput.Simulation) artTarget=BrainArtWeights(.5f+.48f*Mathf.Sin(artTime*.19f),.5f+.48f*Mathf.Sin(artTime*.11f));
                 if(ArtInput==FlowerArtInput.External&&Time.realtimeSinceStartup-lastValid>5) artTarget=new Vector4(0,0,0,1);
                 AdvanceArtWeights(dt);
-                ArtLightWeights=Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/3f));
+                ArtLightWeights=Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/ArtStreamSmoothing));
                 artYaw=Mathf.Repeat(artYaw+4*ArtWeights.x*dt,360);
                 ArtFlowPhase=Mathf.Repeat(ArtFlowPhase+dt*FlowSpeed(),1);
             }

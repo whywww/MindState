@@ -54,8 +54,8 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
   for(int from=0;from<4;from++)for(int to=0;to<4;to++)if(from!=to){
    f.SetArtPreviewImmediate((FlowerArtState)from);f.SetFrozen(false);f.SetArtState((FlowerArtState)to);
    var weights=f.ArtWeights;f.MotionStep(0);Check(f.ArtWeights==weights,"Retarget continuous "+from+" to "+to);
-   for(int frame=0;frame<72;frame++){f.MotionStep(.25f);if(frame%18==0)Check(f.RootAnchorError()<1e-5f,"Transition roots "+from+" to "+to+" frame="+frame);}
-   Check(Mathf.Abs(f.ArtWeights[to]-1)<1e-5f,"18-second transition endpoint "+from+" to "+to);yield return null;
+   for(int frame=0;frame<40;frame++){f.MotionStep(.25f);if(frame%10==0)Check(f.RootAnchorError()<1e-5f,"Transition roots "+from+" to "+to+" frame="+frame);}
+   Check(Mathf.Abs(f.ArtWeights[to]-1)<1e-5f,"9-second transition endpoint "+from+" to "+to);yield return null;
   }
   f.SetFrozen(true);float time=f.ArtTime;uploads=f.MeshUpdates;var frozenWeights=f.ArtWeights;f.MotionStep(4);
   Check(f.ArtTime==time&&f.MeshUpdates==uploads&&f.ArtWeights==frozenWeights,"Freeze preserves time, weights and mesh uploads");f.SetFrozen(false);
