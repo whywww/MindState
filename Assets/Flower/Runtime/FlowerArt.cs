@@ -24,25 +24,18 @@ namespace MindState
         public float ArtTime=>artTime;
         public string ArtStatus=>!artActive?"开合预览":ArtInput==FlowerArtInput.Preview?"单态预览":ArtInput==FlowerArtInput.Simulation?"模拟脑电":Time.realtimeSinceStartup-lastValid>5?"正在重新感知":"外部脑电";
         bool artActive;
+#if UNITY_EDITOR || FLOWER_VALIDATION
+        internal bool suppressArtMotion;
+#endif
         float artTime,artYaw,lastValid=float.NegativeInfinity;
         Vector4 artTarget=new Vector4(1,0,0,0);
         Vector4 artFrom=new Vector4(1,0,0,0),artDestination=new Vector4(1,0,0,0);
-        float artTransitionTime=18,artBud,artOpen;
+        float artTransitionTime=18;
         const float ArtTransitionDuration=18;
-        float LegacyLayerProgress(FlowerLayer c,float global)=>Mathf.Clamp01((global*BloomDuration-c.delay)/c.duration);
-        float ArtLayerBlend(FlowerLayer c)
-        {
-            float u=1-ArtWeights.y;
-            // Small overlapping lead/lag; derivative stays positive across the whole interval.
-            float lead=.24f*(.5f-Mathf.Clamp01(c.delay/Mathf.Max(.001f,BloomDuration-c.duration)));
-            return u+lead*u*(1-u);
-        }
-        float ArtLayerProgress(FlowerLayer c)=>Mathf.Lerp(LegacyLayerProgress(c,artBud),LegacyLayerProgress(c,artOpen),ArtLayerBlend(c));
-        float ArtPatchProgress(FlowerLayer c)
-        {
-            float global=Mathf.Lerp(artBud,artOpen,ArtLayerBlend(c));
-            return Mathf.Clamp01(global+(ArtLayerProgress(c)-LegacyLayerProgress(c,global))*c.duration/BloomDuration);
-        }
+        // All modes share the standard opening path and global correction clock.
+        float StandardLayerProgress(FlowerLayer c,float global)=>Mathf.Clamp01((global*BloomDuration-c.delay)/Mathf.Max(1,c.duration));
+        float ArtLayerProgress(FlowerLayer c)=>StandardLayerProgress(c,bloomProgress);
+        float ArtPatchProgress(FlowerLayer c)=>bloomProgress;
         void AdvanceArtWeights(float dt)
         {
             if(ArtInput!=FlowerArtInput.Preview)
@@ -110,7 +103,6 @@ namespace MindState
             float bud=.04f+.03f*(1-Mathf.Cos(artTime*Mathf.PI*2/5));
             float other=ArtWeights.x+ArtWeights.z+ArtWeights.w;
             float open=other>1e-6f?(ArtWeights.x*artProfiles[0].openness+ArtWeights.z*artProfiles[2].openness+ArtWeights.w*artProfiles[3].openness)/other:1f;
-            artBud=bud; artOpen=open;
             // A shared layer phase drives geometry, transform and sparse correction sampling.
             bloomProgress=gathering>=1f?bud:Mathf.Lerp(open,bud,gathering);
             ApplyPose(bloomProgress,false);ApplyBottomPatches();
@@ -127,21 +119,14 @@ namespace MindState
                         if(i==2) period=7+4*Mathf.Repeat((j+1)*.618034f+k*.37f,1);
                         float phase=i==1?-k*.3f/period*Mathf.PI*2:i==2?az+k*.9f:i==3?-az-k*.5f:0;
                         float motion=profile.amplitude*Mathf.Sin(artTime*Mathf.PI*2/period+phase);
-                        tilt+=ArtWeights[i]*(profile.tilt[k]+motion);
+                        tilt+=ArtWeights[i]*motion;
                     }
-                    PathPetalPose(l,p,j,LegacyLayerProgress(l.config,bud),out var pathPosition,out var pathRotation,out var pathScale);
-                    Vector3 position=pathPosition,scale=pathScale; Quaternion rotation=pathRotation;
-                    if(gathering<1)
-                    {
-                        float otherWeight=ArtWeights.x+ArtWeights.z+ArtWeights.w;
-                        tilt/=Mathf.Max(otherWeight,1e-6f);
-                        float authored=p.authoredTilt*(1-.75f*ArtWeights.x/Mathf.Max(otherWeight,1e-6f));
-                        PetalFrame(l.config,p.azimuth,tilt+p.tilt+authored,p.roll,p.heightOffset,j,l.petals.Length,1,out var artPosition,out var artRotation);
-                        float layerBlend=ArtLayerBlend(l.config);
-                        position=Vector3.Lerp(pathPosition,artPosition,layerBlend);
-                        rotation=Quaternion.Slerp(pathRotation,artRotation,layerBlend);
-                        scale=Vector3.Lerp(pathScale,PetalScale(l.config,p,j,1),layerBlend);
-                    }
+                    PathPetalPose(l,p,j,StandardLayerProgress(l.config,bloomProgress),out var position,out var rotation,out var scale);
+                    // Dynamic pitch is additive; authored standard shape remains intact.
+#if UNITY_EDITOR || FLOWER_VALIDATION
+                    if(suppressArtMotion) tilt=0;
+#endif
+                    rotation=rotation*Quaternion.Euler(tilt,0,0);
                     ApplyPetalPose(l,p,j,position,rotation,scale);
                     if(appearance!=null) {
                         float v=Mathf.Repeat((j+1)*.618034f+k*.37f+appearance.seed*.013f,1);

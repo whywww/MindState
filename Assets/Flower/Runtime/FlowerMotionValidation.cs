@@ -15,7 +15,6 @@ public sealed partial class FlowerAssembler {
   SetFrozen(true);float clock=ArtTime;UpdateArt(4);check(ArtWeights==before&&ArtTime==clock,"Freeze retains transition time");
   SetFrozen(false);UpdateArt(18);check(ArtWeights.w==1,"Resume reaches exact target");
   ResetArt();UpdateArt(0);check(ArtWeights.x==1,"Reset clears pending transition");
-  foreach(var l in layers){artBud=.04f;artOpen=.88f;float last=-1;bool monotonic=true;for(int i=0;i<=100;i++){ArtWeights=new Vector4(i/100f,1-i/100f,0,0);float phase=ArtLayerProgress(l.config);monotonic&=phase>last;last=phase;}check(monotonic,"No layer phase plateau: "+l.config.name);}
   check(VerifyGatheringPath(0)&&VerifyGatheringPath(1.25f)&&VerifyGatheringPath(2.5f),"Gathering endpoints retain original path");
   SetArtPreviewImmediate(FlowerArtState.Clarity);SetBrainMetrics(float.NaN,1);UpdateArt(0);check(ArtWeights.x==1,"Invalid brain input ignored");
   SimulateArtBrain();for(int i=0;i<100;i++)UpdateArt(.05f);check(Mathf.Abs(ArtWeights.x+ArtWeights.y+ArtWeights.z+ArtWeights.w-1)<.0001f,"Simulation normalized");
