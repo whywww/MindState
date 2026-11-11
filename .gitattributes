@@ -9,3 +9,8 @@ Assets/HeroPetal/Prefabs/HeroPetal.prefab -text
 Assets/Flower/Resources/BottomOverlapProvenance.txt -text
 
 Assets/Flower/Runtime/FlowerLayerPatches.cs -text
+
+# Keep provenance inputs stable across Windows checkout.
+Assets/Flower/Baking/*.cs -text
+Assets/Flower/Validation/FlowerDiagnostics.cs -text
+Assets/Flower/Validation/FlowerSurfaceCollision.cs -text
