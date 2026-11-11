@@ -6,17 +6,16 @@ namespace MindState
     public enum FlowerArtInput { Preview, Simulation, External }
     [Serializable] public sealed class FlowerArtProfile
     {
-        public Vector3 tilt;
         public float amplitude,period,openness;
-        public FlowerArtProfile(Vector3 t,float a,float p,float o=1f) { tilt=t; amplitude=a; period=p; openness=o; }
+        public FlowerArtProfile(float a,float p,float o=1f) { amplitude=a; period=p; openness=o; }
     }
     public sealed partial class FlowerAssembler
     {
         public FlowerArtProfile[] artProfiles={
-            new FlowerArtProfile(new Vector3(84,64,40),.2f,1,.88f),
-            new FlowerArtProfile(Vector3.zero,0,5,0f), // Gathering uses the original cached path.
-            new FlowerArtProfile(new Vector3(92,74,48),2.4f,9,1f),
-            new FlowerArtProfile(new Vector3(72,54,32),1.2f,14,.70f)};
+            new FlowerArtProfile(.2f,1,.88f),
+            new FlowerArtProfile(0,5,0f), // Gathering uses the original cached path.
+            new FlowerArtProfile(2.4f,9,1f),
+            new FlowerArtProfile(1.2f,14,.70f)};
         public FlowerArtInput ArtInput { get; private set; }
         public Vector4 ArtWeights { get; private set; }=new Vector4(1,0,0,0);
         public Vector4 ArtLightWeights { get; private set; }=new Vector4(1,0,0,0);
@@ -34,8 +33,6 @@ namespace MindState
         const float ArtTransitionDuration=18;
         // All modes share the standard opening path and global correction clock.
         float StandardLayerProgress(FlowerLayer c,float global)=>Mathf.Clamp01((global*BloomDuration-c.delay)/Mathf.Max(1,c.duration));
-        float ArtLayerProgress(FlowerLayer c)=>StandardLayerProgress(c,bloomProgress);
-        float ArtPatchProgress(FlowerLayer c)=>bloomProgress;
         void AdvanceArtWeights(float dt)
         {
             if(ArtInput!=FlowerArtInput.Preview)
@@ -52,7 +49,7 @@ namespace MindState
         }
         static readonly int ArtWeightsId=Shader.PropertyToID("_ArtWeights"),ArtClockId=Shader.PropertyToID("_ArtClock"),ArtPhaseId=Shader.PropertyToID("_ArtPhase");
         static bool ArtDiagnosticsRequested()
-        { foreach(var a in Environment.GetCommandLineArgs()) if(a=="-flowerAvoidance"||a=="-verifyFlower"||a=="-verifyPetal"||a=="-silkAB"||a=="-verifyArt") return true; return false; }
+        { foreach(var a in Environment.GetCommandLineArgs()) if(a=="-verifyProject"||a=="-bakeFlower") return true; return false; }
         public void SetArtState(FlowerArtState state)
         {
             int i=(int)state; if(i<0||i>3) return;

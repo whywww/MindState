@@ -94,15 +94,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82449ab5febe9804ea1b5d632f972f00, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   pearlMaterial: {fileID: 2100000, guid: 5e7108ebb90df1a468f5e24b2a1212ff, type: 2}
-  inputMode: 0
-  frozen: 0
-  grayPreview: 0
-  targetOpeningAngle: 125
-  targetCurlAmount: 0.2
-  targetPleatSoftness: 0.7
   finePleatCount: 32
-  targetAttention: 0.5
-  targetRelaxation: 0.65

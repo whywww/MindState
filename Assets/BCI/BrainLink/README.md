@@ -1,6 +1,6 @@
 # BrainLink 使用说明 · MindState
 
-本说明沿用 JurassicWorld 的 BrainLink 接入流程，按本项目的整花场景与双指标控制修改。Python 数据程序与 Unity 需要同时运行，游戏不会自动启动 Python。
+本模块将 BrainLink 的专注度、放松度和信号质量接入整花场景。Python 数据程序与 Unity 需要同时运行，游戏不会自动启动 Python。
 
 ## 1. 读取哪些数据
 
@@ -174,6 +174,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\Assets\BCI\BrainLink\
 .\Builds\BrainLinkTools\python-env\python.exe .\Assets\BCI\BrainLink\Tests\test_brainlink.py
 ```
 
-Unity 菜单 `MindState/BrainLink/Run Acceptance` 验证协议、五秒过期、网络重连、线程释放、场景默认配置。测试会打开主场景，先保存当前工作。集成验收由 `MindState.BCI.BrainLink.Tests.BrainLinkAcceptance.PlaySmoke` 进入 Play，或通过验证构建的 `-verifyBrainLink` 执行；输出位于 `Evidence/BrainLink`。执行记录见项目的 `Docs/BrainLinkValidation.zh-CN.md`。
+Unity 菜单 `MindState/BrainLink/Run Acceptance` 验证协议、五秒过期、网络重连、线程释放和场景默认配置。测试会打开主场景，先保存当前工作。集成验收可由 `MindState.BCI.BrainLink.Tests.BrainLinkAcceptance.PlaySmoke` 进入 Play，输出在 `Outputs/BrainLink/Editor`。
 
-独立的接入测试构建可通过 Unity `-executeMethod MindState.BCI.BrainLink.Tests.BrainLinkAcceptance.BuildValidation` 生成到 `Builds/BrainLinkValidation/MindState.exe`，启动时加 `-verifyBrainLink` 运行自动测试。此构建仅验证 BrainLink 集成，不检查几何缓存签名，不替代第 6 节的正式构建流程。
+Windows 测试统一使用 `Tools/Build.ps1 -Validation` 生成的 `Builds/Validation/MindState.exe`，运行时加 `-verifyBrainLink`，输出在项目的 `Outputs/BrainLink/Windows`。此构建与正式构建使用相同几何缓存来源检查。正常使用无需验证参数。

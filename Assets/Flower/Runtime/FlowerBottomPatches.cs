@@ -26,7 +26,7 @@ public sealed partial class FlowerAssembler {
  Matrix4x4 BottomMatrix(int l,int i,float p) {
   var layer=layers[l];var petal=layer.petals[i];float q=Mathf.Clamp01((p*BloomDuration-layer.config.delay)/layer.config.duration);
   PathPetalPose(layer,petal,i,q,out var pos,out var rot,out var scale);
-  if(!rootBaseline)pos.y=layers[0].config.rootHeight+.0045f+layer.config.rootStagger*RootStaggerSign(i,layer.petals.Length);
+  pos.y=layers[0].config.rootHeight+.0045f+layer.config.rootStagger*RootStaggerSign(i,layer.petals.Length);
   return Matrix4x4.TRS(pos,rot,scale)*Matrix4x4.Translate(-BottomPoint(l,i,p,0,0));
  }
  void BuildBottomPatches() {
@@ -76,7 +76,7 @@ public sealed partial class FlowerAssembler {
  void ApplyBottomPatches() {
   if(!bottomPreviewEnabled||bottomProgress==bloomProgress)return;bottomProgress=bloomProgress;
   foreach(var patch in bottomPatches) {
-   float frame=(artActive?ArtPatchProgress(layers[patch.layer].config):Mathf.Clamp01(bloomProgress))*32;int a=Mathf.Min((int)frame,31);float f=frame-a;
+   float frame=Mathf.Clamp01(bloomProgress)*32;int a=Mathf.Min((int)frame,31);float f=frame-a;
    var g=SurfaceFor(layers[patch.layer],patch.index);Array.Copy(g.data,patch.work,g.data.Length);Array.Clear(patch.dirty,0,patch.dirty.Length);
    for(int k=0;k<patch.ids.Length;k++){int id=patch.ids[k];var d=Vector3.Lerp(patch.delta[a][k],patch.delta[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}
    if(upperPreview&&patch.upper!=null)for(int k=0;k<patch.upperIds.Length;k++){int id=patch.upperIds[k];var d=Vector3.Lerp(patch.upper[a][k],patch.upper[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}

@@ -25,7 +25,7 @@ namespace MindState.Editor
         [MenuItem("MindState/Flower Avoidance/Apply layout JSON to current Preset")]
         static void ApplyLayout()
         {
-            string path=EditorUtility.OpenFilePanel("Layout JSON (requires new validation after edits)","Evidence/FlowerArt","json");
+            string path=EditorUtility.OpenFilePanel("Layout JSON (requires new validation after edits)","Outputs","json");
             if(string.IsNullOrEmpty(path)) return;
             ApplyLayoutFile(path,true);
         }
@@ -42,7 +42,7 @@ namespace MindState.Editor
         {
             var args=System.Environment.GetCommandLineArgs(); int index=System.Array.IndexOf(args,"-layoutJson");
             if(index<0||index+1>=args.Length) throw new System.ArgumentException("-layoutJson is required");
-            ApplyLayoutFile(args[index+1],false); CreateGallery.Build();
+            ApplyLayoutFile(args[index+1],false); PerformanceBuild.Delivery();
         }
     }
     public static class FlowerAvoidanceInspector

@@ -33,7 +33,7 @@ namespace MindState
         [Range(.4f,1)] public float width=1;
         [Range(0,1)] public float maximumCurl=1;
         [Range(0,1)] public float edgeFoldScale=1;
-        public PetalSurfaceProfile surfaceProfile=PetalSurfaceProfile.Legacy;
+        public PetalSurfaceProfile surfaceProfile=PetalSurfaceProfile.Default;
         [Range(0,1)] public float microNormalScale=1;
         [Tooltip("Small longitudinal adjustment only; petals retain their radial, inward-facing orientation.")]
         [Range(-12,12)] public float roll;
@@ -101,7 +101,7 @@ namespace MindState
     {
         public int randomSeed=731;
         [Range(0,1)] public float colorVariation=0.035f;
-        public FlowerLayer[] layers=Defaults();
+        public FlowerLayer[] layers=Array.Empty<FlowerLayer>();
         // Deserialize against defaults, not the previous asset's optional fields.
         // FromJsonOverwrite alone retains authored offsets when an older JSON omits them.
         public void ApplyLayoutJson(string json)
@@ -110,17 +110,14 @@ namespace MindState
             try
             {
                 JsonUtility.FromJsonOverwrite(json,fresh);
+                if(fresh.layers==null||fresh.layers.Length==0||Array.Exists(fresh.layers,layer=>layer==null)) throw new ArgumentException("Layout JSON must contain nonempty layers.");
                 randomSeed=fresh.randomSeed; colorVariation=fresh.colorVariation; layers=fresh.layers;
             }
             finally { if(Application.isPlaying) Destroy(fresh); else DestroyImmediate(fresh); }
         }
         public int PetalCount { get { int n=0; foreach(var l in layers) n+=l.count; return n; } }
         public float Duration { get { float t=1; foreach(var l in layers) t=Mathf.Max(t,l.delay+l.duration); return t; } }
-        public static FlowerLayer[] Defaults()=>new[] {
-            new FlowerLayer { name="Outer / 珍珠外裙",count=6,size=1,azimuth=0,rootRadius=.10f,rootHeight=0,closedTilt=54,openTilt=68,openingAngle=125,curl=.16f,softness=.82f,delay=0,pearl=new Color(.90f,.88f,.95f),root=new Color(.71f,.61f,.77f),pink=new Color(.96f,.81f,.87f) },
-            new FlowerLayer { name="Middle / 淡粉花冠",count=5,size=.8f,azimuth=30,rootRadius=.08f,rootHeight=.12f,closedTilt=52,openTilt=50,openingAngle=118,curl=.30f,softness=.76f,delay=1.8f,pearl=new Color(.91f,.85f,.93f),root=new Color(.76f,.59f,.71f),pink=new Color(.98f,.77f,.84f) },
-            new FlowerLayer { name="Inner / 浅紫花杯",count=3,size=.56f,azimuth=12,rootRadius=.06f,rootHeight=.25f,closedTilt=50,openTilt=40,openingAngle=110,curl=.38f,softness=.70f,delay=3.6f,pearl=new Color(.87f,.83f,.95f),root=new Color(.76f,.61f,.78f),pink=new Color(.96f,.79f,.86f) }
-        };
+
     }
 }
 

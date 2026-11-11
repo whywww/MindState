@@ -29,7 +29,7 @@ namespace MindState.BCI.BrainLink.Tests
         IEnumerator Start()
         {
             Application.runInBackground=true;
-            output=Path.GetFullPath(Path.Combine(Application.dataPath,"../"+(Application.isEditor?"":"../../")+"Evidence/BrainLink/"+(Application.isEditor?"Editor":"Windows")));
+            output=Path.GetFullPath(Path.Combine(Application.dataPath,"../"+(Application.isEditor?"":"../../")+"Outputs/BrainLink/"+(Application.isEditor?"Editor":"Windows")));
             Directory.CreateDirectory(output); File.WriteAllText(Path.Combine(output,"Checks.txt"),"");
             File.WriteAllText(Path.Combine(output,"Complete.txt"),"Running");
             var run=Run(); bool passed=true;

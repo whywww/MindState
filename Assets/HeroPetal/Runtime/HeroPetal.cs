@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace MindState
 {
-    public enum PetalInputMode { SimulatedBrain, ExternalBrain, DirectShape }
 
     [System.Serializable]
     public struct PetalSurfaceProfile
@@ -21,7 +20,7 @@ namespace MindState
         [Range(0,1)] public float budSpanNarrow;
         [Range(-1,1)] public float budRightOut;
         [Range(0,1)] public float tipRound;
-        public static PetalSurfaceProfile Legacy=>new PetalSurfaceProfile { widePleatCount=7,surfaceDetail=1,rimVariation=1 };
+        public static PetalSurfaceProfile Default=>new PetalSurfaceProfile { widePleatCount=7,surfaceDetail=1,rimVariation=1 };
         public PetalSurfaceProfile Constrained()=>new PetalSurfaceProfile {
             widePleatCount=Mathf.Clamp(widePleatCount,1,7), softFolds=softFolds,
             closureBendDegrees=float.IsNaN(closureBendDegrees)||float.IsInfinity(closureBendDegrees)?0:Mathf.Clamp(closureBendDegrees,0,90),
@@ -43,39 +42,17 @@ namespace MindState
         public const int LengthSegments=80, WidthSegments=128;
         const int Cols=WidthSegments+1, Rows=LengthSegments+1, SurfaceCount=Cols*Rows;
         public Material pearlMaterial;
-        public PetalInputMode inputMode=PetalInputMode.SimulatedBrain;
-        public bool frozen,grayPreview;
-        [Range(90,150)] public float targetOpeningAngle=125;
-        [Range(0,1)] public float targetCurlAmount=0.2f,targetPleatSoftness=0.7f;
         [Range(20,40)] public int finePleatCount=32;
-        [Range(0,1)] public float targetAttention=0.5f,targetRelaxation=0.65f;
         public float OpeningAngle { get; private set; }=125;
         public float CurlAmount { get; private set; }=0.2f;
         public float PleatSoftness { get; private set; }=0.7f;
-        public float Attention { get; private set; }=0.5f;
-        public float Relaxation { get; private set; }=0.65f;
         public float OpeningProgress { get; private set; }
-        public float Growth=>OpeningProgress; // Compatibility: unfolding, never mesh truncation.
-        public bool automatic { get=>inputMode==PetalInputMode.SimulatedBrain; set=>inputMode=value?PetalInputMode.SimulatedBrain:PetalInputMode.ExternalBrain; }
-        public Mesh RuntimeMesh=>mesh;
         internal Vector3[] RuntimeVertices=>vertices;
         internal Vector3[] RuntimeNormals=>normals;
         internal Vector4[] RuntimeTangents=>tangents;
         internal Vector2[] RuntimeUV=>uv;
         internal int[] RuntimeTriangles=>triangleCache;
         internal Bounds LastBounds=>lastBounds;
-        internal static int SamplingInstances;
-        public double LastUpdateMilliseconds { get; private set; }
-        public long LastUpdateAllocation { get; private set; }
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || FLOWER_VALIDATION
-        // Only the diagnostics runner selects 1.0 for the preserved A baseline.
-        internal float diagnosticPleatScale=0.8f;
-#endif
-        static readonly Unity.Profiling.ProfilerMarker UpdateMarker=new Unity.Profiling.ProfilerMarker("MindState.Petal.Update");
-
-        Mesh mesh;
-        MeshRenderer meshRenderer;
-        MaterialPropertyBlock properties;
         Vector3[] surface,vertices,normals;
         Vector4[] tangents;
         Vector2[] uv;
@@ -87,22 +64,11 @@ namespace MindState
         readonly float[] sectionRest=new float[Cols],sectionX=new float[Cols],sectionZ=new float[Cols];
         readonly float[] closureY=new float[257],closureZ=new float[257];
         int preparedSeed=int.MinValue,preparedCount;
-        float elapsed,nextSample;
         float trajectoryCurlLimit=1,trajectoryFoldScale=1;
         float waveRoom=1f;
-        PetalSurfaceProfile surfaceProfile=PetalSurfaceProfile.Legacy;
-        static readonly int BreathId=Shader.PropertyToID("_Breath"),FineCountId=Shader.PropertyToID("_FineCount"),GrayId=Shader.PropertyToID("_GrayMode");
-
+        PetalSurfaceProfile surfaceProfile=PetalSurfaceProfile.Default;
         void Awake()
         {
-            bool sampling=SamplingInstances>0;
-            if(!sampling)
-            {
-                mesh=new Mesh { name="Silk fan — closed thin shell" }; mesh.MarkDynamic();
-                GetComponent<MeshFilter>().sharedMesh=mesh;
-                meshRenderer=GetComponent<MeshRenderer>(); meshRenderer.sharedMaterial=pearlMaterial;
-            }
-            properties=new MaterialPropertyBlock();
             surface=new Vector3[SurfaceCount]; boundary=new int[2*(LengthSegments+WidthSegments)];
             int b=0;
             for(int x=0;x<Cols-1;x++) boundary[b++]=x;
@@ -131,109 +97,22 @@ namespace MindState
                 triangleCache[k++]=a; triangleCache[k++]=c; triangleCache[k++]=a+1;
                 triangleCache[k++]=c; triangleCache[k++]=c+1; triangleCache[k++]=a+1;
             }
-            if(sampling) return;
-            mesh.vertices=vertices; mesh.uv=uv; mesh.triangles=triangleCache;
-            Rebuild();
         }
 
-        static bool Finite(float v)=>!float.IsNaN(v)&&!float.IsInfinity(v);
-        /// <summary>Main thread, degrees / normalized curl / normalized softness. Selects DirectShape.</summary>
-        public void SetShapeParameters(float openingAngleDegrees,float curlAmount01,float pleatSoftness01)
-        {
-            trajectoryCurlLimit=1;
-            trajectoryFoldScale=1;
-            surfaceProfile=PetalSurfaceProfile.Legacy;
-            inputMode=PetalInputMode.DirectShape;
-            if(Finite(openingAngleDegrees)) targetOpeningAngle=Mathf.Clamp(openingAngleDegrees,90,150);
-            if(Finite(curlAmount01)) targetCurlAmount=Mathf.Clamp01(curlAmount01);
-            if(Finite(pleatSoftness01)) targetPleatSoftness=Mathf.Clamp01(pleatSoftness01);
-        }
-        /// <summary>Main thread, normalized device targets. Selects ExternalBrain and holds the last sample.</summary>
-        public void SetBrainMetrics(float attention01,float relaxation01)
-        {
-            inputMode=PetalInputMode.ExternalBrain;
-            AcceptBrain(attention01,relaxation01);
-        }
-        void AcceptBrain(float a,float r)
-        {
-            trajectoryCurlLimit=1;
-            trajectoryFoldScale=1;
-            surfaceProfile=PetalSurfaceProfile.Legacy;
-            if(Finite(a)) targetAttention=Mathf.Clamp01(a);
-            if(Finite(r)) targetRelaxation=Mathf.Clamp01(r);
-            targetOpeningAngle=90+60*targetRelaxation;
-            targetCurlAmount=0.85f-0.75f*targetRelaxation;
-            targetPleatSoftness=0.9f-0.65f*targetAttention;
-        }
-        public void RestartOpening() { OpeningProgress=0; frozen=false; }
-        public void RestartGrowth()=>RestartOpening();
-        public void SetShapeImmediate(float angle,float curl,float softness,float progress=1)
-        { SetShapeImmediateLimited(angle,curl,softness,progress,1); }
-
-        // Flower pose-cache sampling only. The existing single-petal API always uses limit=1.
-        public void SetShapeImmediateLimited(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale=1)
-        { SetShapeImmediateLimited(angle,curl,softness,progress,maximumCurl,edgeFoldScale,PetalSurfaceProfile.Legacy); }
-
-        public void SetShapeImmediateLimited(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile)
-        { SetShapeImmediateLimited(angle,curl,softness,progress,maximumCurl,edgeFoldScale,profile,0); }
-
-        public void SetShapeImmediateLimited(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile,int foldSeed,float waveRoom=1f)
-        {
-            ApplyShapeState(angle,curl,softness,progress,maximumCurl,edgeFoldScale,profile,foldSeed,waveRoom);
-            if(mesh!=null) Rebuild();
-        }
+        static bool Finite(float value)=>!float.IsNaN(value)&&!float.IsInfinity(value);
+        // The whole-flower assembler samples this deterministic generator; no standalone demo runs.
         internal void SetShapeImmediateSampling(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile,int foldSeed,float waveRoom=1f)
         {
-            ApplyShapeState(angle,curl,softness,progress,maximumCurl,edgeFoldScale,profile,foldSeed,waveRoom);
-            Rebuild(false);
-        }
-        void ApplyShapeState(float angle,float curl,float softness,float progress,float maximumCurl,float edgeFoldScale,PetalSurfaceProfile profile,int foldSeed,float waveRoom)
-        {
-            SetShapeParameters(angle,curl,softness);
+            OpeningAngle=Finite(angle)?Mathf.Clamp(angle,90,150):OpeningAngle;
+            CurlAmount=Finite(curl)?Mathf.Clamp01(curl):CurlAmount;
+            PleatSoftness=Finite(softness)?Mathf.Clamp01(softness):PleatSoftness;
             surfaceProfile=profile.Constrained();
             if(surfaceProfile.softFolds) PrepareSoftFolds(foldSeed);
             trajectoryCurlLimit=Finite(maximumCurl)?Mathf.Clamp01(maximumCurl):1;
             trajectoryFoldScale=Finite(edgeFoldScale)?Mathf.Clamp01(edgeFoldScale):1;
-            this.waveRoom=Finite(waveRoom)?Mathf.Clamp01(waveRoom):1f;
-            OpeningAngle=targetOpeningAngle; CurlAmount=targetCurlAmount; PleatSoftness=targetPleatSoftness;
-            OpeningProgress=Finite(progress)?Mathf.Clamp01(progress):1; frozen=false;
-        }
-        public void SetImmediate(float attention,float relaxation,float growth=1)
-        {
-            SetBrainMetrics(attention,relaxation); Attention=targetAttention; Relaxation=targetRelaxation;
-            SetShapeImmediate(targetOpeningAngle,targetCurlAmount,targetPleatSoftness,growth);
-            inputMode=PetalInputMode.ExternalBrain;
-        }
-        public void ResetDemo()
-        {
-            elapsed=0; nextSample=0; SetShapeImmediate(125,0.2f,0.7f,0);
-            targetAttention=0.5f; targetRelaxation=0.65f; inputMode=PetalInputMode.SimulatedBrain;
-        }
-        void Update()
-        {
-            using var profile=UpdateMarker.Auto();
-            long started=System.Diagnostics.Stopwatch.GetTimestamp(),allocated=System.GC.GetAllocatedBytesForCurrentThread();
-            float dt=Time.deltaTime; elapsed+=dt;
-            if(inputMode==PetalInputMode.SimulatedBrain&&elapsed>=nextSample)
-            {
-                nextSample=elapsed+1;
-                AcceptBrain(0.5f+0.40f*Mathf.Sin(elapsed*0.19f),0.65f+0.3f*Mathf.Sin(elapsed*0.13f));
-            }
-            if(!frozen)
-            {
-                float blend=1-Mathf.Exp(-dt/2);
-                Attention=Mathf.Lerp(Attention,targetAttention,blend); Relaxation=Mathf.Lerp(Relaxation,targetRelaxation,blend);
-                OpeningAngle=Mathf.Lerp(OpeningAngle,Mathf.Clamp(targetOpeningAngle,90,150),blend);
-                CurlAmount=Mathf.Lerp(CurlAmount,Mathf.Clamp01(targetCurlAmount),blend);
-                PleatSoftness=Mathf.Lerp(PleatSoftness,Mathf.Clamp01(targetPleatSoftness),blend);
-                OpeningProgress=Mathf.Min(1,OpeningProgress+dt/12);
-                Rebuild();
-            }
-            properties.SetFloat(BreathId,Mathf.Sin(elapsed*0.65f));
-            properties.SetFloat(FineCountId,Mathf.Clamp(finePleatCount,20,40));
-            properties.SetFloat(GrayId,grayPreview?1:0); meshRenderer.SetPropertyBlock(properties);
-            LastUpdateAllocation=System.GC.GetAllocatedBytesForCurrentThread()-allocated;
-            LastUpdateMilliseconds=(System.Diagnostics.Stopwatch.GetTimestamp()-started)*1000.0/System.Diagnostics.Stopwatch.Frequency;
+            this.waveRoom=Finite(waveRoom)?Mathf.Clamp01(waveRoom):1;
+            OpeningProgress=Finite(progress)?Mathf.Clamp01(progress):1;
+            Rebuild();
         }
 
         void PrepareSoftFolds(int seed)
@@ -291,7 +170,7 @@ namespace MindState
             }
         }
         static float ClosureAngle(float distance,float bend)=>bend*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.2575f,2.575f,distance));
-        void Rebuild(bool uploadMesh=true)
+        void Rebuild()
         {
             float curl=Mathf.Lerp(trajectoryCurlLimit,Mathf.Min(CurlAmount,trajectoryCurlLimit),Mathf.SmoothStep(0,1,OpeningProgress));
             float openEnvelope=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.12f,1f,OpeningProgress));
@@ -301,11 +180,7 @@ namespace MindState
             float ruffleFactor=surfaceProfile.softFolds?Mathf.Lerp(.08f,1f,waveOpen):.15f+.85f*openEnvelope;
             float ruffleAmount=surfaceProfile.ruffle*ruffleFactor;
             float amplitude=Mathf.Lerp(0.145f,0.075f,PleatSoftness);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || FLOWER_VALIDATION
-            amplitude*=diagnosticPleatScale;
-#else
             amplitude*=0.8f;
-#endif
             for(int x=0;x<Cols;x++)
             {
                 // OpeningAngle describes the resting fan. Curl gathers its ribs while
@@ -509,11 +384,7 @@ namespace MindState
                 uv[a]=uv[a+1]=uv[source];
             }
             lastBounds=new Bounds((min+max)*0.5f,max-min+Vector3.one*0.015f);
-            if(uploadMesh&&mesh!=null)
-            {
-                mesh.vertices=vertices; mesh.normals=normals; mesh.tangents=tangents; mesh.uv=uv;
-                mesh.bounds=lastBounds;
-            }
+
         }
         // The cache sampler supplies the horizontal radial direction in petal space.
         internal Matrix4x4 overlapToFlower=Matrix4x4.identity,overlapFromFlower=Matrix4x4.identity;
@@ -546,6 +417,5 @@ namespace MindState
                 }
             }
         }
-        void OnDestroy() { if(mesh!=null) Destroy(mesh); }
     }
 }

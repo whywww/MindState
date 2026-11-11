@@ -42,8 +42,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b743fb7ced4c34438871979f22abef1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
+  appearance: {fileID: 11400000, guid: 092e621bc6dcea94198e6bbdbaa43399, type: 2}
+  appearanceEnabled: 1
+  artProfiles:
+  - amplitude: 0.2
+    period: 1
+    openness: 0.88
+  - amplitude: 0
+    period: 5
+    openness: 0
+  - amplitude: 2.4
+    period: 9
+    openness: 1
+  - amplitude: 1.2
+    period: 14
+    openness: 0.7
   preset: {fileID: 11400000, guid: 138c111d2df613546823f3daeae871ce, type: 2}
   petalPrefab: {fileID: 6160294998254176640, guid: 14522fe79cafb544cb516691d26bab17, type: 3}
   coreMaterial: {fileID: 2100000, guid: 53bcaacc1ce176c4e94653859f5c5694, type: 2}
@@ -52,3 +67,12 @@ MonoBehaviour:
   autoPlay: 1
   frozen: 0
   materialBreathing: 1
+  InterpolateMs: 0
+  UploadMs: 0
+  TransformMs: 0
+  MaterialMs: 0
+  diagnosticColors: 0
+  diagnosticWireframe: 0
+  diagnosticLabels: 0
+  diagnosticExtremeVariation: 0
+  diagnosticMaterial: {fileID: 0}

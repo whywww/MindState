@@ -10,6 +10,7 @@ namespace MindState {
    "Flower/Runtime/FlowerBottomPatches.cs", "Flower/Runtime/FlowerLayerPatches.cs",
    "Flower/Baking/FlowerGeometryBaking.cs", "Flower/Baking/FlowerLayerBaking.cs",
    "Flower/Baking/FlowerCacheProvenance.cs", "HeroPetal/Runtime/HeroPetal.cs",
+   "Flower/Validation/FlowerDiagnostics.cs", "Flower/Validation/FlowerSurfaceCollision.cs",
    "Flower/Runtime/FlowerAssembler.cs", "Flower/Runtime/FlowerPreset.cs",
    "Flower/Art/ExhibitionPeony.asset", "HeroPetal/Prefabs/HeroPetal.prefab"
   };

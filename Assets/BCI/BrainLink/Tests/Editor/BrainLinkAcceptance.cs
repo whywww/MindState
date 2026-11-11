@@ -119,19 +119,5 @@ namespace MindState.BCI.BrainLink.Tests
             EditorApplication.isPlaying=true;
         }
 
-        // Isolated integration build, not a geometry-certified delivery build.
-        public static void BuildValidation()
-        {
-            Debug.LogWarning("[BrainLink] Diagnostic build only. Use PerformanceBuild for geometry-validated delivery.");
-            var options=new BuildPlayerOptions {
-                scenes=new[]{"Assets/Flower/Scenes/FlowerGallery.unity"},
-                locationPathName="Builds/BrainLinkValidation/MindState.exe",
-                target=BuildTarget.StandaloneWindows64, options=BuildOptions.Development,
-                extraScriptingDefines=new[]{"FLOWER_VALIDATION"}
-            };
-            var report=BuildPipeline.BuildPlayer(options);
-            if(report.summary.result!=UnityEditor.Build.Reporting.BuildResult.Succeeded)
-                throw new Exception("BrainLink diagnostic build failed: "+report.summary.result);
-        }
     }
 }

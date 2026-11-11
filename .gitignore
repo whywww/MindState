@@ -11,3 +11,6 @@
 /*.csproj
 /*.sln
 /.vs/
+/Outputs/
+**/__pycache__/
+*.pyc

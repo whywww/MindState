@@ -1,12 +1,12 @@
-param([int]$Seconds = 10)
-$ErrorActionPreference = 'Stop'
-if ($Seconds -lt 1) { throw 'Seconds 必须大于零。' }
-$taskRoot = Split-Path -Parent $PSScriptRoot
-$taskPlayer = Join-Path $taskRoot 'Builds\Validation\MindState.exe'
-$taskEvidence = Join-Path $taskRoot 'Evidence\FlowerArt\LegacySingleBud'
-$taskLog = Join-Path $taskRoot 'SilkRegressionPlayer.log'
-if (-not (Test-Path -LiteralPath $taskPlayer)) { throw '请先运行 Tools\Build.ps1 -Validation。' }
-$taskArgs = @('-verifyPetal', '-soakSeconds', $Seconds, '-evidencePath', ('"' + $taskEvidence + '"'), '-screen-width', '1920', '-screen-height', '1080', '-windowed', '-force-d3d11', '-logFile', ('"' + $taskLog + '"'))
-$taskProcess = Start-Process -FilePath $taskPlayer -ArgumentList $taskArgs -WindowStyle Hidden -Wait -PassThru
-if ($taskProcess.ExitCode -ne 0) { throw "验证失败，参见 $taskLog 和 $taskEvidence" }
-Get-Content -LiteralPath (Join-Path $taskEvidence 'Validation.json')
+param([switch]$Contacts,[string]$Unity='C:/Program Files/Unity 2022.3.62f3c1/Editor/Unity.exe')
+$ErrorActionPreference='Stop'
+$taskRoot=Split-Path -Parent $PSScriptRoot
+$taskOutput=Join-Path $taskRoot 'Outputs'
+New-Item -ItemType Directory -Force -Path $taskOutput | Out-Null
+if(-not (Test-Path -LiteralPath $Unity)){throw "Unity not found: $Unity"}
+$taskArgs=@('-batchmode','-projectPath',('"'+$taskRoot+'"'),'-executeMethod','MindState.FlowerProjectValidation.Run','-verifyProject','-logFile',('"'+(Join-Path $taskOutput 'Verify.log')+'"'))
+if($Contacts){$taskArgs+='-scanContacts'}
+$taskProcess=Start-Process -FilePath $Unity -ArgumentList $taskArgs -WorkingDirectory $taskRoot -WindowStyle Hidden -Wait -PassThru
+if($taskProcess.ExitCode -ne 0){throw 'Project validation failed. See Outputs/Verify.log.'}
+$taskChecks=Get-Content -LiteralPath (Join-Path $taskOutput 'Validation/Checks.txt')
+Write-Output ($taskChecks.Count.ToString()+' checks passed. See Outputs/Validation.')

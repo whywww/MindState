@@ -43,7 +43,6 @@ namespace MindState
         sealed class Layer { public FlowerLayer config; public Variant[] variants; public Petal[] petals; public float progress=-1; }
         static Variant SurfaceFor(Layer layer,int petal)=>layer.variants[petal%layer.variants.Length];
         Layer[] layers;
-        readonly bool rootBaseline=Array.IndexOf(Environment.GetCommandLineArgs(),"-rootBaseline")>=0;
         Transform generated;
         Mesh coreMesh,stamenMesh;
         int previousCascades;
@@ -53,7 +52,7 @@ namespace MindState
         static bool Finite(float v)=>!float.IsNaN(v)&&!float.IsInfinity(v);
         public void SetBloomProgress(float progress)
         { if(!Finite(progress)) return; LeaveArt(); autoPlay=false; bloomProgress=Mathf.Clamp01(progress); ApplyPose();ApplyBottomPatches(); }
-        public void PlayBloom() { LeaveArt(); bloomProgress=0; frozen=false; autoPlay=true; ApplyPose(); }
+        public void PlayBloom() { LeaveArt(); bloomProgress=0; frozen=false; autoPlay=true; ApplyPose();ApplyBottomPatches(); }
         public void SetFrozen(bool value)=>frozen=value;
         [ContextMenu("Rebuild Flower / 重建缓存与组装")]
         public void RebuildFlower()
@@ -194,23 +193,18 @@ namespace MindState
         HeroPetal[][] CreatePoseSamplers()
         {
             var grid=new HeroPetal[layers.Length][];
-            HeroPetal.SamplingInstances++;
-            try
+            for(int i=0;i<layers.Length;i++)
             {
-                for(int i=0;i<layers.Length;i++)
+                grid[i]=new HeroPetal[layers[i].variants.Length];
+                for(int variant=0;variant<grid[i].Length;variant++)
                 {
-                    grid[i]=new HeroPetal[layers[i].variants.Length];
-                    for(int variant=0;variant<grid[i].Length;variant++)
-                    {
-                        var sampler=Instantiate(petalPrefab,generated);
-                        sampler.name="Pose sampler "+i+"-"+variant;
-                        sampler.GetComponent<MeshRenderer>().enabled=false;
-                        sampler.enabled=false;
-                        grid[i][variant]=sampler;
-                    }
+                    var sampler=Instantiate(petalPrefab,generated);
+                    sampler.name="Pose sampler "+i+"-"+variant;
+                    sampler.GetComponent<MeshRenderer>().enabled=false;
+                    sampler.enabled=false;
+                    grid[i][variant]=sampler;
                 }
             }
-            finally { HeroPetal.SamplingInstances--; }
             return grid;
         }
         void DestroyPoseSamplers(HeroPetal[][] grid)
@@ -278,10 +272,9 @@ namespace MindState
         void ApplyPose(float globalProgress,bool applyTransforms=true)
         {
             if(layers==null) return;
-            float elapsed=Mathf.Clamp01(globalProgress)*BloomDuration;
             foreach(var l in layers)
             {
-                float progress=artActive?ArtLayerProgress(l.config):Mathf.Clamp01((elapsed-l.config.delay)/Mathf.Max(1,l.config.duration));
+                float progress=StandardLayerProgress(l.config,Mathf.Clamp01(globalProgress));
                 if(progress==l.progress) continue;
                 l.progress=progress; float frame=progress*(PoseCount-1); int a=Mathf.Min((int)frame,PoseCount-2); float f=frame-a;
                 foreach(var g in l.variants)
@@ -315,8 +308,8 @@ namespace MindState
         }
         void ApplyPetalPose(Layer l,Petal p,int index,Vector3 position,Quaternion rotation,Vector3 scale)
         {
-            // A common embedded root height applies to legacy and all art-state poses.
-            if(!rootBaseline) position.y=layers[0].config.rootHeight+.0045f+l.config.rootStagger*RootStaggerSign(index,l.petals.Length);
+            // Every mode uses the same embedded root height.
+            position.y=layers[0].config.rootHeight+.0045f+l.config.rootStagger*RootStaggerSign(index,l.petals.Length);
             p.anchor.SetLocalPositionAndRotation(position,rotation);
             p.scale=scale; p.body.localScale=scale;
             p.body.localPosition=-Vector3.Scale(SurfaceFor(l,index).root,scale);
