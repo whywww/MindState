@@ -174,6 +174,8 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
 #if UNITY_EDITOR
   bool forceRebuild=Array.IndexOf(Environment.GetCommandLineArgs(),"-rebuildBottom")>=0;
   if(!forceRebuild&&BottomCacheProvenanceMatches()&&LoadBottomCache())return;
+  var middleBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Middle47/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
+  if(File.Exists(middleBaseline)&&LoadBottomCache(File.ReadAllBytes(middleBaseline))){BuildMiddleResidualPatches();return;}
   var residualBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Outer58/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
   if(File.Exists(residualBaseline)&&LoadBottomCache(File.ReadAllBytes(residualBaseline))){BuildOuterResidualPatches();return;}
   var outerBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/OuterFlow/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));

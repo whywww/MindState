@@ -13,6 +13,53 @@ public sealed partial class FlowerAssembler {
  // Fair the complete accepted outer surface. The obstacle constraint retains the
  // existing outward clearance instead of flattening a raised edge back into its neighbour.
  // Add clearance to the accepted, already faired surface; keep the earlier caches intact.
+ void BuildMiddleResidualPatches(){
+  var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();
+  var report=new StringBuilder("petal,phase,contacts,maxAddedOffset\n");
+  var additions=new Dictionary<int,Vector3[][]>();
+  foreach(var patch in bottomPatches)if(patch.layer==1){
+   int i=patch.index,neighbor=(i+5)%6;var frames=new Vector3[33][];additions[i]=frames;
+   for(int pose=0;pose<33;pose++){
+    frames[pose]=new Vector3[BottomSurface];float phase=pose/32f;
+    float gate=1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.46875f,.53125f,phase));if(gate<=0)continue;
+    var mask=new bool[BottomSurface];int contacts=0;
+    foreach(float sample in new[]{Mathf.Max(0,phase-.015625f),phase,Mathf.Min(.53125f,phase+.015625f)}){scan.Sample(sample,null,1);scan.FindPairContacts(7+i,7+neighbor,hits);
+    foreach(var h in hits){if(h.rootRegion||h.lengthA<.12f)continue;contacts++;int sx=Mathf.RoundToInt((h.widthA+1)*64),sy=Mathf.RoundToInt(h.lengthA*80);
+     for(int y=Mathf.Max(8,sy-24);y<=Mathf.Min(80,sy+24);y++)for(int x=Mathf.Max(0,sx-24);x<=Mathf.Min(128,sx+24);x++)mask[y*129+x]=true;
+    }
+    }
+    var matrix=BottomMatrix(1,i,phase);var inverse=matrix.inverse;
+    var required=new float[BottomSurface];var height=new float[BottomSurface];
+    // Lift the covering sheet rather than pushing the underlying sheet through it.
+    var surface=new Vector3[BottomSurface];SampleDiagnosticSurface(1,i,phase,surface);
+    var direction=matrix.MultiplyVector(Vector3.Cross(surface[40*129+65]-surface[40*129+63],surface[41*129+64]-surface[39*129+64])).normalized;
+    var center=matrix.MultiplyPoint3x4(surface[40*129+64]);if(Vector3.Dot(direction,new Vector3(center.x,Mathf.Max(0,phase-.2f)*5,center.z))<0)direction=-direction;
+    var directions=new Vector3[BottomSurface];for(int id=0;id<BottomSurface;id++){float tip=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.75f,.95f,(id/129)/80f))*(1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.15f,.3f,phase)));directions[id]=Vector3.Lerp(direction,Vector3.up,tip).normalized;}
+    foreach(float sample in new[]{Mathf.Max(0,phase-.015625f),phase,Mathf.Min(.53125f,phase+.015625f)}){
+     var sampleMatrix=BottomMatrix(1,i,sample);var sampleTree=new BottomTree(this,1,neighbor,sample,BottomMatrix(1,neighbor,sample),true,true);
+     for(int id=8*129;id<BottomSurface;id++)if(mask[id]){
+      var point=sampleMatrix.MultiplyPoint3x4(LayerBase(1,i,sample,id)+ExtraDeltaAt(1,i,sample,id));float d=sampleTree.OutsideDistance(point,directions[id]);
+      if(d>-.015f&&d<.16f)required[id]=Mathf.Max(required[id],Mathf.Min(.16f,Mathf.Max(0,d+.018f)));height[id]=required[id];
+     }
+    }
+    for(int pass=0;pass<140;pass++){var next=(float[])height.Clone();for(int y=8;y<=80;y++)for(int x=0;x<129;x++){
+     int id=y*129+x;float sum=height[id]*2;int count=2;foreach(int n in new[]{y>8?id-129:-1,y<80?id+129:-1,x>0?id-1:-1,x<128?id+1:-1})if(n>=0){sum+=height[n];count++;}
+     next[id]=Mathf.Max(required[id],sum/count);
+    }height=next;}
+    // Translate the curled tip as a broad strip; a narrow height peak can fold
+    // the last few rows back through their own surface during interpolation.
+    for(int x=0;x<129;x++){float tipHeight=0;for(int y=64;y<=80;y++)tipHeight=Mathf.Max(tipHeight,height[y*129+x]);for(int y=56;y<=80;y++){int id=y*129+x;float blend=Mathf.SmoothStep(0,1,Mathf.InverseLerp(56,64,y))*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.3f,.328125f,phase))*(1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.375f,.40625f,phase)));height[id]=Mathf.Lerp(height[id],Mathf.Max(height[id],tipHeight),blend);}}
+    float maximum=0;for(int id=8*129;id<BottomSurface;id++){float h=height[id]*gate*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.1f,.2f,(id/129)/80f));frames[pose][id]=inverse.MultiplyVector(directions[id]*h);maximum=Mathf.Max(maximum,frames[pose][id].magnitude);}
+    report.AppendFormat(System.Globalization.CultureInfo.InvariantCulture,"{0},{1},{2},{3}\n",i,phase,contacts,maximum);
+   }
+  }
+  // Commit together so all pairs are fitted against the same accepted surface.
+  foreach(var patch in bottomPatches)if(patch.layer==1){var frames=additions[patch.index];for(int pose=0;pose<33;pose++)for(int k=0;k<patch.extraIds.Length;k++)frames[pose][patch.extraIds[k]]+=patch.extra[pose][k];
+   CacheBytes-=patch.extraIds.Length*33L*12;var ids=new List<int>();for(int id=0;id<BottomSurface;id++){bool used=false;for(int pose=0;pose<33;pose++)used|=frames[pose][id].sqrMagnitude>1e-12f;if(used)ids.Add(id);}patch.extraIds=ids.ToArray();patch.extra=new Vector3[33][];
+   for(int pose=0;pose<33;pose++){patch.extra[pose]=new Vector3[ids.Count];float radius=0;for(int k=0;k<ids.Count;k++){patch.extra[pose][k]=frames[pose][ids[k]];radius=Mathf.Max(radius,patch.extra[pose][k].magnitude);}patch.radius[pose]+=radius;}CacheBytes+=ids.Count*33L*12;
+  }
+  string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Middle47/Bake"));Directory.CreateDirectory(path);File.WriteAllText(Path.Combine(path,"Regions.csv"),report.ToString());
+ }
  void BuildOuterResidualPatches(){
   var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();
   var report=new StringBuilder("petal,phase,contacts,maxAddedOffset\n");

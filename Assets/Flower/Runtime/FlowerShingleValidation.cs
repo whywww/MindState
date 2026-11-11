@@ -52,6 +52,26 @@ public sealed class FlowerShingleValidation : MonoBehaviour {
   gallery.showInterface=false; flower.materialBreathing=false; flower.SetFrozen(true);
   cam=GetComponent<Camera>(); cam.enabled=false; rt=new RenderTexture(960,960,24){antiAliasing=4}; rt.Create(); cam.targetTexture=rt;
   image=new Texture2D(960,960,TextureFormat.RGB24,false); QualitySettings.vSyncCount=0;
+  if(Arg("-middle47","0")=="1") {
+   var scan=new FlowerSurfaceCollision(flower);var hits=new List<FlowerSurfaceCollision.Contact>();
+   var csv=new StringBuilder("phase,petal,neighbor,contacts\n");
+   foreach(float phase in new[]{0f,.1f,.2f,.3f,.4f,.44f,.46f,.47f,.48f,.5f,.55f,.58f,.6f,.65f,1f}) {
+    flower.SetBloomProgress(phase);scan.Sample(phase);
+    for(int i=0;i<6;i++){scan.FindPairContacts(7+i,7+(i+5)%6,hits);csv.AppendFormat(Inv,"{0},{1},{2},{3}\n",phase,i,(i+5)%6,hits.FindAll(h=>!h.rootRegion&&h.lengthA>.25f).Count);}
+    if(phase<=.55f){Shot("Pose_"+phase,0,90,10);Shot("Oblique_"+phase,22,55,10);}
+    if(phase==.3f||phase==.46f){for(int az=0;az<360;az+=45)Shot("Orbit_"+phase+"_"+az,az,55,10);for(int i=0;i<6;i++){flower.SoloPetal(1,i);flower.SetPetalVisible(1,(i+5)%6,true);Shot("Pair_"+phase+"_"+i,0,90,10);flower.ShowAllPetals();}}
+    scan.FindAllPairContacts(hits);var detail=new StringBuilder("a,b,tA,tB,sA,sB,root\n");foreach(var h in hits)if(scan.Petals[h.petalA].layer==1||scan.Petals[h.petalB].layer==1)detail.AppendFormat(Inv,"{0},{1},{2},{3},{4},{5},{6}\n",scan.Petals[h.petalA].id,scan.Petals[h.petalB].id,h.lengthA,h.lengthB,h.widthA,h.widthB,h.rootRegion);File.WriteAllText(Path.Combine(output,"Contacts_"+phase+".csv"),detail.ToString());
+    Check(flower.RootAnchorError()<1e-5f,"Root attachment "+phase);Check(flower.BottomIsolationCheck(),"Protected vertices "+phase);yield return null;
+   }
+   File.WriteAllText(Path.Combine(output,"MiddleContacts.csv"),csv.ToString());
+   flower.SetBloomProgress(1);Snapshot("FullBloom");
+#if UNITY_EDITOR
+   flower.SaveBottomCache();UnityEditor.EditorApplication.Exit(0);
+#else
+   Application.Quit(0);
+#endif
+   yield break;
+  }
   if(Arg("-outer58","0")=="1") {
    var scan=new FlowerSurfaceCollision(flower);var hits=new List<FlowerSurfaceCollision.Contact>();
    var csv=new StringBuilder("phase,petal,neighbor,contacts\n");
@@ -169,6 +189,7 @@ public sealed class FlowerShingleValidation : MonoBehaviour {
   {
    var scan=new FlowerSurfaceCollision(flower); var hits=new List<FlowerSurfaceCollision.Contact>();
    var times=new SortedSet<float>(); for(int k=0;k<=64;k++) times.Add(k/64f);
+   times.UnionWith(new[]{.1f,.2f,.3f,.4f,.44f,.46f,.47f,.48f,.5f,.55f,.58f,.6f,.65f});
    foreach(var l in flower.preset.layers) for(int k=0;k<=64;k++) times.Add(Mathf.Clamp01((l.delay+l.duration*k/64f)/flower.BloomDuration));
    if(Arg("-shingleQuick","0")=="1"||Arg("-shingleScreens","0")=="1") times=new SortedSet<float>(new[]{0f,.1f,.25f,.5f,.75f,1f});
    int orderReversed=0,orderCovered=0;
@@ -176,7 +197,7 @@ public sealed class FlowerShingleValidation : MonoBehaviour {
    var csv=new StringBuilder("progress,petalA,petalB,kind,lengthA,lengthB,sA,sB\n");
    var summary=new StringBuilder("progress,same,cross,self,root\n"); int step=0,selfContacts=0;
    foreach(float p in times) {
-    scan.Sample(p); scan.FindContacts(hits,parallel:true); int same=0,cross=0,self=0,roots=0;
+    scan.Sample(p); scan.FindContacts(hits,focusLayer:Arg("-middleDense","0")=="1"?1:-1,parallel:true); int same=0,cross=0,self=0,roots=0;
     foreach(var h in hits) { var a=petals[h.petalA]; var b=petals[h.petalB]; string kind=h.rootRegion?"root":h.petalA==h.petalB?"self":a.layer==b.layer?"same":"cross";
      if(kind=="root") roots++; else if(kind=="self") self++; else if(kind=="same") same++; else cross++;
      csv.AppendFormat(Inv,"{0},{1},{2},{3},{4},{5},{6},{7}\n",p,a.id,b.id,kind,h.lengthA,h.lengthB,h.widthA,h.widthB);
