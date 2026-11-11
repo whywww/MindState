@@ -4,6 +4,8 @@
 
 启动 Builds/Windows/MindState.exe。
 
+BrainLink 接入与新电脑安装见 [BrainLink 使用说明](Assets/BCI/BrainLink/README.md)：读取专注度、放松度和佩戴信号质量；在 Flower Gallery Camera 的 Inspector 勾选 Brain Link Flower Input 后启用，F9 切换默认隐藏的实时诊断面板，Console 搜索 `[BrainLink]` 查看日志。
+
 当前记录：Evidence/NaturalLight/报告.md。历史色带截图保留于 Evidence/NaturalLight/PreviousBands.jpg。
 
 构建：Tools/Build.ps1 -Validation；场景配置：MindState.Editor.ConfigureColorVariant.Build。采集：验证程序 -verifyColor；编码：python Tools/EncodeNaturalEvidence.py。

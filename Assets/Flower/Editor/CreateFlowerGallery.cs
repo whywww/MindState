@@ -31,6 +31,7 @@ namespace MindState.Editor
             var c=camera.AddComponent<Camera>(); c.clearFlags=CameraClearFlags.SolidColor; c.backgroundColor=new Color(.045f,.065f,.12f); c.fieldOfView=38; c.nearClipPlane=.05f; c.farClipPlane=40; c.allowHDR=true; c.allowMSAA=true; c.renderingPath=RenderingPath.Forward;
             var post=camera.AddComponent<GalleryPost>(); post.shader=Shader.Find("Hidden/MindState/GalleryPost"); post.bloom=false; post.exposure=.92f;
             var gallery=camera.AddComponent<FlowerGallery>(); gallery.flower=flower;
+            var brainLink=camera.AddComponent<MindState.BCI.BrainLink.BrainLinkFlowerInput>(); brainLink.flower=flower; brainLink.enabled=false;
             camera.transform.position=new Vector3(1.96f,7.61f,-4.85f); camera.transform.LookAt(new Vector3(0,.65f,0));
             string scene=Root+"/Scenes/FlowerGallery.unity"; EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(),scene);
             EditorBuildSettings.scenes=new[] { new EditorBuildSettingsScene(scene,true),new EditorBuildSettingsScene("Assets/HeroPetal/Scenes/HeroPetalGallery.unity",true) };

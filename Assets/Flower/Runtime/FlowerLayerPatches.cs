@@ -13,6 +13,129 @@ public sealed partial class FlowerAssembler {
  // Fair the complete accepted outer surface. The obstacle constraint retains the
  // existing outward clearance instead of flattening a raised edge back into its neighbour.
  // Add clearance to the accepted, already faired surface; keep the earlier caches intact.
+ // Fair the complete accepted middle surface in space and time. Every projection
+ // check samples all six petals together, avoiding order-dependent neighbours.
+ void SmoothMiddleFlow(){
+  const int count=6;var rest=new Vector3[count][][];var fair=new Vector3[count][][];var normals=new Vector3[count][][];var matrices=new Matrix4x4[count][];
+  for(int i=0;i<count;i++){rest[i]=new Vector3[33][];fair[i]=new Vector3[33][];normals[i]=new Vector3[33][];matrices[i]=new Matrix4x4[33];
+   for(int pose=0;pose<33;pose++){float phase=pose/32f;var v=new Vector3[BottomSurface];SampleDiagnosticSurface(1,i,phase,v);rest[i][pose]=v;fair[i][pose]=(Vector3[])v.Clone();matrices[i][pose]=BottomMatrix(1,i,phase);normals[i][pose]=new Vector3[BottomSurface];
+    for(int y=8;y<=80;y++)for(int x=0;x<129;x++){int id=y*129+x;var across=v[y*129+Mathf.Min(128,x+1)]-v[y*129+Mathf.Max(0,x-1)];var along=v[Mathf.Min(80,y+1)*129+x]-v[Mathf.Max(0,y-1)*129+x];var n=matrices[i][pose].MultiplyVector(Vector3.Cross(across,along)).normalized;var point=matrices[i][pose].MultiplyPoint3x4(v[id]);if(Vector3.Dot(n,new Vector3(point.x,Mathf.Max(0,phase-.2f)*5,point.z))<0)n=-n;normals[i][pose][id]=n;}
+   }
+  }
+  for(int pass=0;pass<180;pass++){
+   var next=new Vector3[count][][];
+   for(int i=0;i<count;i++){next[i]=(Vector3[][])fair[i].Clone();for(int pose=9;pose<=16;pose++){
+    var v=fair[i][pose];var dst=(Vector3[])v.Clone();next[i][pose]=dst;float phase=pose/32f;float gate=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.25f,.3125f,phase))*(1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.46875f,.53125f,phase)));
+    for(int y=8;y<=80;y++)for(int x=0;x<129;x++){
+     int id=y*129+x;var left=x>0?v[id-1]:2*v[id]-v[id+1];var right=x<128?v[id+1]:2*v[id]-v[id-1];var below=v[id-129];var above=y<80?v[id+129]:2*v[id]-below;
+     var spatial=(left+right+above+below)*.25f;var temporal=(fair[i][pose-1][id]+fair[i][pose+1][id])*.5f;
+     var target=v[id]+.45f*(spatial-v[id])+.08f*(temporal-v[id]);float along=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.1f,.3f,y/80f));var localNormal=matrices[i][pose].inverse.MultiplyVector(normals[i][pose][40*129+64]).normalized;float outward=Mathf.Max(0,Vector3.Dot(target-rest[i][pose][id],localNormal));float side=1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(-.4f,.2f,x/64f-1));dst[id]=rest[i][pose][id]+localNormal*Mathf.Min(outward,.06f*gate*along*side);
+    }
+   }}fair=next;
+  }
+  var report=new StringBuilder("petal,phase,maxAddedOffset\n");
+  foreach(var patch in bottomPatches)if(patch.layer==1){int i=patch.index;var frames=new Vector3[33][];
+   for(int pose=0;pose<33;pose++){frames[pose]=new Vector3[BottomSurface];for(int k=0;k<patch.extraIds.Length;k++)frames[pose][patch.extraIds[k]]=patch.extra[pose][k];float maximum=0;for(int id=8*129;id<BottomSurface;id++){var d=fair[i][pose][id]-rest[i][pose][id];frames[pose][id]+=d;maximum=Mathf.Max(maximum,d.magnitude);}report.AppendFormat(System.Globalization.CultureInfo.InvariantCulture,"{0},{1},{2}\n",i,pose/32f,maximum);}
+   CacheBytes-=patch.extraIds.Length*33L*12;var ids=new List<int>();for(int id=0;id<BottomSurface;id++){bool used=Array.BinarySearch(patch.extraIds,id)>=0;for(int pose=0;pose<33&&!used;pose++)used|=frames[pose][id].sqrMagnitude>1e-12f;if(used)ids.Add(id);}patch.extraIds=ids.ToArray();patch.extra=new Vector3[33][];
+   for(int pose=0;pose<33;pose++){patch.extra[pose]=new Vector3[ids.Count];float radius=0;for(int k=0;k<ids.Count;k++){patch.extra[pose][k]=frames[pose][ids[k]];radius=Mathf.Max(radius,patch.extra[pose][k].magnitude);}patch.radius[pose]+=radius;}CacheBytes+=ids.Count*33L*12;
+  }
+  // Project back into the collision-free neighbourhood of the accepted surface.
+  // A global step reduction keeps both spatial and temporal continuity intact.
+  var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();var phases=new SortedSet<float>();for(int k=0;k<=50;k++)phases.Add(.25f+k*.005f);for(int k=16;k<=34;k++)phases.Add(k/64f);
+  float factor=1;bool feasible=false;
+  for(int attempt=0;attempt<4;attempt++){
+   feasible=true;foreach(float phase in phases){scan.Sample(phase);scan.FindContacts(hits,focusLayer:1,parallel:true);if(hits.Exists(h=>h.petalA==h.petalB&&!h.rootRegion)){feasible=false;break;}
+    if(phase<.47f)for(int i=0;i<count;i++){scan.FindPairContacts(7+i,7+(i+5)%count,hits);if(hits.Exists(h=>!h.rootRegion&&h.lengthA>.25f&&h.lengthB>.25f)){feasible=false;break;}}if(!feasible)break;
+   }
+   if(feasible)break;float previous=factor;factor*=.5f;foreach(var patch in bottomPatches)if(patch.layer==1)for(int pose=9;pose<=16;pose++)for(int k=0;k<patch.extraIds.Length;k++){int id=patch.extraIds[k];patch.extra[pose][k]-=(fair[patch.index][pose][id]-rest[patch.index][pose][id])*(previous-factor);}
+  }
+  if(!feasible)throw new InvalidOperationException("Middle flow proposal could not retain accepted clearance; cache not publishable.");
+  string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/MiddleFlow/Bake"));Directory.CreateDirectory(path);File.WriteAllText(Path.Combine(path,"Flow.csv"),report.ToString());File.WriteAllText(Path.Combine(path,"Constraint.txt"),"Accepted proposal scale="+factor);
+ }
+ void SmoothInnerFlow(){
+  const int count=5;var rest=new Vector3[count][][];var fair=new Vector3[count][][];var normals=new Vector3[count][][];var matrices=new Matrix4x4[count][];
+  for(int i=0;i<count;i++){rest[i]=new Vector3[33][];fair[i]=new Vector3[33][];normals[i]=new Vector3[33][];matrices[i]=new Matrix4x4[33];
+   for(int pose=0;pose<33;pose++){float phase=pose/32f;var v=new Vector3[BottomSurface];SampleDiagnosticSurface(2,i,phase,v);rest[i][pose]=v;fair[i][pose]=(Vector3[])v.Clone();matrices[i][pose]=BottomMatrix(2,i,phase);normals[i][pose]=new Vector3[BottomSurface];
+    for(int y=8;y<=80;y++)for(int x=0;x<129;x++){int id=y*129+x;var across=v[y*129+Mathf.Min(128,x+1)]-v[y*129+Mathf.Max(0,x-1)];var along=v[Mathf.Min(80,y+1)*129+x]-v[Mathf.Max(0,y-1)*129+x];var n=matrices[i][pose].MultiplyVector(Vector3.Cross(across,along)).normalized;var point=matrices[i][pose].MultiplyPoint3x4(v[id]);if(Vector3.Dot(n,new Vector3(point.x,Mathf.Max(0,phase-.2f)*5,point.z))<0)n=-n;normals[i][pose][id]=n;}
+   }
+  }
+  for(int pass=0;pass<180;pass++){
+   var next=new Vector3[count][][];
+   for(int i=0;i<count;i++){next[i]=(Vector3[][])fair[i].Clone();for(int pose=0;pose<=20;pose++){
+    var v=fair[i][pose];var dst=(Vector3[])v.Clone();next[i][pose]=dst;float phase=pose/32f;float gate=(1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.59375f,.65625f,phase)));
+    for(int y=8;y<=80;y++)for(int x=0;x<129;x++){
+     int id=y*129+x;var left=x>0?v[id-1]:2*v[id]-v[id+1];var right=x<128?v[id+1]:2*v[id]-v[id-1];var below=v[id-129];var above=y<80?v[id+129]:2*v[id]-below;
+     var spatial=(left+right+above+below)*.25f;var temporal=(fair[i][Mathf.Max(0,pose-1)][id]+fair[i][pose+1][id])*.5f;
+     var target=v[id]+.45f*(spatial-v[id])+.08f*(temporal-v[id]);float along=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.1f,.3f,y/80f));dst[id]=rest[i][pose][id]+Vector3.ClampMagnitude(target-rest[i][pose][id],.06f*gate*along);
+    }
+   }}fair=next;
+  }
+  var report=new StringBuilder("petal,phase,maxAddedOffset\n");
+  foreach(var patch in bottomPatches)if(patch.layer==2){int i=patch.index;var frames=new Vector3[33][];
+   for(int pose=0;pose<33;pose++){frames[pose]=new Vector3[BottomSurface];for(int k=0;k<patch.extraIds.Length;k++)frames[pose][patch.extraIds[k]]=patch.extra[pose][k];float maximum=0;for(int id=8*129;id<BottomSurface;id++){var d=fair[i][pose][id]-rest[i][pose][id];frames[pose][id]+=d;maximum=Mathf.Max(maximum,d.magnitude);}report.AppendFormat(System.Globalization.CultureInfo.InvariantCulture,"{0},{1},{2}\n",i,pose/32f,maximum);}
+   CacheBytes-=patch.extraIds.Length*33L*12;var ids=new List<int>();for(int id=0;id<BottomSurface;id++){bool used=Array.BinarySearch(patch.extraIds,id)>=0;for(int pose=0;pose<33&&!used;pose++)used|=frames[pose][id].sqrMagnitude>1e-12f;if(used)ids.Add(id);}patch.extraIds=ids.ToArray();patch.extra=new Vector3[33][];
+   for(int pose=0;pose<33;pose++){patch.extra[pose]=new Vector3[ids.Count];float radius=0;for(int k=0;k<ids.Count;k++){patch.extra[pose][k]=frames[pose][ids[k]];radius=Mathf.Max(radius,patch.extra[pose][k].magnitude);}patch.radius[pose]+=radius;}CacheBytes+=ids.Count*33L*12;
+  }
+  // Project back into the collision-free neighbourhood of the accepted surface.
+  // A global step reduction keeps both spatial and temporal continuity intact.
+  var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();var phases=new SortedSet<float>();for(int k=0;k<=65;k++)phases.Add(k/100f);for(int k=0;k<=42;k++)phases.Add(k/64f);
+  float factor=1;bool feasible=false;
+  for(int attempt=0;attempt<4;attempt++){
+   feasible=true;foreach(float phase in phases){scan.Sample(phase);scan.FindContacts(hits,focusLayer:2,parallel:true);if(hits.Exists(h=>h.petalA==h.petalB&&!h.rootRegion)){feasible=false;break;}
+    if(phase<.6f)for(int i=0;i<count;i++){scan.FindPairContacts(13+i,13+(i+4)%count,hits);if(hits.Exists(h=>!h.rootRegion&&h.lengthA>.25f&&h.lengthB>.25f)){feasible=false;break;}}if(!feasible)break;
+   }
+   if(feasible)break;float previous=factor;factor*=.5f;foreach(var patch in bottomPatches)if(patch.layer==2)for(int pose=0;pose<=20;pose++)for(int k=0;k<patch.extraIds.Length;k++){int id=patch.extraIds[k];patch.extra[pose][k]-=(fair[patch.index][pose][id]-rest[patch.index][pose][id])*(previous-factor);}
+  }
+  if(!feasible)throw new InvalidOperationException("Inner flow proposal could not retain accepted clearance; cache not publishable.");
+  string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/InnerFlow/Bake"));Directory.CreateDirectory(path);File.WriteAllText(Path.Combine(path,"Flow.csv"),report.ToString());File.WriteAllText(Path.Combine(path,"Constraint.txt"),"Accepted proposal scale="+factor);
+ }
+ void BuildInnerResidualPatches(){
+  var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();
+  var report=new StringBuilder("petal,phase,contacts,maxAddedOffset,dx,dy,dz\n");
+  var additions=new Dictionary<int,Vector3[][]>();
+  foreach(var patch in bottomPatches)if(patch.layer==2){
+   int i=patch.index,neighbor=(i+4)%5;var frames=new Vector3[33][];additions[i]=frames;
+   for(int pose=0;pose<33;pose++){
+    frames[pose]=new Vector3[BottomSurface];float phase=pose/32f;
+    float gate=1-Mathf.SmoothStep(0,1,Mathf.InverseLerp(.59375f,.65625f,phase));if(gate<=0)continue;
+    var mask=new bool[BottomSurface];int contacts=0;
+    foreach(float sample in new[]{Mathf.Max(0,phase-.015625f),phase,Mathf.Min(.65625f,phase+.015625f)}){scan.Sample(sample,null,2);scan.FindPairContacts(13+i,13+neighbor,hits);
+    foreach(var h in hits){if(h.rootRegion||h.lengthA<.12f)continue;contacts++;int sx=Mathf.RoundToInt((h.widthA+1)*64),sy=Mathf.RoundToInt(h.lengthA*80);
+     for(int y=Mathf.Max(8,sy-24);y<=Mathf.Min(80,sy+24);y++)for(int x=Mathf.Max(0,sx-24);x<=Mathf.Min(128,sx+24);x++)mask[y*129+x]=true;
+    }
+    }
+    var matrix=BottomMatrix(2,i,phase);var inverse=matrix.inverse;
+    var required=new float[BottomSurface];var height=new float[BottomSurface];
+    // Lift the covering sheet rather than pushing the underlying sheet through it.
+    var surface=new Vector3[BottomSurface];SampleDiagnosticSurface(2,i,phase,surface);
+    var direction=matrix.MultiplyVector(Vector3.Cross(surface[40*129+65]-surface[40*129+63],surface[41*129+64]-surface[39*129+64])).normalized;
+    var center=matrix.MultiplyPoint3x4(surface[40*129+64]);if(Vector3.Dot(direction,new Vector3(center.x,0,center.z))<0)direction=-direction;
+    var directions=new Vector3[BottomSurface];for(int id=0;id<BottomSurface;id++)directions[id]=direction;
+    foreach(float sample in new[]{Mathf.Max(0,phase-.015625f),phase,Mathf.Min(.65625f,phase+.015625f)}){
+     var sampleMatrix=BottomMatrix(2,i,sample);var sampleTree=new BottomTree(this,2,neighbor,sample,BottomMatrix(2,neighbor,sample),true,true);
+     for(int id=8*129;id<BottomSurface;id++)if(mask[id]){
+      var point=sampleMatrix.MultiplyPoint3x4(LayerBase(2,i,sample,id)+ExtraDeltaAt(2,i,sample,id));float d=sampleTree.OutsideDistance(point,directions[id]);
+      if(d>-.015f&&d<.16f)required[id]=Mathf.Max(required[id],Mathf.Min(.16f,Mathf.Max(0,d+.018f)));height[id]=required[id];
+     }
+    }
+    for(int pass=0;pass<140;pass++){var next=(float[])height.Clone();for(int y=8;y<=80;y++)for(int x=0;x<129;x++){
+     int id=y*129+x;float sum=height[id]*2;int count=2;foreach(int n in new[]{y>8?id-129:-1,y<80?id+129:-1,x>0?id-1:-1,x<128?id+1:-1})if(n>=0){sum+=height[n];count++;}
+     next[id]=Mathf.Max(required[id],sum/count);
+    }height=next;}
+    // Translate the curled tip as a broad strip; a narrow height peak can fold
+    // the last few rows back through their own surface during interpolation.
+    for(int x=0;x<129;x++){float tipHeight=0;for(int y=64;y<=80;y++)tipHeight=Mathf.Max(tipHeight,height[y*129+x]);for(int y=56;y<=80;y++){int id=y*129+x;float blend=Mathf.SmoothStep(0,1,Mathf.InverseLerp(56,64,y));height[id]=Mathf.Lerp(height[id],Mathf.Max(height[id],tipHeight),blend);}}
+    float maximum=0;for(int id=8*129;id<BottomSurface;id++){float h=height[id]*gate*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.1f,.2f,(id/129)/80f));frames[pose][id]=inverse.MultiplyVector(directions[id]*h);maximum=Mathf.Max(maximum,frames[pose][id].magnitude);}
+    report.AppendFormat(System.Globalization.CultureInfo.InvariantCulture,"{0},{1},{2},{3},{4},{5},{6}\n",i,phase,contacts,maximum,direction.x,direction.y,direction.z);
+   }
+  }
+  // Commit together so all pairs are fitted against the same accepted surface.
+  foreach(var patch in bottomPatches)if(patch.layer==2){var frames=additions[patch.index];for(int pose=0;pose<33;pose++)for(int k=0;k<patch.extraIds.Length;k++)frames[pose][patch.extraIds[k]]+=patch.extra[pose][k];
+   CacheBytes-=patch.extraIds.Length*33L*12;var ids=new List<int>();for(int id=0;id<BottomSurface;id++){bool used=false;for(int pose=0;pose<33;pose++)used|=frames[pose][id].sqrMagnitude>1e-12f;if(used)ids.Add(id);}patch.extraIds=ids.ToArray();patch.extra=new Vector3[33][];
+   for(int pose=0;pose<33;pose++){patch.extra[pose]=new Vector3[ids.Count];float radius=0;for(int k=0;k<ids.Count;k++){patch.extra[pose][k]=frames[pose][ids[k]];radius=Mathf.Max(radius,patch.extra[pose][k].magnitude);}patch.radius[pose]+=radius;}CacheBytes+=ids.Count*33L*12;
+  }
+  string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Inner60/Bake"));Directory.CreateDirectory(path);File.WriteAllText(Path.Combine(path,"Regions.csv"),report.ToString());
+ }
  void BuildMiddleResidualPatches(){
   var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();
   var report=new StringBuilder("petal,phase,contacts,maxAddedOffset\n");

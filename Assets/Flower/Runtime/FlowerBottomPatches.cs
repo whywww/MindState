@@ -173,7 +173,17 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
   if(!Application.isEditor&&LoadBottomCache())return;
 #if UNITY_EDITOR
   bool forceRebuild=Array.IndexOf(Environment.GetCommandLineArgs(),"-rebuildBottom")>=0;
+  if(Array.IndexOf(Environment.GetCommandLineArgs(),"-innerReference")>=0){
+   var reference=Path.Combine(Application.dataPath,"../Evidence/Inner60/Baseline/Assets/Flower/Resources/BottomOverlap.bytes");
+   if(!LoadBottomCache(File.ReadAllBytes(reference)))throw new InvalidOperationException("Inner60 reference configuration mismatch.");return;
+  }
   if(!forceRebuild&&BottomCacheProvenanceMatches()&&LoadBottomCache())return;
+  var innerFlowBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/InnerFlow/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
+  if(File.Exists(innerFlowBaseline)&&LoadBottomCache(File.ReadAllBytes(innerFlowBaseline))){SmoothInnerFlow();return;}
+  var innerBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Inner60/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
+  if(File.Exists(innerBaseline)&&LoadBottomCache(File.ReadAllBytes(innerBaseline))){BuildInnerResidualPatches();return;}
+  var flowBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/MiddleFlow/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
+  if(File.Exists(flowBaseline)&&LoadBottomCache(File.ReadAllBytes(flowBaseline))){SmoothMiddleFlow();return;}
   var middleBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Middle47/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));
   if(File.Exists(middleBaseline)&&LoadBottomCache(File.ReadAllBytes(middleBaseline))){BuildMiddleResidualPatches();return;}
   var residualBaseline=Path.GetFullPath(Path.Combine(Application.dataPath,"../Evidence/Outer58/Baseline/Assets/Flower/Resources/BottomOverlap.bytes"));

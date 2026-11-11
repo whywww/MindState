@@ -52,6 +52,46 @@ public sealed class FlowerShingleValidation : MonoBehaviour {
   gallery.showInterface=false; flower.materialBreathing=false; flower.SetFrozen(true);
   cam=GetComponent<Camera>(); cam.enabled=false; rt=new RenderTexture(960,960,24){antiAliasing=4}; rt.Create(); cam.targetTexture=rt;
   image=new Texture2D(960,960,TextureFormat.RGB24,false); QualitySettings.vSyncCount=0;
+  if(Arg("-inner60","0")=="1") {
+   var scan=new FlowerSurfaceCollision(flower);var hits=new List<FlowerSurfaceCollision.Contact>();var csv=new StringBuilder("phase,petal,neighbor,contacts,roots\n");
+   var phases=new SortedSet<float>();for(int k=0;k<=64;k++)phases.Add(k/64f);for(int k=0;k<=65;k++)phases.Add(k/100f);
+   if(Arg("-innerQuick","0")=="1")phases=new SortedSet<float>(new[]{0f,.1f,.2f,.3f,.4f,.5f,.55f,.58f,.6f,.625f,.65625f,1f});
+   File.WriteAllText(Path.Combine(output,"Phases.txt"),string.Join("\n",phases));
+   using(var geometry=new BinaryWriter(File.Create(Path.Combine(output,"Geometry.bin"))))foreach(float phase in phases){
+    flower.SetBloomProgress(phase);scan.Sample(phase);scan.FindContacts(hits,focusLayer:2,parallel:true);Check(!hits.Exists(h=>h.petalA==h.petalB&&!h.rootRegion),"Inner self intersection "+phase);
+    for(int i=0;i<5;i++){int a=Array.FindIndex(scan.Petals,p=>p.layer==2&&p.index==i),b=Array.FindIndex(scan.Petals,p=>p.layer==2&&p.index==(i+4)%5);scan.FindPairContacts(a,b,hits);int count=hits.FindAll(h=>!h.rootRegion&&h.lengthA>.25f&&h.lengthB>.25f).Count;csv.AppendFormat(Inv,"{0},{1},{2},{3},{4}\n",phase,i,(i+4)%5,count,hits.FindAll(h=>h.rootRegion).Count);if(phase<.6f)Check(count==0,"Inner clearance "+phase+" petal "+i);}
+    if(Arg("-innerScreens","0")=="1"||phase==0||phase==.3f||phase==.5f||phase==.58f||phase==.6f){Shot("Top_"+phase,0,90,7);Shot("View_"+phase,22,55,7);if(phase==.5f)for(int i=0;i<5;i++){flower.SoloPetal(2,i);flower.SetPetalVisible(2,(i+4)%5,true);Shot("Pair_"+i,0,65,6);flower.ShowAllPetals();}}
+    if(Arg("-innerSide","0")=="1")Shot("Side_"+phase,90,25,7);
+    scan.FindAllPairContacts(hits);var detail=new StringBuilder("a,b,tA,tB,sA,sB,root\n");foreach(var h in hits)if(scan.Petals[h.petalA].layer==2||scan.Petals[h.petalB].layer==2)detail.AppendFormat(Inv,"{0},{1},{2},{3},{4},{5},{6}\n",scan.Petals[h.petalA].id,scan.Petals[h.petalB].id,h.lengthA,h.lengthB,h.widthA,h.widthB,h.rootRegion);File.WriteAllText(Path.Combine(output,"Contacts_"+phase+".csv"),detail.ToString());
+    for(int i=0;i<5;i++){var v=new Vector3[129*81];flower.SampleDiagnosticSurface(2,i,phase,v);foreach(var q in v){geometry.Write(q.x);geometry.Write(q.y);geometry.Write(q.z);}}
+    Check(flower.RootAnchorError()<1e-5f,"Roots "+phase);Check(flower.BottomIsolationCheck(),"Protected vertices "+phase);yield return null;
+   }
+   File.WriteAllText(Path.Combine(output,"InnerContacts.csv"),csv.ToString());bool innerFailed=checks.Exists(c=>c.StartsWith("FAIL"));
+#if UNITY_EDITOR
+   if(!innerFailed&&Arg("-innerSave","0")=="1"&&Array.IndexOf(Environment.GetCommandLineArgs(),"-innerReference")<0)flower.SaveBottomCache();UnityEditor.EditorApplication.Exit(innerFailed?2:0);
+#else
+   Application.Quit(innerFailed?2:0);
+#endif
+   yield break;
+  }
+  if(Arg("-middleFlow","0")=="1") {
+   var scan=new FlowerSurfaceCollision(flower);var hits=new List<FlowerSurfaceCollision.Contact>();var csv=new StringBuilder("phase,petal,contacts\n");
+   var phases=new SortedSet<float>(new[]{0f,.1f,.2f,.53f,.55f,.58f,1f});for(int k=0;k<=50;k++)phases.Add(.25f+k*.005f);
+   using(var geometry=new BinaryWriter(File.Create(Path.Combine(output,"Geometry.bin"))))foreach(float phase in phases){
+    flower.SetBloomProgress(phase);scan.Sample(phase);scan.FindContacts(hits,focusLayer:1,parallel:true);Check(!hits.Exists(h=>h.petalA==h.petalB&&!h.rootRegion),"No self intersection "+phase);
+    for(int i=0;i<6;i++){scan.FindPairContacts(7+i,7+(i+5)%6,hits);int count=hits.FindAll(h=>!h.rootRegion&&h.lengthA>.25f&&h.lengthB>.25f).Count;csv.AppendFormat(Inv,"{0},{1},{2}\n",phase,i,count);if(phase<.47f)Check(count==0,"Middle clearance "+phase+" petal "+i);
+     var v=new Vector3[129*81];flower.SampleDiagnosticSurface(1,i,phase,v);foreach(var q in v){geometry.Write(q.x);geometry.Write(q.y);geometry.Write(q.z);}}
+    if(phase>=.25f&&phase<=.5f){int k=Mathf.RoundToInt((phase-.25f)*200);Shot("Frame_"+k.ToString("000"),22,55,10);Shot("Side_"+k.ToString("000"),90,25,10);if(k%5==0)Shot("Top_"+k.ToString("000"),0,90,10);if(k==24)for(int az=0;az<360;az+=45)Shot("FlowOrbit_"+az,az,55,10);}
+    Check(flower.RootAnchorError()<1e-5f,"Roots "+phase);Check(flower.BottomIsolationCheck(),"Protected vertices "+phase);yield return null;
+   }
+   File.WriteAllText(Path.Combine(output,"Contacts.csv"),csv.ToString());File.WriteAllText(Path.Combine(output,"Phases.txt"),string.Join("\n",phases));bool flowFailed=checks.Exists(c=>c.StartsWith("FAIL"));
+#if UNITY_EDITOR
+   if(!flowFailed)flower.SaveBottomCache();UnityEditor.EditorApplication.Exit(flowFailed?2:0);
+#else
+   Application.Quit(flowFailed?2:0);
+#endif
+   yield break;
+  }
   if(Arg("-middle47","0")=="1") {
    var scan=new FlowerSurfaceCollision(flower);var hits=new List<FlowerSurfaceCollision.Contact>();
    var csv=new StringBuilder("phase,petal,neighbor,contacts\n");

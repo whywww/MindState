@@ -322,6 +322,7 @@ GameObject:
   - component: {fileID: 1096601215}
   - component: {fileID: 1096601214}
   - component: {fileID: 1096601213}
+  - component: {fileID: 1096601217}
   m_Layer: 0
   m_Name: Flower Gallery Camera
   m_TagString: MainCamera
@@ -604,3 +605,19 @@ SceneRoots:
   - {fileID: 702503799}
   - {fileID: 86799806}
   - {fileID: 1096601216}
+--- !u!114 &1096601217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096601212}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 667e9a48a6aa4383aee5adb02b5e2c33, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  flower: {fileID: 813119313001454442}
+  settings:
+    host: 127.0.0.1
+    port: 13856
