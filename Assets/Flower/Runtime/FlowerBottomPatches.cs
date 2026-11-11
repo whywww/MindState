@@ -244,6 +244,9 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
   }
 #if UNITY_EDITOR
   BuildUpperCorners();
+  BuildLayerPatches();
+  SmoothOuterPatches();
+  BuildOuterResidualPatches();
 #endif
  }
  internal long BottomPatchCacheBytes {get{long bytes=0;foreach(var p in bottomPatches)bytes+=(p.ids.Length+p.upperIds.Length+p.extraIds.Length)*33L*12;return bytes;}}

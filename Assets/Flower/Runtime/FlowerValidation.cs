@@ -142,15 +142,12 @@ namespace MindState
                 yield return Capture("09_MiddleFixedTop_"+(phase*100).ToString("000"),0,90,6.2f);
             }
             foreach(var renderer in renderers) renderer.enabled=true;
-            for(int i=1;i<4;i++)
+            for(int i=0;i<=4;i++)
             {
                 flower.SetBloomProgress(i*.25f);
                 yield return Capture("10_AllTop_"+(i*25).ToString("000"),0,90,6.2f);
                 yield return Capture("10_AllView_"+(i*25).ToString("000"),22,55,6.2f);
             }
-            flower.SetBloomProgress(1);
-            yield return Capture("10_AllTop_100",0,90,6.2f);
-            yield return Capture("10_AllView_100",22,55,6.2f);
             flower.SetBloomProgress(.99f); flower.SetBloomProgress(1);
             File.WriteAllText(Path.Combine(output,"ClosureMetrics.csv"),closureMetrics.ToString());
             var report=new Report { unity=Application.unityVersion,device=SystemInfo.deviceModel,cpu=SystemInfo.processorType,gpu=SystemInfo.graphicsDeviceName,petals=flower.PetalCount,sharedMeshes=flower.SharedMeshCount,poseCacheBytes=flower.CacheBytes,geometryBytes=flower.GeometryBytes,initializationMs=flower.InitializationMilliseconds,interpolationMaxError=flower.MaxCachePositionError,normalMaxAngle=flower.MaxCacheNormalAngle,rootAnchorMaxError=flower.RootAnchorError(),renderers=flower.GetComponentsInChildren<MeshRenderer>().Length };

@@ -251,7 +251,7 @@ MonoBehaviour:
       widePleatCount: 2
       surfaceDetail: 0.6
       rimVariation: 0.7
-      closureBendDegrees: 62
+      closureBendDegrees: 42
       closureSideLeftDegrees: 45
       closureSideRightDegrees: 42
       softFolds: 1
