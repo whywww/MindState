@@ -38,7 +38,7 @@ namespace MindState {
     float colorMix=.12f+.12f*(.5f+.5f*Wander(seed+17,t*.29f));
     c=Color.Lerp(c,i==2?appearance.lavender:appearance.pearl,colorMix);
     c=Color.Lerp(c,appearance.pearl,.10f);
-    c=Color.Lerp(c,ArtAccentColor,.14f);
+    c=Color.Lerp(c,ArtAccentColor,.28f);
     l.color=c;
     l.intensity=appearance.coloredLightIntensity*ArtLightGain*(.9f+.1f*Wander(seed+23,t*.53f));
     l.spotAngle=appearance.coloredLightAngle+Wander(seed+29,t*.31f)*7;

@@ -19,10 +19,10 @@ namespace MindState
     public sealed partial class FlowerAssembler
     {
         public FlowerArtProfile[] artProfiles={
-            new FlowerArtProfile(.35f,12,.88f),
-            new FlowerArtProfile(0,5,0f), // Gathering uses the original cached path.
-            new FlowerArtProfile(3.2f,9,1f),
-            new FlowerArtProfile(1.4f,14,.64f)};
+            new FlowerArtProfile(1.5f,8,.90f),
+            new FlowerArtProfile(0,5,.13f), // Gathering keeps the narrow bud silhouette.
+            new FlowerArtProfile(4f,9,1f),
+            new FlowerArtProfile(1.4f,14,.35f)};
         public FlowerArtLook[] artLooks;
         public FlowerArtInput ArtInput { get; private set; }
         public Vector4 ArtWeights { get; private set; }=new Vector4(1,0,0,0);
@@ -47,12 +47,21 @@ namespace MindState
         float artTime,artYaw,lastValid=float.NegativeInfinity;
         Vector4 artTarget=new Vector4(1,0,0,0);
         Vector4 artFrom=new Vector4(1,0,0,0),artDestination=new Vector4(1,0,0,0);
-        float artTransitionTime=9;
-        const float ArtTransitionDuration=9,ArtStreamSmoothing=3;
-        // Display-side mapping: 180 s median baseline, 0.5 s sampling, light sharpening.
+        Color previewAccentFrom=Color.white,previewAccentTo=Color.white,artAccentCurrent=Color.white,artAccentSmooth=Color.white;
+        int accentCommitted;
+        float artTransitionTime=6;
+        const float ArtTransitionDuration=6,ArtStreamSmoothing=2.5f,ShapeSmoothing=2.5f,AccentSmoothing=1.8f,AccentCommitMargin=.45f;
+        // Raw attention/relaxation drive the silk thread's route. They are smoothed separately from
+        // the four-state commitment so slider moves keep reshaping the path even while the picture
+        // stays committed to one state.
+        public float ShapeAttention=>shapeAttention;
+        public float ShapeRelaxation=>shapeRelaxation;
+        float shapeAttention=.5f,shapeRelaxation=.5f,shapeAttentionTarget=.5f,shapeRelaxationTarget=.5f;
+        static readonly Vector2[] ShapePresets={new Vector2(.8f,.8f),new Vector2(.8f,.2f),new Vector2(.2f,.8f),new Vector2(.2f,.2f)};
+        // Display-side mapping: 180 s median baseline plus a committed softmax choice.
         const int BaselineCapacity=360;
-        const float BaselineInterval=.5f,BaselineAbsoluteGain=2.2f,BaselineRelativeGain=.8f,BaselineDeadband=.015f;
-        const float WeightSharpness=2.2f,TieThreshold=.03f,TieLean=.05f;
+        const float BaselineInterval=.5f,BaselineAbsoluteGain=3f,BaselineRelativeGain=.8f,BaselineDeadband=.015f;
+        const float SoftmaxSharpness=16f,DominantSwitchMargin=.02f,TieThreshold=.03f,TieLean=.05f;
         readonly float[] baselineAttention=new float[BaselineCapacity];
         readonly float[] baselineRelaxation=new float[BaselineCapacity];
         readonly float[] baselineScratchA=new float[BaselineCapacity];
@@ -62,10 +71,10 @@ namespace MindState
         // All modes share the standard opening path and global correction clock.
         float StandardLayerProgress(FlowerLayer c,float global)=>Mathf.Clamp01((global*BloomDuration-c.delay)/Mathf.Max(1,c.duration));
         static FlowerArtLook[] CreateDefaultLooks()=>new[]{
-            new FlowerArtLook(new Color(.92f,.97f,1f),.08f,1f,1f,.05f,.26f,.06f,.04f,1.06f,.6f,0f,0f,3.5f),
-            new FlowerArtLook(new Color(1f,.86f,.72f),.12f,1f,1f,.02f,.1f,.04f,.02f,.92f,.4f,0f,0f,0f),
-            new FlowerArtLook(new Color(.86f,.8f,1f),.12f,.98f,.98f,0f,.14f,.05f,0f,1f,1.6f,0f,2f,0f),
-            new FlowerArtLook(new Color(.78f,.75f,.82f),.16f,.86f,.78f,-.05f,.02f,.015f,-.08f,.82f,.5f,-6f,0f,0f)};
+            new FlowerArtLook(new Color(.62f,.91f,.99f),.86f,.98f,1.08f,.25f,.40f,0f,.04f,1.12f,.5f,0f,0f,2f),
+            new FlowerArtLook(new Color(.98f,.68f,.32f),.82f,.98f,.98f,.12f,.18f,.06f,.02f,1.05f,.35f,0f,0f,0f),
+            new FlowerArtLook(new Color(.52f,.60f,1f),.86f,1.01f,1.08f,.10f,.20f,.03f,0f,1.02f,1.8f,0f,2.5f,.4f),
+            new FlowerArtLook(new Color(.58f,.42f,.62f),.82f,.82f,.80f,-.04f,.04f,.01f,-.10f,.74f,.3f,-7.5f,0f,0f)};
         public void EnsureArtLooks()
         {
             if(artLooks!=null&&artLooks.Length==4&&artLooks[0].lightGain>.01f&&artLooks[0].brightness>.01f) return;
@@ -77,11 +86,9 @@ namespace MindState
         {
             EnsureArtLooks();
             var look=new FlowerArtLook();
-            look.accent=Color.black;
             for(int i=0;i<4;i++)
             {
                 var s=artLooks[i];float w=weights[i];
-                look.accent+=s.accent*w;
                 look.huePull+=s.huePull*w;look.brightness+=s.brightness*w;look.saturation+=s.saturation*w;
                 look.gloss+=s.gloss*w;look.rim+=s.rim*w;look.selfGlow+=s.selfGlow*w;look.exposure+=s.exposure*w;
                 look.lightGain+=s.lightGain*w;look.lightDrift+=s.lightDrift*w;
@@ -89,6 +96,39 @@ namespace MindState
             }
             return look;
         }
+        // The picture picks one color family; the runner-up only shades it. Averaging all four
+        // accents during a mixed state is what used to turn the flower into gray-pink.
+        static void LeadingPair(Vector4 weights,out int top,out int second,out float margin)
+        {
+            top=0;
+            for(int i=1;i<4;i++) if(weights[i]>weights[top]) top=i;
+            second=top==0?1:0;
+            for(int i=0;i<4;i++) if(i!=top&&weights[i]>weights[second]) second=i;
+            margin=weights[top]-weights[second];
+        }
+        // Commits the color family only once a leader is clearly ahead; never mutates state so the
+        // delayed echo and validation can ask for a color without disturbing the live flower.
+        void CommitAccent(Vector4 weights)
+        {
+            LeadingPair(weights,out int top,out _,out float margin);
+            if(margin>=AccentCommitMargin) accentCommitted=top;
+        }
+        int LeadingState(Vector4 weights)
+        {
+            LeadingPair(weights,out int top,out _,out _);
+            return top;
+        }
+        // A tie keeps the committed color; the switch happens at a clear lead and the shared
+        // filter below turns that step into a drift.
+        Color CommittedAccent()
+        {
+            EnsureArtLooks();
+            return artLooks[accentCommitted].accent;
+        }
+        internal Color AccentFor(Vector4 weights)=>CommittedAccent();
+        // One step of the shared color filter; exposed so validation can prove per-frame continuity.
+        internal static Color SmoothAccentStep(Color current,Color target,float dt)
+            =>Color.Lerp(current,target,1-Mathf.Exp(-Mathf.Max(0f,dt)/AccentSmoothing));
         void AdvanceArtWeights(float dt)
         {
             if(ArtInput!=FlowerArtInput.Preview)
@@ -109,6 +149,12 @@ namespace MindState
         public void SetArtState(FlowerArtState state)
         {
             int i=(int)state; if(i<0||i>3) return;
+            EnsureArtLooks();
+            // Preview crossfades straight between two accents instead of passing through a mix.
+            previewAccentFrom=artActive?artAccentCurrent:artLooks[i].accent;
+            previewAccentTo=artLooks[i].accent;
+            accentCommitted=i;
+            shapeAttentionTarget=ShapePresets[i].x;shapeRelaxationTarget=ShapePresets[i].y;
             EnterArt(); ArtInput=FlowerArtInput.Preview; artTarget=Vector4.zero; artTarget[i]=1;
         }
         public void WaitForArtBrain() { EnterArt(); ArtInput=FlowerArtInput.External; lastValid=float.NegativeInfinity; }
@@ -118,8 +164,10 @@ namespace MindState
             if(!signalValid||!Finite(attention01)||!Finite(relaxation01)) return;
             float a=Mathf.Clamp01(attention01),r=Mathf.Clamp01(relaxation01);
             RawBrainWeights=BrainArtWeights(a,r);
+            shapeAttentionTarget=a;shapeRelaxationTarget=r;
             PushBaseline(a,r);
             artTarget=MapDisplayWeights(a,r);
+            CommitAccent(artTarget);
             lastValid=Time.realtimeSinceStartup;
         }
         public static Vector4 BrainArtWeights(float a,float r)
@@ -149,13 +197,6 @@ namespace MindState
             medianRelaxation=baselineScratchR[baselineCount/2];
         }
         static float Deadband(float x)=>x>BaselineDeadband?x-BaselineDeadband:x<-BaselineDeadband?x+BaselineDeadband:0f;
-        static Vector4 Sharpen(Vector4 w)
-        {
-            float x=Mathf.Pow(Mathf.Max(0,w.x),WeightSharpness),y=Mathf.Pow(Mathf.Max(0,w.y),WeightSharpness);
-            float z=Mathf.Pow(Mathf.Max(0,w.z),WeightSharpness),u=Mathf.Pow(Mathf.Max(0,w.w),WeightSharpness);
-            float sum=x+y+z+u;
-            return sum>1e-6f?new Vector4(x/sum,y/sum,z/sum,u/sum):new Vector4(1,0,0,0);
-        }
         Vector4 MapDisplayWeights(float a,float r)
         {
             float nA=.5f+.5f*(float)Math.Tanh(BaselineAbsoluteGain*(a-.5f)+BaselineRelativeGain*Deadband(a-medianAttention));
@@ -163,26 +204,41 @@ namespace MindState
             var w=BrainArtWeights(nA,nR);
             float max=w.x,min=w.x;int dominant=0;
             for(int i=1;i<4;i++){max=Mathf.Max(max,w[i]);min=Mathf.Min(min,w[i]);if(w[i]>w[dominant])dominant=i;}
-            w=Sharpen(w);
+            // A challenger must lead by a small margin before it takes over.
+            if(dominant!=lastDominant&&w[dominant]-w[lastDominant]<DominantSwitchMargin) dominant=lastDominant;
+            // Softmax over the four quadrants commits the picture to one state instead of averaging them.
+            var e=new Vector4(
+                Mathf.Exp(SoftmaxSharpness*w.x+(dominant==0?.6f:0)),
+                Mathf.Exp(SoftmaxSharpness*w.y+(dominant==1?.6f:0)),
+                Mathf.Exp(SoftmaxSharpness*w.z+(dominant==2?.6f:0)),
+                Mathf.Exp(SoftmaxSharpness*w.w+(dominant==3?.6f:0)));
+            float sum=e.x+e.y+e.z+e.w;
+            var result=sum>1e-6f?e/sum:new Vector4(1,0,0,0);
             if(max-min<TieThreshold)
             {
                 var lean=Vector4.zero;lean[lastDominant]=1f;
-                w=Vector4.Lerp(w,lean,TieLean);
+                result=Vector4.Lerp(result,lean,TieLean);
+                sum=result.x+result.y+result.z+result.w;
+                result=sum>1e-6f?result/sum:new Vector4(1,0,0,0);
             }
-            float sum=w.x+w.y+w.z+w.w;
-            w=sum>1e-6f?w/sum:new Vector4(1,0,0,0);
             lastDominant=dominant;
-            return w;
+            return result;
         }
         void EnterArt()
         {
             if(artActive) return;
             autoPlay=false; bloomProgress=1; ApplyPose(); bottomProgress=-1; artActive=true;
+            EnsureArtLooks();
+            LeadingPair(ArtWeights,out int top,out _,out _);
+            accentCommitted=top;
+            artAccentSmooth=artAccentCurrent=artLooks[top].accent;
+            ShowArtExtras();
         }
         void LeaveArt()
         {
             if(!artActive) return;
-            artActive=false; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localScale=Vector3.one;
+            artActive=false; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localPosition=Vector3.zero; generated.localScale=Vector3.one;
+            HideArtExtras();
             foreach(var l in layers) { l.progress=-1; foreach(var p in l.petals) {
                 p.block.SetVector(ArtWeightsId,Vector4.zero); p.block.SetVector("_ArtLightWeights",Vector4.zero);
                 p.block.SetVector("_StateTint",new Vector4(1,1,0,0)); p.block.SetVector("_StateAccent",(Vector4)Color.white.linear); p.block.SetVector("_StateSurface",Vector4.zero);
@@ -191,9 +247,9 @@ namespace MindState
             if(naturalLights!=null) UpdateNaturalLights();
         }
         public void ResetArt()
-        { artTime=artYaw=0; ResetFlowPhase(); frozen=false; ArtWeights=ArtLightWeights=artFrom=artDestination=new Vector4(1,0,0,0); RawBrainWeights=new Vector4(1,0,0,0); artTransitionTime=ArtTransitionDuration; ArtExposureOffset=0;ArtSaturation=1;ArtAccentColor=Color.white;ArtLightGain=ArtLightDrift=1; ResetBrainBaseline(); SetArtState(FlowerArtState.Clarity); }
+        { artTime=artYaw=0; ResetFlowPhase(); frozen=false; ArtWeights=ArtLightWeights=artFrom=artDestination=new Vector4(1,0,0,0); RawBrainWeights=new Vector4(1,0,0,0); artTransitionTime=ArtTransitionDuration; ArtExposureOffset=0;ArtSaturation=1;ArtAccentColor=Color.white;ArtLightGain=ArtLightDrift=1; ResetBrainBaseline(); SetArtState(FlowerArtState.Clarity); EnsureArtLooks(); accentCommitted=0; artAccentSmooth=artAccentCurrent=artLooks[0].accent; shapeAttention=shapeAttentionTarget=ShapePresets[0].x; shapeRelaxation=shapeRelaxationTarget=ShapePresets[0].y; ResetRibbonThread(); }
         public void SetArtPreviewImmediate(FlowerArtState state)
-        { SetArtState(state); ArtWeights=ArtLightWeights=artTarget; artFrom=artDestination=artTarget; artTransitionTime=ArtTransitionDuration; artTime=artYaw=0; ResetFlowPhase(); UpdateArt(0); }
+        { SetArtState(state); ArtWeights=ArtLightWeights=artTarget; artFrom=artDestination=artTarget; artTransitionTime=ArtTransitionDuration; artTime=artYaw=0; ResetFlowPhase(); accentCommitted=(int)state; artAccentSmooth=artAccentCurrent=artLooks[(int)state].accent; shapeAttention=shapeAttentionTarget=ShapePresets[(int)state].x; shapeRelaxation=shapeRelaxationTarget=ShapePresets[(int)state].y; ResetRibbonThread(); UpdateArt(0); }
         float FlowSpeed(){var periods=appearance!=null?appearance.flowPeriods:new Vector4(12,10,9,18);float speed=0;for(int i=0;i<4;i++)speed+=ArtLightWeights[i]/Mathf.Max(1,periods[i]);return speed;}
         void UpdateArt(float dt)
         {
@@ -204,16 +260,46 @@ namespace MindState
                 ArtLightWeights=Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/ArtStreamSmoothing));
                 artYaw=Mathf.Repeat(artYaw+BlendLook(ArtWeights).yawSpeed*dt,360);
                 ArtFlowPhase=Mathf.Repeat(ArtFlowPhase+dt*FlowSpeed(),1);
+                float shapeStep=1f-Mathf.Exp(-dt/ShapeSmoothing);
+                shapeAttention=Mathf.Lerp(shapeAttention,shapeAttentionTarget,shapeStep);
+                shapeRelaxation=Mathf.Lerp(shapeRelaxation,shapeRelaxationTarget,shapeStep);
             }
             var look=BlendLook(ArtWeights);
             var lightLook=BlendLook(ArtLightWeights);
+            Color accentTarget;
+            if(ArtInput==FlowerArtInput.Preview)
+            {
+                float accentTime=ArtTransitionDuration>0?Mathf.Clamp01(artTransitionTime/ArtTransitionDuration):1f;
+                accentTarget=Color.Lerp(previewAccentFrom,previewAccentTo,Mathf.SmoothStep(0,1,accentTime));
+            }
+            else
+            {
+                CommitAccent(ArtWeights);
+                accentTarget=CommittedAccent();
+            }
+            // A shared first-order filter bounds how fast the color can move, so violent input
+            // swings read as a drift instead of a hard cut. Preview already crossfades over six
+            // seconds, so it maps straight through.
+            if(!frozen) artAccentSmooth=ArtInput==FlowerArtInput.Preview?accentTarget:SmoothAccentStep(artAccentSmooth,accentTarget,dt);
+            look.accent=artAccentSmooth;
+            lightLook.accent=artAccentSmooth;
+            artAccentCurrent=artAccentSmooth;
             ArtExposureOffset=look.exposure;ArtSaturation=look.saturation;
             ArtLightGain=lightLook.lightGain;ArtLightDrift=lightLook.lightDrift;ArtAccentColor=lightLook.accent;
             UpdateNaturalLights();
-            generated.localRotation=Quaternion.Euler(0,artYaw,0);
+            bool suppress=false;
+#if UNITY_EDITOR || FLOWER_VALIDATION
+            suppress=suppressArtMotion;
+#endif
+            // The whole flower leans for Wandering and nods for Quiet; Clarity and Gathering stay upright.
+            float pitch=suppress?0:4f*ArtWeights.w;
+            float sideLean=suppress?0:5f*ArtWeights.z;
+            float lift=suppress?0:(.01f*ArtWeights.z-.05f*ArtWeights.w);
+            generated.localRotation=Quaternion.Euler(pitch,artYaw,sideLean);
+            generated.localPosition=new Vector3(0,lift,0);
             generated.localScale=Vector3.one;
             float gathering=ArtWeights.y;
-            float bud=.04f+.03f*(1-Mathf.Cos(artTime*Mathf.PI*2/5));
+            float bud=artProfiles[1].openness+.03f*(1-Mathf.Cos(artTime*Mathf.PI*2/5))*.5f;
             float other=ArtWeights.x+ArtWeights.z+ArtWeights.w;
             float open=other>1e-6f?(ArtWeights.x*artProfiles[0].openness+ArtWeights.z*artProfiles[2].openness+ArtWeights.w*artProfiles[3].openness)/other:1f;
             // A shared layer phase drives geometry, transform and sparse correction sampling.
@@ -222,26 +308,13 @@ namespace MindState
             Vector4 stateTint=new Vector4(look.brightness,look.saturation,0,0);
             Vector4 stateAccent=(Vector4)look.accent.linear;
             Vector4 stateSurface=new Vector4(look.huePull,look.rim,look.selfGlow,look.gloss);
-            float quietDroop=look.droop;
-            float wanderRoll=look.asym;
             for(int k=0;k<layers.Length;k++)
             {
                 var l=layers[k];
                 for(int j=0;j<l.petals.Length;j++)
                 {
-                    var p=l.petals[j]; float az=j*Mathf.PI*2/l.petals.Length,tilt=0,roll=0;
-                    for(int i=0;i<4;i++)
-                    {
-                        if(i==1) continue;
-                        var profile=artProfiles[i]; float period=profile.period;
-                        if(i==2) period=6.5f+4*Mathf.Repeat((j+1)*.618034f+k*.37f,1);
-                        float phase=i==2?az+k*.9f:i==3?-az-k*.5f:0;
-                        float motion=profile.amplitude*Mathf.Sin(artTime*Mathf.PI*2/period+phase);
-                        tilt+=ArtWeights[i]*motion;
-                    }
-                    // Quiet droops from the outer layer inward; Wandering adds a deterministic per-petal roll.
-                    tilt+=quietDroop*(k==0?1.2f:.7f);
-                    roll+=wanderRoll*Mathf.Sin((j+1)*1.7f+k*.9f);
+                    var p=l.petals[j]; float az=j*Mathf.PI*2/l.petals.Length;
+                    PetalArtMotion(ArtWeights,artTime,az,k,j,out float tilt,out float roll);
                     PathPetalPose(l,p,j,StandardLayerProgress(l.config,bloomProgress),out var position,out var rotation,out var scale);
 #if UNITY_EDITOR || FLOWER_VALIDATION
                     if(suppressArtMotion){ tilt=0; roll=0; }
@@ -258,6 +331,25 @@ namespace MindState
                     p.renderer.SetPropertyBlock(p.block);
                 }
             }
+            if(echoPetals!=null) UpdateEcho(dt);
+            if(ribbonThread!=null) UpdateRibbons(dt);
+        }
+        // Shared by the main flower and the delayed echo; i == 1 (Gathering) is carried by the bud shape.
+        void PetalArtMotion(Vector4 weights,float time,float az,int layer,int petal,out float tilt,out float roll)
+        {
+            tilt=0;
+            for(int i=0;i<4;i++)
+            {
+                if(i==1) continue;
+                var profile=artProfiles[i]; float period=profile.period;
+                if(i==2) period=7f+4*Mathf.Repeat((petal+1)*.618034f+layer*.37f,1);
+                float phase=i==2?az+layer*.9f:i==3?-az-layer*.5f:0;
+                tilt+=weights[i]*profile.amplitude*Mathf.Sin(time*Mathf.PI*2/period+phase);
+            }
+            var look=BlendLook(weights);
+            // Quiet droops from the outer layer inward; Wandering adds a deterministic per-petal roll.
+            tilt+=look.droop*(layer==0?1.2f:.7f);
+            roll=look.asym*Mathf.Sin((petal+1)*1.7f+layer*.9f);
         }
     }
 }

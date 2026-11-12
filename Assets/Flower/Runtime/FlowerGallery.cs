@@ -14,7 +14,7 @@ namespace MindState
         Texture2D panel;
         Font font;
         bool dragging,showFps;
-        const float SliderSyncDuration=9;
+        const float SliderSyncDuration=6;
         static readonly Vector2[] ArtTargets={new Vector2(.8f,.8f),new Vector2(.8f,.2f),new Vector2(.2f,.8f),new Vector2(.2f,.2f)};
         static readonly Vector2[] StateCorners={new Vector2(1,1),new Vector2(1,0),new Vector2(0,1),new Vector2(0,0)};
         float attention=.5f,relaxation=.5f,fps, fpsTime;
@@ -29,7 +29,7 @@ namespace MindState
         public void SetView(float az,float el,float d=-1)
         {
             azimuth=az; elevation=el;
-            if(flower!=null&&flower.Ready) { focus=flower.FullBloomBounds.center; var cameraComponent=GetComponent<Camera>(); distance=d>0?d:flower.FitCameraDistance(ViewRotation(),cameraComponent.fieldOfView,cameraComponent.aspect); }
+            if(flower!=null&&flower.Ready) { var cameraComponent=GetComponent<Camera>(); float fit=flower.FitCameraDistance(ViewRotation(),cameraComponent.fieldOfView,cameraComponent.aspect); var rotation=ViewRotation(); distance=d>0?d:fit*1.02f; focus=d>0?flower.FullBloomBounds.center:flower.FullBloomBounds.center-rotation*Vector3.right*(fit*.20f)+rotation*Vector3.up*(fit*.03f); }
             else if(d>0) distance=d;
             PositionCamera();
         }
@@ -56,7 +56,7 @@ namespace MindState
             if(Input.GetMouseButtonDown(0)&&!over) dragging=true;
             if(Input.GetMouseButtonUp(0)) dragging=false;
             if(dragging) { azimuth+=Input.GetAxis("Mouse X")*3; elevation=Mathf.Clamp(elevation-Input.GetAxis("Mouse Y")*2,-35,90); }
-            if(!over) distance=Mathf.Clamp(distance-Input.mouseScrollDelta.y*.3f,4,13);
+            if(!over) distance=Mathf.Clamp(distance-Input.mouseScrollDelta.y*.3f,4,16);
             PositionCamera();
             if(animatingSliders)
             {
@@ -110,7 +110,14 @@ namespace MindState
             Vector3 up=Mathf.Abs(elevation)>89?Vector3.forward:Vector3.up;
             Quaternion rotation=Quaternion.LookRotation(-dir,up);
             Vector3 target=focus-rotation*Vector3.right*(showInterface?.55f:0);
-            transform.SetPositionAndRotation(target+dir*distance,rotation);
+            // The bud and the quiet flower sit back in a slightly closer frame.
+            float dolly=1f;
+            if(flower!=null&&flower.ArtActive)
+            {
+                var weights=flower.ArtWeights;
+                dolly=Mathf.Lerp(1f,.84f,weights.y)*Mathf.Lerp(1f,.96f,weights.w);
+            }
+            transform.SetPositionAndRotation(target+dir*(distance*dolly),rotation);
         }
         void Styles()
         {
