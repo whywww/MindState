@@ -100,7 +100,7 @@ namespace MindState.BCI.BrainLink.Tests
             Check(input.ReadSnapshot().Usable && flower.ArtStatus=="外部脑电","New callback after reconnect resumes");
             var client=input.Client; input.enabled=false;
             Check(!client.IsWorkerAlive && !gallery.BrainLinkOwnsInput,"Disable releases worker and ownership");
-            Check(flower.ArtInput==FlowerArtInput.Preview,"Disable restores Clarity preview");
+            Check(flower.ArtInput==FlowerArtInput.External,"Disable returns to slider-controlled external input");
             input.enabled=true; yield return new WaitForSecondsRealtime(.2f);
             client=input.Client; input.enabled=false;
             Check(!client.IsWorkerAlive,"Second enable/disable leaves no worker");

@@ -74,8 +74,8 @@ namespace MindState.BCI.BrainLink
         {
             Client?.Dispose(); Client = null;
             if (enteredExternal && flower != null && flower.Ready)
-                flower.SetArtState(FlowerArtState.Clarity);
-            if (enteredExternal) Debug.Log("[BrainLink] Disabled; connection released; returned to Clarity.", this);
+                flower.WaitForArtBrain();
+            if (enteredExternal) Debug.Log("[BrainLink] Disabled; connection released; sliders resume control.", this);
             enteredExternal = false;
         }
         void OnDestroy() => OnDisable();

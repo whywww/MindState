@@ -61,7 +61,6 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
   Check(f.ArtTime==time&&f.MeshUpdates==uploads&&f.ArtWeights==frozenWeights,"Freeze preserves time, weights and mesh uploads");f.SetFrozen(false);
   f.ResetArt();f.MotionStep(0);Check(f.ArtWeights.x==1,"Reset to Clarity");
   f.SetBrainMetrics(float.NaN,1);f.MotionStep(0);Check(f.ArtWeights.x==1,"Invalid sample does not change weights");
-  f.SimulateArtBrain();for(int i=0;i<100;i++)f.MotionStep(.05f);Check(Mathf.Abs(f.ArtWeights.x+f.ArtWeights.y+f.ArtWeights.z+f.ArtWeights.w-1)<1e-5f,"Simulation weights normalized");
   f.SetBrainMetrics(.4f,.6f);yield return new WaitForSecondsRealtime(5.2f);f.MotionStep(0);Check(f.ArtStatus=="正在重新感知","External timeout");f.SetBrainMetrics(.4f,.6f);Check(f.ArtStatus=="外部脑电","External recovery");
   f.SetBloomProgress(.5f);Check(!f.ArtActive,"Manual preview exits art");f.PlayBloom();Check(f.autoPlay&&f.bloomProgress==0&&!f.frozen,"Replay resets opening");
   for(int state=0;state<4;state++){f.SetArtPreviewImmediate((FlowerArtState)state);Shot("State"+state);}

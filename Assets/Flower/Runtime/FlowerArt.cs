@@ -3,7 +3,7 @@ using UnityEngine;
 namespace MindState
 {
     public enum FlowerArtState { Clarity, Gathering, Wandering, Quiet }
-    public enum FlowerArtInput { Preview, Simulation, External }
+    public enum FlowerArtInput { Preview, External }
     [Serializable] public sealed class FlowerArtProfile
     {
         public float amplitude,period,openness;
@@ -21,7 +21,7 @@ namespace MindState
         public Vector4 ArtLightWeights { get; private set; }=new Vector4(1,0,0,0);
         public bool ArtActive=>artActive;
         public float ArtTime=>artTime;
-        public string ArtStatus=>!artActive?"开合预览":ArtInput==FlowerArtInput.Preview?"单态预览":ArtInput==FlowerArtInput.Simulation?"模拟脑电":Time.realtimeSinceStartup-lastValid>5?"正在重新感知":"外部脑电";
+        public string ArtStatus=>!artActive?"开合预览":ArtInput==FlowerArtInput.Preview?"单态预览":Time.realtimeSinceStartup-lastValid>5?"正在重新感知":"外部脑电";
         bool artActive;
 #if UNITY_EDITOR || FLOWER_VALIDATION
         internal bool suppressArtMotion;
@@ -55,7 +55,6 @@ namespace MindState
             int i=(int)state; if(i<0||i>3) return;
             EnterArt(); ArtInput=FlowerArtInput.Preview; artTarget=Vector4.zero; artTarget[i]=1;
         }
-        public void SimulateArtBrain() { EnterArt(); ArtInput=FlowerArtInput.Simulation; }
         public void WaitForArtBrain() { EnterArt(); ArtInput=FlowerArtInput.External; lastValid=float.NegativeInfinity; }
         public void SetBrainMetrics(float attention01,float relaxation01,bool signalValid=true)
         {
@@ -86,7 +85,6 @@ namespace MindState
             if(!frozen)
             {
                 artTime+=dt;
-                if(ArtInput==FlowerArtInput.Simulation) artTarget=BrainArtWeights(.5f+.48f*Mathf.Sin(artTime*.19f),.5f+.48f*Mathf.Sin(artTime*.11f));
                 if(ArtInput==FlowerArtInput.External&&Time.realtimeSinceStartup-lastValid>5) artTarget=new Vector4(0,0,0,1);
                 AdvanceArtWeights(dt);
                 ArtLightWeights=Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/ArtStreamSmoothing));
