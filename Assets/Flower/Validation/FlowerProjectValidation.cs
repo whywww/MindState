@@ -51,6 +51,19 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
   f.SetBloomProgress(.5f);int uploads=f.MeshUpdates;f.SetBloomProgress(.5f);Check(f.MeshUpdates==uploads,"Repeated progress does not upload base meshes");
   Check(f.VerifyPackedInterpolation().StartsWith("PASS"),"Packed interpolation matches reference");
   for(int state=0;state<4;state++)for(int sample=0;sample<3;sample++)Check(f.VerifyStandardArtPath((FlowerArtState)state,sample*1.25f),"Standard geometry and transforms state="+state+" sample="+sample);
+  f.ResetBrainBaseline();f.BrainBaselineFrozen=true;
+  Check(FlowerAssembler.BrainArtWeights(1,1)==new Vector4(1,0,0,0),"Raw corner Clarity");
+  Check(FlowerAssembler.BrainArtWeights(1,0)==new Vector4(0,1,0,0),"Raw corner Gathering");
+  Check(FlowerAssembler.BrainArtWeights(0,1)==new Vector4(0,0,1,0),"Raw corner Wandering");
+  Check(FlowerAssembler.BrainArtWeights(0,0)==new Vector4(0,0,0,1),"Raw corner Quiet");
+  f.SetBrainMetrics(.55f,.45f);var display55=f.DisplayWeights;
+  Check(Mathf.Abs(display55.x+display55.y+display55.z+display55.w-1)<1e-4f,"Display weights normalize");
+  Check(display55.y>=.36f,"55/45 forms a Gathering majority");
+  f.SetBrainMetrics(.65f,.35f);
+  Check(f.DisplayWeights.y>=.60f,"65/35 strengthens Gathering");
+  f.SetBrainMetrics(.5f,.5f);var mix=f.DisplayWeights;
+  Check(!float.IsNaN(mix.x)&&!float.IsNaN(mix.y)&&!float.IsNaN(mix.z)&&!float.IsNaN(mix.w),"Tie weights stay finite");
+  f.BrainBaselineFrozen=false;
   for(int from=0;from<4;from++)for(int to=0;to<4;to++)if(from!=to){
    f.SetArtPreviewImmediate((FlowerArtState)from);f.SetFrozen(false);f.SetArtState((FlowerArtState)to);
    var weights=f.ArtWeights;f.MotionStep(0);Check(f.ArtWeights==weights,"Retarget continuous "+from+" to "+to);
@@ -61,9 +74,13 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
   Check(f.ArtTime==time&&f.MeshUpdates==uploads&&f.ArtWeights==frozenWeights,"Freeze preserves time, weights and mesh uploads");f.SetFrozen(false);
   f.ResetArt();f.MotionStep(0);Check(f.ArtWeights.x==1,"Reset to Clarity");
   f.SetBrainMetrics(float.NaN,1);f.MotionStep(0);Check(f.ArtWeights.x==1,"Invalid sample does not change weights");
-  f.SetBrainMetrics(.4f,.6f);yield return new WaitForSecondsRealtime(5.2f);f.MotionStep(0);Check(f.ArtStatus=="正在重新感知","External timeout");f.SetBrainMetrics(.4f,.6f);Check(f.ArtStatus=="外部脑电","External recovery");
+  f.SetBrainMetrics(.4f,.6f);f.MotionStep(20);var held=f.ArtWeights;yield return new WaitForSecondsRealtime(5.2f);f.MotionStep(0);Check(f.ArtStatus=="正在重新感知","External timeout");
+  Check((f.ArtWeights-held).sqrMagnitude<1e-6f,"Timeout holds the last state");f.SetBrainMetrics(.4f,.6f);Check(f.ArtStatus=="外部脑电","External recovery");
   f.SetBloomProgress(.5f);Check(!f.ArtActive,"Manual preview exits art");f.PlayBloom();Check(f.autoPlay&&f.bloomProgress==0&&!f.frozen,"Replay resets opening");
   for(int state=0;state<4;state++){f.SetArtPreviewImmediate((FlowerArtState)state);Shot("State"+state);}
+  gallery.SetView(22,55,2.5f);
+  for(int state=0;state<4;state++){f.SetArtPreviewImmediate((FlowerArtState)state);Shot("State"+state+"_close");}
+  f.BrainBaselineFrozen=true;f.SetBrainMetrics(.5f,.5f);f.MotionStep(20);Shot("Mix");f.BrainBaselineFrozen=false;
   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-scanContacts")>=0){
    var scan=new FlowerSurfaceCollision(f);var hits=new List<FlowerSurfaceCollision.Contact>();var lines=new List<string>{"state,time,a,b,lengthA,lengthB,root"};
    for(int state=0;state<4;state++)for(int sample=0;sample<=12;sample++){

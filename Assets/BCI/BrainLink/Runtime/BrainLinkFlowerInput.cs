@@ -56,18 +56,23 @@ namespace MindState.BCI.BrainLink
             : new BrainLinkSnapshot { Status=error ?? (isActiveAndEnabled ? "Starting" : "Disabled in Inspector"),
                 Attention=-1, Meditation=-1, Signal=-1, Age=double.PositiveInfinity };
 
+        static string Percent(Vector4 w) => Mathf.RoundToInt(w.x * 100) + "/" + Mathf.RoundToInt(w.y * 100) + "/" + Mathf.RoundToInt(w.z * 100) + "/" + Mathf.RoundToInt(w.w * 100);
         // Drawn by FlowerGallery so F9 can also report a disabled component.
         public void DrawDiagnostics(GUIStyle style)
         {
             if (!ShowDiagnostics) return;
             var sample = ReadSnapshot();
-            GUI.Box(new Rect(1320, 30, 570, 240), GUIContent.none);
+            GUI.Box(new Rect(1320, 30, 570, 270), GUIContent.none);
             string values = sample.HasSample
                 ? $"专注度 attention: {sample.Attention} / 100\n放松度 meditation: {sample.Meditation} / 100\n佩戴信号 signal: {sample.Signal}（0 为良好）\n距最近数据: {sample.Age:F1}s" + (sample.Fresh ? "" : " · 已过期")
                 : "暂无数据";
-            GUI.Label(new Rect(1340, 44, 530, 220), "BrainLink Pro · F9 显示/隐藏\n"
+            string mapping = flower != null
+                ? "\n权重 原始 " + Percent(flower.RawBrainWeights) + " / 显示 " + Percent(flower.DisplayWeights)
+                  + " · 基线 " + Mathf.RoundToInt(flower.BaselineAttention * 100) + "/" + Mathf.RoundToInt(flower.BaselineRelaxation * 100)
+                : "";
+            GUI.Label(new Rect(1340, 44, 530, 240), "BrainLink Pro · F9 显示/隐藏\n"
                 + settings.host + ":" + settings.port + " · " + sample.State + "\n"
-                + "来源: " + (sample.Mode ?? "unknown") + "\n" + values, style);
+                + "来源: " + (sample.Mode ?? "unknown") + "\n" + values + mapping, style);
         }
 
         void OnDisable()

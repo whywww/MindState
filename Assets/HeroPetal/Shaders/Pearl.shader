@@ -16,6 +16,9 @@ Shader "MindState/Radial Pearl Silk"
         _ArtWeights ("Art weights", Vector) = (0,0,0,0)
         _ArtClock ("Art clock", Float) = 0
         _ArtPhase ("Art phase", Float) = 0
+        _StateTint ("State tint (brightness, saturation)", Vector) = (1,1,0,0)
+        _StateAccent ("State accent", Color) = (1,1,1,1)
+        _StateSurface ("State surface (hue, rim, glow, gloss)", Vector) = (0,0,0,0)
         _Breath ("Breathing", Float) = 0
         _RootTrim ("Petal root cut", Vector) = (0,0,0,0)
     }
@@ -32,6 +35,7 @@ Shader "MindState/Radial Pearl Silk"
         float4 _RootTrim; float4x4 _RootTrimWorldToFlower;
         float _TargetAppearance; float4 _RoseLinear,_PeachLinear,_LavenderLinear,_PearlLinear,_CyanLinear,_AppearancePlacement,_AppearanceSurface,_ArtLightWeights;
         float4 _ArtWeights; float _ArtClock,_ArtPhase;
+        float4 _StateTint,_StateSurface; half4 _StateAccent;
         struct Input { float2 uv_BumpMap; float3 viewDir; float3 worldPos; float3 worldNormal; INTERNAL_DATA };
         void surf(Input IN,inout SurfaceOutputStandardSpecular o)
         {
@@ -72,8 +76,6 @@ Shader "MindState/Radial Pearl Silk"
             float drifting=.5+.5*sin(uv.x*3+uv.y*2-_ArtClock*.45+_ArtPhase);
             float quiet=.5+.5*sin(_ArtClock*.448-_ArtPhase);
             float sheenMask=dot(_ArtWeights,float4(outward,inward,drifting,quiet*.5));
-            o.Smoothness=clamp(o.Smoothness+.04*sheenMask,.18,.44);
-            o.Emission+=base*.025*sheenMask;
             if(_TargetAppearance>.5)
             {
                 // Natural root-to-rim gradient with a soft pearl edge and subtle fresnel iridescence.
@@ -83,14 +85,27 @@ Shader "MindState/Radial Pearl Silk"
                 col=lerp(col,_PearlLinear.rgb,smoothstep(.66,.99,uv.y)*(.30+.14*_AppearancePlacement.y));
                 col*=lerp(.94,1.06,detail.r);
                 col=lerp(col,_LavenderLinear.rgb,.08*saturate(_AppearancePlacement.z*.5));
+                // Keep the pearl luminance while pulling gently toward the state accent.
+                float lum=dot(col,float3(.2126,.7152,.0722));
+                float accentLum=max(dot(_StateAccent.rgb,float3(.2126,.7152,.0722)),.001);
+                col=lerp(col,_StateAccent.rgb*(lum/accentLum),saturate(_StateSurface.x));
+                float gray=dot(col,float3(.2126,.7152,.0722));
+                col=lerp(gray.xxx,col,saturate(_StateTint.y))*_StateTint.x;
                 o.Albedo=col*1.04;
-                o.Smoothness=clamp(_AppearanceSurface.x+.06+(detail.r*2-1)*.035,.30,.52);
+                o.Smoothness=clamp(_AppearanceSurface.x+.06+(detail.r*2-1)*.035+_StateSurface.w,.22,.55);
                 o.Specular=half3(.040,.038,.044);
                 float fres=pow(1-saturate(dot(normalize(IN.viewDir),o.Normal)),3);
                 float irid=fres*(.30+.70*detail.b)*_AppearanceSurface.z;
                 float3 iridCol=lerp(_CyanLinear.rgb,_LavenderLinear.rgb,.35+.35*sin(uv.x*6.283+_ArtClock*.10));
-                o.Emission=col*.055+iridCol*irid*.12+col*_LightColor0.rgb*back*_AppearanceSurface.y*.35;
-
+                o.Emission=col*.055+iridCol*irid*.12+col*_LightColor0.rgb*back*_AppearanceSurface.y*.35
+                           +_StateAccent.rgb*fres*_StateSurface.y+col*_StateSurface.z;
+                o.Smoothness=clamp(o.Smoothness+.04*sheenMask,.22,.55);
+                o.Emission+=o.Albedo*.025*sheenMask;
+            }
+            else
+            {
+                o.Smoothness=clamp(o.Smoothness+.04*sheenMask,.18,.44);
+                o.Emission+=base*.025*sheenMask;
             }
             if(_GrayMode>0.5)
             {

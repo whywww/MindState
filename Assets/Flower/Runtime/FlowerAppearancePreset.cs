@@ -41,6 +41,7 @@ namespace MindState {
      b.SetVector("_AppearancePlacement",new Vector4(pink,v,k,1));
      b.SetTexture("_FlowPalette",flowPalette);
      b.SetVector("_AppearanceSurface",new Vector4(appearance.polish,appearance.transmission,appearance.cyanStrength,0));
+     b.SetVector("_StateTint",new Vector4(1,1,0,0));b.SetVector("_StateAccent",(Vector4)Color.white.linear);b.SetVector("_StateSurface",Vector4.zero);
     }
     p.renderer.SetPropertyBlock(b);
    }

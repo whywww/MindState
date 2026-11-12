@@ -1,6 +1,6 @@
 Shader "Hidden/MindState/GalleryPost"
 {
-    Properties { _MainTex ("Source", 2D) = "white" {} }
+    Properties { _MainTex ("Source", 2D) = "white" {} _Saturation ("Saturation", Float) = 1 }
     SubShader
     {
         Cull Off ZWrite Off ZTest Always
@@ -9,7 +9,7 @@ Shader "Hidden/MindState/GalleryPost"
         sampler2D _MainTex, _BloomTex;
         float4 _MainTex_TexelSize;
         float2 _Direction;
-        float _Bloom, _Exposure;
+        float _Bloom, _Exposure, _Saturation;
         half4 threshold(v2f_img i) : SV_Target
         {
             half3 c=tex2D(_MainTex,i.uv).rgb;
@@ -27,6 +27,8 @@ Shader "Hidden/MindState/GalleryPost"
         half4 composite(v2f_img i) : SV_Target
         {
             half3 c=(tex2D(_MainTex,i.uv).rgb+tex2D(_BloomTex,i.uv).rgb*_Bloom)*_Exposure;
+            half l=dot(c,half3(0.2126,0.7152,0.0722));
+            c=lerp(l.xxx,c,_Saturation);
             // ACES fitted filmic response; applied in linear space.
             c=saturate((c*(2.51*c+0.03))/(c*(2.43*c+0.59)+0.14));
             float2 q=(i.uv-0.5)*float2(1.0,0.8);

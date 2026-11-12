@@ -23,10 +23,8 @@ namespace MindState {
    naturalLightRoot.gameObject.SetActive(enabled);
    if(!enabled)return;
    // A shared, unwrapped clock preserves continuous trajectories through state changes.
-   float t=artTime*appearance.lightDriftSpeed;
+   float t=artTime*appearance.lightDriftSpeed*ArtLightDrift;
    Vector3 center=transform.TransformPoint(new Vector3(0,.9f,0));
-   var w=ArtLightWeights;
-   float energetic=.85f*w.x+1*w.y+1.1f*w.z+.65f*w.w;
    for(int i=0;i<naturalLights.Length;i++) {
     float seed=appearance.seed*.071f+i*19.37f;
     float angle=((i==0?230:i==1?125:20)+Wander(seed+1,t*.37f)*35)*Mathf.Deg2Rad;
@@ -40,9 +38,9 @@ namespace MindState {
     float colorMix=.12f+.12f*(.5f+.5f*Wander(seed+17,t*.29f));
     c=Color.Lerp(c,i==2?appearance.lavender:appearance.pearl,colorMix);
     c=Color.Lerp(c,appearance.pearl,.10f);
+    c=Color.Lerp(c,ArtAccentColor,.14f);
     l.color=c;
-    float stateBias=i==2?(.55f*w.x+1*w.y+.7f*w.z+.5f*w.w):(1*w.x+.65f*w.y+1*w.z+.85f*w.w);
-    l.intensity=appearance.coloredLightIntensity*(.8f+.2f*energetic)*stateBias*(.85f+.15f*Wander(seed+23,t*.53f));
+    l.intensity=appearance.coloredLightIntensity*ArtLightGain*(.9f+.1f*Wander(seed+23,t*.53f));
     l.spotAngle=appearance.coloredLightAngle+Wander(seed+29,t*.31f)*7;
    }
   }

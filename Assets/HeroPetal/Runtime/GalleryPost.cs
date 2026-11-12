@@ -6,10 +6,12 @@ namespace MindState
     public sealed class GalleryPost : MonoBehaviour
     {
         public Shader shader;
+        public FlowerAssembler flower;
         public bool bloom = false;
         [Range(0,1)] public float bloomStrength=0.14f;
         [Range(0.2f,3)] public float exposure=1.05f;
         Material material;
+        void Awake() { if(flower==null) flower=FindObjectOfType<FlowerAssembler>(); }
         void OnEnable() { if(shader!=null) material=new Material(shader) { hideFlags=HideFlags.HideAndDontSave }; }
         void OnRenderImage(RenderTexture source,RenderTexture destination)
         {
@@ -29,7 +31,10 @@ namespace MindState
             }
             material.SetTexture("_BloomTex",a!=null?(Texture)a:Texture2D.blackTexture);
             material.SetFloat("_Bloom",bloom?bloomStrength:0);
-            material.SetFloat("_Exposure",exposure);
+            float stateExposure=exposure,stateSaturation=1;
+            if(flower!=null) { stateExposure+=flower.ArtExposureOffset; stateSaturation=flower.ArtSaturation; }
+            material.SetFloat("_Exposure",Mathf.Clamp(stateExposure,.4f,1.5f));
+            material.SetFloat("_Saturation",Mathf.Clamp(stateSaturation,0,1.5f));
             Graphics.Blit(source,destination,material,2);
             if(a!=null) RenderTexture.ReleaseTemporary(a);
             if(b!=null) RenderTexture.ReleaseTemporary(b);
