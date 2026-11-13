@@ -6,6 +6,8 @@ Unity 2022.3.62f3c1 / Windows x64。主场景是 `Assets/Flower/Scenes/FlowerGal
 
 启动 `Builds/Windows/MindState.exe`，保留同目录的数据与 DLL。
 
+最终演示视频：[ClosingContinuity_10s.mp4](Outputs/ClosingContinuity_10s.mp4)，保留慢速版前 10 秒，1280×720、60 FPS。
+
 - 四态按钮把虚拟脑电滑条在 9 秒内移到对应目标值，花朵实时跟随；1–4 等同按钮，Shift+1–4 直接注入四个角点。
 - 拖动环绕、滚轮缩放；R 重播标准开合，空格冻结；面板默认隐藏，H 显示 / 隐藏。
 - 开合滑条直接控制 0%～100%；F9 切换 BrainLink 诊断面板，L 显示帧率。
@@ -26,7 +28,15 @@ Unity 2022.3.62f3c1 / Windows x64。主场景是 `Assets/Flower/Scenes/FlowerGal
 ./Tools/Performance.ps1          # GPU 播放性能与四态截图
 ```
 
-烘焙会检查来源，构建拒绝过期缓存。`Outputs` 是可删除的本轮验证产物；`Builds` 是生成程序与 BrainLink 工具环境，均不纳入 Git。
+首次运行和修改几何后的处理见下文「第一次运行与缓存」。`Outputs` 当前仅保留最终演示视频；验证报告、日志和帧序列可按需重新生成。`Tools/CleanGenerated.ps1` 清理临时和历史产物时会保留这段视频；`Builds` 是生成程序与 BrainLink 工具环境，均不纳入 Git。
+
+## 第一次运行与缓存
+
+- 新拷贝的项目或删掉缓存后，第一次运行会自动生成播放缓存：编辑器里按 Play 会卡住并显示进度条，运行 `Tools/Build.ps1` 时终端会多等几分钟；完成后自动继续，不用重新按 Play。
+- 生成过一次后不会重复。程序启动时要先加载缓存，所以刚启动会稍慢，进入画面后播放流畅。
+- 改过花形、几何或相关生成代码后，需要手动运行 `Tools/Bake.ps1`；否则按 Play 会被拦下并弹窗提示。
+- 自动生成失败时看 Console 或弹窗，最稳妥的重试方式是手动运行 `Tools/Bake.ps1`。
+- 缓存位于 `Assets/StreamingAssets`，约 1.2 GB，和 `Outputs`、`Builds` 一样不纳入 Git。
 
 - [架构、接口与维护](Docs/Architecture.zh-CN.md)
 - [BrainLink 安装、模拟与设备接入](Assets/BCI/BrainLink/README.md)

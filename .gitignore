@@ -12,5 +12,8 @@
 /*.sln
 /.vs/
 /Outputs/
+/Assets/StreamingAssets/
+/Assets/StreamingAssets.meta
+*.bin.tmp
 **/__pycache__/
 *.pyc

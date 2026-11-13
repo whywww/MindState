@@ -4,6 +4,11 @@ namespace MindState.Editor {
 public static class PerformanceBuild {
  public static void Validation()=>Build("Validation",true);
  public static void Delivery()=>Build("Windows",false);
+ public static void CheckCaches() {
+  if(!FlowerCacheProvenance.Matches()){Debug.Log("CACHE_CHECK geometry_stale");UnityEditor.EditorApplication.Exit(4);return;}
+  if(!FlowerCacheProvenance.PlaybackMatches()){Debug.Log("CACHE_CHECK playback_stale");UnityEditor.EditorApplication.Exit(3);return;}
+  Debug.Log("CACHE_CHECK ok");UnityEditor.EditorApplication.Exit(0);
+ }
  static void Build(string folder,bool validation) {
  if(!FlowerCacheProvenance.Matches())throw new System.Exception("Geometry cache is stale. Run Tools/Bake.ps1 before building.");
  if(!FlowerCacheProvenance.PlaybackMatches())throw new System.Exception("Playback cache is stale. Run Tools/Bake.ps1 before building.");

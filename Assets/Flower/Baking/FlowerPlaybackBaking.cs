@@ -53,6 +53,7 @@ public sealed partial class FlowerAssembler {
   if(gpuPlayback)throw new InvalidOperationException("Bake requires CPU reference geometry");
   string path=PlaybackPath;Directory.CreateDirectory(Path.GetDirectoryName(path));string temp=path+".tmp";
   var report=new List<string>{"Final geometry cache; Float32 positions/normals/tangents; quarter/mid/three-quarter refinement; position <= 0.0001, direction <= 1 degree"};
+  int baked=0,petalTotal=0;foreach(var layer in layers)petalTotal+=layer.petals.Length;
   try{
    using(var w=new BinaryWriter(new DeflateStream(File.Create(temp),System.IO.Compression.CompressionLevel.Fastest))){
     w.Write(PlaybackFormat);w.Write(BottomConfigHash());w.Write(layers.Length);
@@ -69,13 +70,14 @@ public sealed partial class FlowerAssembler {
       foreach(float time in nodes){var next=CapturePlaybackFrame(l,p,time);if(previous==null)frames.Add(next);else RefinePlayback(l,p,previous,next,frames,0);previous=next;}
       w.Write(frames.Count);w.Write(frames[0].data.Length);foreach(var frame in frames){w.Write(frame.time);WriteBounds(w,frame.bounds);}foreach(var frame in frames)WriteVertices(w,frame.data);
       string line="layer="+l+" petal="+p+" frames="+frames.Count+" gpu_bytes="+(frames.Count*frames[0].data.Length*40L);report.Add(line);Debug.Log("PLAYBACK_BAKE "+line);
+      if(!Application.isBatchMode)UnityEditor.EditorUtility.DisplayProgressBar("Flower playback bake","layer "+l+" petal "+p,++baked/(float)Mathf.Max(1,petalTotal));
      }
     }
    }
    if(File.Exists(path))File.Delete(path);File.Move(temp,path);
    File.WriteAllText(Path.Combine(Application.dataPath,"Flower/Resources/FlowerPlaybackProvenance.txt"),FlowerCacheProvenance.Signature());
    report.Add("compressed_bytes="+new FileInfo(path).Length);File.WriteAllLines("Outputs/PlaybackBake.txt",report);
-  }finally{if(File.Exists(temp))File.Delete(temp);}
+  }finally{if(File.Exists(temp))File.Delete(temp);if(!Application.isBatchMode)UnityEditor.EditorUtility.ClearProgressBar();}
  }
 }
 }

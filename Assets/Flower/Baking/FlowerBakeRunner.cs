@@ -18,14 +18,17 @@ namespace MindState {
     Application.logMessageReceived+=Fail;Camera.main.gameObject.AddComponent<FlowerBakeRunner>();
    }
   }
-  IEnumerator Start() {
-   yield return null;
-   var flower=FindObjectOfType<FlowerAssembler>();
-   if(flower==null||!flower.Ready) {UnityEditor.EditorApplication.Exit(2);yield break;}
+  internal static void ValidateReference(FlowerAssembler flower) {
    foreach(float phase in new[]{0f,.25f,.5f,.75f,1f}) {
     flower.SetBloomProgress(phase);
     if(flower.RootAnchorError()>1e-5f)throw new Exception("Bake root attachment failed at "+phase);
    }
+  }
+  IEnumerator Start() {
+   yield return null;
+   var flower=FindObjectOfType<FlowerAssembler>();
+   if(flower==null||!flower.Ready) {UnityEditor.EditorApplication.Exit(2);yield break;}
+   ValidateReference(flower);
    if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bakePlayback")<0)flower.SaveBottomCache();
    flower.SavePlaybackCache();
    Debug.Log("FLOWER_BAKE_SUCCESS");UnityEditor.EditorApplication.Exit(0);

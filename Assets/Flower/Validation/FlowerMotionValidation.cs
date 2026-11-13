@@ -103,11 +103,11 @@ public sealed class FlowerMotionValidation:MonoBehaviour {
  [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Array.IndexOf(Environment.GetCommandLineArgs(),"-verifyMotion")>=0)new GameObject("Motion continuity validation").AddComponent<FlowerMotionValidation>();}
  IEnumerator Start(){
   yield return null;int exit=0;var report=new List<string>();var flower=FindObjectOfType<FlowerAssembler>();
-  try{if(flower==null||!flower.Ready)throw new Exception("Flower not ready");flower.enabled=false;flower.VerifyMotionContinuity(report);}
+  try{if(flower==null||!flower.Ready)throw new Exception("Flower not ready");flower.enabled=false;flower.VerifyMotionContinuity(report);report.Add(FlowerCaptureReadback.VerifyTransfer());}
   catch(Exception e){Debug.LogException(e);report.Add("FAIL "+e);exit=2;}
   Directory.CreateDirectory("Outputs/MotionValidation");File.WriteAllLines("Outputs/MotionValidation/Result.txt",report);
   if(exit==0&&Array.IndexOf(Environment.GetCommandLineArgs(),"-captureClosing")>=0){
-   var capture=CaptureClosing(flower);bool more=true;
+   var capture=CaptureClosing(flower,report);bool more=true;
    while(more){object current=null;try{more=capture.MoveNext();if(more)current=capture.Current;}catch(Exception e){Debug.LogException(e);report.Add("FAIL capture "+e);exit=2;more=false;}if(more)yield return current;}
    File.WriteAllLines("Outputs/MotionValidation/Result.txt",report);
   }
@@ -116,19 +116,40 @@ public sealed class FlowerMotionValidation:MonoBehaviour {
 #endif
   Application.Quit(exit);
  }
- IEnumerator CaptureClosing(FlowerAssembler flower){
+ static string VerifyDisplayMatch(Camera camera,Texture2D corrected){
+  var target=new RenderTexture(1280,720,24,RenderTextureFormat.ARGB32,RenderTextureReadWrite.sRGB){antiAliasing=Mathf.Max(1,QualitySettings.antiAliasing)};target.Create();
+  var reference=new Texture2D(1280,720,TextureFormat.RGB24,false);var oldTarget=camera.targetTexture;var active=RenderTexture.active;bool srgb=GL.sRGBWrite;
+  double error=0;
+  try{
+   camera.targetTexture=target;GL.sRGBWrite=QualitySettings.activeColorSpace==ColorSpace.Linear;camera.Render();RenderTexture.active=target;reference.ReadPixels(new Rect(0,0,1280,720),0,0);
+   var a=corrected.GetPixels32();var b=reference.GetPixels32();
+   for(int i=0;i<a.Length;i++)error+=Math.Abs(a[i].r-b[i].r)+Math.Abs(a[i].g-b[i].g)+Math.Abs(a[i].b-b[i].b);
+   error/=a.Length*3.0*255;Directory.CreateDirectory("Outputs/VideoColorValidation");
+   File.WriteAllBytes("Outputs/VideoColorValidation/Corrected.png",corrected.EncodeToPNG());File.WriteAllBytes("Outputs/VideoColorValidation/SdrReference.png",reference.EncodeToPNG());
+  }finally{camera.targetTexture=oldTarget;RenderTexture.active=active;GL.sRGBWrite=srgb;target.Release();Destroy(target);Destroy(reference);}
+  if(error>.005)throw new Exception("Video/display SDR reference mismatch: "+error);
+  return "PASS video readback matches same-frame SDR display target; mean channel error="+error;
+ }
+ IEnumerator CaptureClosing(FlowerAssembler flower,List<string> report){
+  var args=Environment.GetCommandLineArgs();int speedIndex=Array.IndexOf(args,"-closingTimeScale");
+  float timeScale=speedIndex>=0?float.Parse(args[speedIndex+1],CultureInfo.InvariantCulture):1f;
+  if(float.IsNaN(timeScale)||float.IsInfinity(timeScale)||timeScale<=0||timeScale>1)throw new ArgumentOutOfRangeException("closingTimeScale","Use a time scale greater than zero and at most one.");
+  int frameCount=Mathf.RoundToInt(600/timeScale);string folder=timeScale==1?"Outputs/ClosingFrames":"Outputs/ClosingFramesSlow";
+  report.Add("Capture: timeScale="+timeScale.ToString("R",CultureInfo.InvariantCulture)+" frames="+frameCount+" fps=60 duration="+(frameCount/60f).ToString("R",CultureInfo.InvariantCulture));
   var gallery=FindObjectOfType<FlowerGallery>();gallery.enabled=false;gallery.showInterface=false;flower.PrepareClosingCapture();
   var camera=Camera.main;var oldTarget=camera.targetTexture;var oldActive=RenderTexture.active;camera.enabled=false;
   var target=new RenderTexture(1280,720,24,RenderTextureFormat.ARGBHalf){antiAliasing=Mathf.Max(1,QualitySettings.antiAliasing)};target.Create();
   var image=new Texture2D(1280,720,TextureFormat.RGB24,false);camera.targetTexture=target;
-  var rows=new List<string>{"frame,ribbon_radius,echo_bloom,head_turns"};Directory.CreateDirectory("Outputs/ClosingFrames");
+  var rows=new List<string>{"frame,ribbon_radius,echo_bloom,head_turns"};Directory.CreateDirectory(folder);
+  using var readback=new FlowerCaptureReadback(1280,720);
   try{
-   for(int frame=0;frame<600;frame++){
-    flower.MotionStep(1f/60);camera.Render();RenderTexture.active=target;image.ReadPixels(new Rect(0,0,1280,720),0,0);image.Apply();RenderTexture.active=oldActive;
-    File.WriteAllBytes("Outputs/ClosingFrames/frame_"+frame.ToString("0000")+".png",image.EncodeToPNG());rows.Add(flower.ClosingCaptureRow(frame));
-    if(frame%60==0)Debug.Log("CLOSING_CAPTURE "+frame+"/600");yield return null;
+   for(int frame=0;frame<frameCount;frame++){
+    flower.MotionStep(timeScale/60);camera.Render();readback.Read(target,image);
+    if(frame==frameCount/2)report.Add(VerifyDisplayMatch(camera,image));
+    File.WriteAllBytes(Path.Combine(folder,"frame_"+frame.ToString("0000")+".png"),image.EncodeToPNG());rows.Add(flower.ClosingCaptureRow(frame));
+    if(frame%60==0)Debug.Log("CLOSING_CAPTURE "+frame+"/"+frameCount);yield return null;
    }
-   File.WriteAllLines("Outputs/MotionValidation/Closing.csv",rows);
+   File.WriteAllLines(timeScale==1?"Outputs/MotionValidation/Closing.csv":"Outputs/MotionValidation/ClosingSlow.csv",rows);
   }finally{camera.targetTexture=oldTarget;RenderTexture.active=oldActive;Destroy(image);target.Release();Destroy(target);}
  }
 }

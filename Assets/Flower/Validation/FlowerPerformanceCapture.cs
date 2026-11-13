@@ -70,7 +70,8 @@ public sealed class FlowerPerformanceCapture : MonoBehaviour {
  IEnumerator Finish(){
   if(duration<120){File.WriteAllText(Path.Combine(output,"Result.txt"),"SMOKE COMPLETE");Application.Quit(0);yield break;}
   var image=new Texture2D(1920,1080,TextureFormat.RGB24,false);
-  for(int i=0;i<4;i++){flower.SetArtState((FlowerArtState)i);yield return new WaitForSecondsRealtime(6.5f);var old=RenderTexture.active;RenderTexture.active=target;image.ReadPixels(new Rect(0,0,1920,1080),0,0);image.Apply();RenderTexture.active=old;File.WriteAllBytes(Path.Combine(output,"State"+i+".png"),image.EncodeToPNG());yield return null;}
+  using var readback=new FlowerCaptureReadback(1920,1080);
+  for(int i=0;i<4;i++){flower.SetArtState((FlowerArtState)i);yield return new WaitForSecondsRealtime(6.5f);readback.Read(target,image);File.WriteAllBytes(Path.Combine(output,"State"+i+".png"),image.EncodeToPNG());yield return null;}
   Destroy(image);
   File.WriteAllText(Path.Combine(output,"Result.txt"),"COMPLETE");Application.Quit(0);
  }

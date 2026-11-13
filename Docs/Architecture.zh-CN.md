@@ -49,11 +49,13 @@ flower.ResetArt();
 
 `Tools/Bake.ps1` 默认完整重建补偿及播放缓存。修改播放代码或包围盒元数据后，使用 `Tools/Bake.ps1 -PlaybackOnly` 只重新生成播放缓存，前提是底层补偿来源校验通过；该模式保留原补偿签名。`-flowerCpuReference` 仅在 Editor / 验证构建启用原 CPU 路径。正式构建不接受该开关。
 
+播放缓存缺失或过期时有两个自动入口：编辑器进入 Play 前由 `FlowerPlaybackAutoBakeHook` 检查签名，播放缓存过期而补偿缓存有效时写入 `SessionState` 标记，场景加载后 `FlowerPlaybackAutoBake` 以 CPU 参考几何烘焙，成功后在同一会话内释放并重建为 GPU 播放；补偿缓存也过期时取消 Play 并提示先运行 `Tools/Bake.ps1`。`Tools/Build.ps1` 构建前调用 `PerformanceBuild.CheckCaches`（0 新鲜、3 仅播放过期、4 几何过期），仅播放过期时自动执行 `Tools/Bake.ps1 -PlaybackOnly` 后重新检查，几何过期则直接失败。构建内的原有签名检查保留作兜底。
+
 ## 验证与产物
 
 `Tools/Verify.ps1` 先验证原 CPU 参考路径，再通过与顶点着色器共享的采样函数执行 GPU 回读比较，检查主花与回声花、根部、包围盒、切线方向、跳转/反向进度、零顶点上传以及释放后重建。新增 GPU 运动连续性回归验证 30/60/120 Hz 下的闭合、呼吸、历史窗口边界、所有缓存节点、冻结恢复和更新率一致性；历史线性信号使用解析积分作独立对照，并检查花瓣零上传、更新零分配。原有回归验证标准路径、四态切换、冻结与根部连接，并检查回声花历史概括与间隙、单条丝线的离花间隙与逐帧路线连续性、亮头单向前行、专注/放松对路线形状的驱动、颜色提交与逐帧连续性、显示层映射和截图产物。接触扫描是离散采样，不能据此宣称连续时间、所有角度零穿插；已接受的动态接触见当前问题文档。
 
-验证结果、烘焙统计及日志统一写入 `Outputs`，重复执行覆盖本轮输出。正式程序仅保留 `Builds/Windows`，BrainLink 的本机环境保留在 `Builds/BrainLinkTools`。验证构建可以重新生成。
+验证结果、烘焙统计及日志按需生成到 `Outputs`，重复执行覆盖本轮输出。清理后的目录只保留最终演示 `Outputs/ClosingContinuity_10s.mp4`；帧序列、历史视频、临时报告与日志均可重新生成。正式程序仅保留 `Builds/Windows`，BrainLink 的本机环境保留在 `Builds/BrainLinkTools`。验证构建可以重新生成。
 
 ## 性能对比
 
@@ -64,3 +66,11 @@ flower.ResetArt();
 ## 闭合连续性录像
 
 先构建验证程序，再运行 `Builds/Validation/MindState.exe -verifyMotion -captureClosing -logFile Outputs/ClosingCapture.log`。该检查先执行运动回归，然后用预热的非恒定历史录制 600 张 1280×720、4×MSAA 图像，固定步长为 1/60 秒，覆盖从澄明到凝聚及其呼吸。图像位于 `Outputs/ClosingFrames`，半径/回声开合/亮头进度位于 `Outputs/MotionValidation/Closing.csv`。用 FFmpeg 以 60 FPS 编码为 `Outputs/ClosingContinuity.mp4`，不使用补帧或运动模糊。录像是固定步长视觉检查，性能仍需单独运行 120 秒采集。
+
+## 录制色彩输出
+
+项目是 Linear 色彩空间。离屏 ARGBHalf 目标保存已经过后处理的线性数值，不能直接 ReadPixels 后当作显示 PNG 编码。`FlowerCaptureReadback` 先以显式 sRGB 写入将其复制到 ARGB32 sRGB 目标，再读回编码像素；读取前后恢复 RenderTexture.active 和 GL.sRGBWrite。不更改材质、灯光或曝光，也不再做一次色调映射。相同工具用于闭合录像和性能测试结束后的截图，不加入性能测量的每帧路径。
+
+运动检查增加已知暗阶/中灰/白色色阶校验、sRGB 输入往返校验以防重复转换；录像中间帧还与同帧 SDR 显示目标比较。视频输出使用 BT.709 原色/YCbCr 矩阵、有限范围，并把已编码的 sRGB 传递函数标记为 IEC 61966-2-1。最终视频为 `Outputs/ClosingContinuity_10s.mp4`；旧版本和色彩对照图已清理。
+
+慢速录制使用 `-closingTimeScale 0.6666667`，每个输出帧推进 1/90 秒动画，6 秒预览过渡在成片中延长到约 9 秒。源帧按需生成到 `Outputs/ClosingFramesSlow`，轨迹生成到 `Outputs/MotionValidation/ClosingSlow.csv`；以 60 FPS 编码前 600 帧即得到最终 10 秒演示。不会修改应用的开合时间常量，也不使用重复帧或光流补帧。
