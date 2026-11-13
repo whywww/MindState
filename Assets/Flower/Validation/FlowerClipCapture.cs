@@ -8,14 +8,28 @@ using UnityEditor;
 using UnityEngine;
 namespace MindState {
 public sealed partial class FlowerAssembler {
+ internal bool clipReverseEcho;
+ internal float clipEchoBloom;
  internal void ClipStep(float dt)=>UpdateArt(dt);
+ // A single Bezier path through the four looks has no internal zero-speed joins.
+ internal void ClipBlend(Vector4 weights){
+  ArtWeights=ArtLightWeights=artTarget=artFrom=artDestination=weights;
+  artTransitionTime=6;ArtInput=FlowerArtInput.Preview;
+  Color accent=Color.clear;Vector2 shape=Vector2.zero;
+  for(int i=0;i<4;i++){accent+=artLooks[i].accent*weights[i];shape+=ShapePresets[i]*weights[i];}
+  previewAccentFrom=previewAccentTo=accent;
+  shapeAttentionTarget=shape.x;shapeRelaxationTarget=shape.y;
+ }
 }
 // Offline 10-second montage: each state is premultiplied to a settled pose, then captured as a PNG
 // sequence. The silk thread needs up to 12.5 s to lay down a full trail after a reset, hence the
 // 13 s pre-roll; the echo flower records the same state during that warm-up.
 public sealed class FlowerClipCapture : MonoBehaviour {
- const string Output="Outputs/ClipFrames";
+ string Output=>continuous?"Outputs/ArtContinuousFrames":showcase?(preview?"Outputs/ArtPreview":"Outputs/ArtShowcaseFrames"):"Outputs/ClipFrames";
+ bool showcase,preview,continuous;
+ readonly int[] shotFrames={162,132,132,210};
  readonly List<string> report=new List<string>();
+ readonly List<string> motion=new List<string>{"frame,bloom,clarity,gathering,wandering,quiet,echoBloom"};
  int width,height,segFrames,fps,exitCode;
  float preRoll;
  FlowerArtState[] states;
@@ -28,11 +42,15 @@ public sealed class FlowerClipCapture : MonoBehaviour {
  }
  IEnumerator Start()
  {
+  continuous=Arg("-clipContinuous","0")=="1";
+  showcase=Arg("-artShowcase","0")=="1";preview=Arg("-clipPreview","0")=="1";
   Application.runInBackground=true;Application.targetFrameRate=-1;
   width=Mathf.Max(64,ArgInt("-clipWidth",1920));height=Mathf.Max(64,ArgInt("-clipHeight",1080));
   segFrames=Mathf.Max(2,ArgInt("-clipSegFrames",180));fps=Mathf.Max(1,ArgInt("-clipFps",60));
   preRoll=Mathf.Max(0f,ArgFloat("-clipPreroll",13f));
   states=ParseStates(Arg("-clipStates","Clarity,Gathering,Wandering,Quiet"));
+  if(continuous){fps=60;preRoll=Mathf.Max(13,preRoll);states=ParseStates("Gathering");}
+  if(showcase){fps=60;preRoll=Mathf.Max(13,preRoll);states=ParseStates("Clarity,Gathering,Quiet,Wandering");}
   Directory.CreateDirectory(Output);File.WriteAllText(Path.Combine(Output,"Result.txt"),"RUNNING");
   var run=Capture();bool more=true;
   while(more){
@@ -42,6 +60,7 @@ public sealed class FlowerClipCapture : MonoBehaviour {
    if(more)yield return current;
   }
   File.WriteAllLines(Path.Combine(Output,"ClipReport.txt"),report);
+  if(continuous)File.WriteAllLines(Path.Combine(Output,"Motion.csv"),motion);
   File.WriteAllText(Path.Combine(Output,"Result.txt"),failure??"PASS");
   if(failure!=null)Debug.LogError(failure);
   EditorApplication.Exit(exitCode);
@@ -57,8 +76,12 @@ public sealed class FlowerClipCapture : MonoBehaviour {
   }
   var post=cam.GetComponent<GalleryPost>();
   Require(post!=null&&post.enabled&&post.shader!=null,3,"GalleryPost is missing or disabled.");
-  gallery.showInterface=false;f.enabled=false;f.SetFrozen(false);f.BrainBaselineFrozen=false;
-  var hi=new RenderTexture(width*2,height*2,24);var lo=new RenderTexture(width,height,0);
+  gallery.showInterface=false;gallery.enabled=false;cam.enabled=false;
+  var brain=cam.GetComponent<MindState.BCI.BrainLink.BrainLinkFlowerInput>();if(brain!=null)brain.enabled=false;
+  f.enabled=false;f.SetFrozen(false);f.BrainBaselineFrozen=false;
+  var hi=new RenderTexture(width*2,height*2,24,RenderTextureFormat.ARGBHalf){antiAliasing=Mathf.Max(1,QualitySettings.antiAliasing)};var lo=new RenderTexture(width,height,0,RenderTextureFormat.ARGBHalf);
+  using var readback=new FlowerCaptureReadback(width,height);
+  report.Add(FlowerCaptureReadback.VerifyTransfer());
   var tex=new Texture2D(width,height,TextureFormat.RGB24,false);
   var oldTarget=cam.targetTexture;var oldActive=RenderTexture.active;
   try{
@@ -68,30 +91,52 @@ public sealed class FlowerClipCapture : MonoBehaviour {
    yield return null;
    for(int s=0;s<states.Length;s++){
     var state=states[s];string folder=Path.Combine(Output,"state"+s);Directory.CreateDirectory(folder);
-    f.SetArtPreviewImmediate(state);
+    f.clipReverseEcho=continuous;
+    if(showcase)f.ResetArt();f.SetArtPreviewImmediate(state);
     Require(f.EchoVisible,3,"Echo flower is missing for "+state+".");
     Require(f.VisibleRibbonCount==1,3,"Silk thread is missing for "+state+".");
     int steps=Mathf.CeilToInt(preRoll*fps);
     for(int i=0;i<steps;i++){f.ClipStep(1f/fps);if(i%300==299)yield return null;}
     float mean=0,std=0;
-    for(int frame=0;frame<segFrames;frame++){
-     f.ClipStep(1f/fps);cam.Render();Graphics.Blit(hi,lo);
-     RenderTexture.active=lo;tex.ReadPixels(new Rect(0,0,width,height),0,0);tex.Apply();RenderTexture.active=oldActive;
+    int count=continuous?600:showcase?shotFrames[s]:segFrames;
+    float el=showcase&&s==1?45:55;if(showcase)gallery.SetView(18,el);
+    Vector3 pivot=gallery.focus;float distance=gallery.distance;
+    if(continuous)distance*=.94f;
+    if(showcase&&s==1){pivot=Vector3.Lerp(pivot,f.FullBloomBounds.center,.6f);distance*=.72f;}
+    for(int frame=0;frame<(preview?1:count);frame++){
+     if(continuous){
+      float clock=frame/60f;
+      // Ease only the start/end of the whole take; never stop at an intermediate look.
+      float t=Mathf.SmoothStep(0,1,Mathf.Clamp01((clock-.4f)/9f)),u=1-t;
+      f.ClipBlend(new Vector4(3*u*t*t,u*u*u,t*t*t,3*u*u*t));
+     }
+     if(showcase||continuous){
+      float az=Mathf.Lerp(18,26,preview?.5f:(float)frame/(count-1));
+      float a=az*Mathf.Deg2Rad,e=el*Mathf.Deg2Rad;
+      Vector3 dir=new Vector3(Mathf.Sin(a)*Mathf.Cos(e),Mathf.Sin(e),-Mathf.Cos(a)*Mathf.Cos(e));
+      Quaternion rot=Quaternion.LookRotation(-dir,Vector3.up);
+      cam.transform.SetPositionAndRotation(pivot+dir*distance,rot);
+      f.SetViewFrame(dir,rot*Vector3.up,rot*Vector3.right,distance);
+     }
+     f.ClipStep(1f/fps);
+     if(continuous){var w=f.ArtWeights;motion.Add(string.Format(CultureInfo.InvariantCulture,"{0},{1:R},{2:R},{3:R},{4:R},{5:R},{6:R}",frame,f.bloomProgress,w.x,w.y,w.z,w.w,f.clipEchoBloom));}
+     cam.Render();Graphics.Blit(hi,lo);
+     readback.Read(lo,tex);tex.Apply();
      byte[] png=tex.EncodeToPNG();
      File.WriteAllBytes(Path.Combine(folder,"frame_"+frame.ToString("0000")+".png"),png);
-     if(frame%30==0||frame==segFrames-1){
+     if(frame%30==0||frame==count-1){
       Measure(tex,out mean,out std);
       Require(mean>.003f&&mean<.9f&&std>.006f,4,"Blank frame "+frame+" for "+state+" (mean "+mean.ToString("F4",CultureInfo.InvariantCulture)+", std "+std.ToString("F4",CultureInfo.InvariantCulture)+").");
      }
-     if(frame%60==0||frame==segFrames-1)
+     if(frame%60==0||frame==count-1)
       report.Add(state+","+frame+",mean="+mean.ToString("F4",CultureInfo.InvariantCulture)+",std="+std.ToString("F4",CultureInfo.InvariantCulture)+",bytes="+png.Length);
-     if(frame%60==0)Debug.Log("[Clip] "+state+" "+frame+"/"+segFrames);
+     if(frame%60==0)Debug.Log("[Clip] "+state+" "+frame+"/"+count);
      yield return null;
     }
     var weights=f.ArtWeights;
-    Require(weights[(int)state]>.999f,4,"Art weights not settled for "+state+": "+weights.ToString("F4"));
+    Require(continuous||weights[(int)state]>.999f,4,"Art weights not settled for "+state+": "+weights.ToString("F4"));
     var echo=f.EchoWeights;
-    Require(echo[(int)state]>.90f,4,"Echo weights do not match "+state+": "+echo.ToString("F4"));
+    Require(continuous||echo[(int)state]>.90f,4,"Echo weights do not match "+state+": "+echo.ToString("F4"));
     report.Add(state+",settled,art="+weights.ToString("F4")+",echo="+echo.ToString("F4"));
     Debug.Log("[Clip] "+state+" complete. art="+weights.ToString("F4")+" echo="+echo.ToString("F4"));
    }

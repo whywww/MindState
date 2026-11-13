@@ -246,6 +246,15 @@ namespace MindState
             echoFade=Mathf.MoveTowards(echoFade,1,dt/EchoFadeDuration);
             PushEchoHistory();
             AverageEchoHistory(out var weights,out var light,out var bloom);
+#if UNITY_EDITOR
+            // The continuous exhibition take pairs an opening hero with a closing companion.
+            if(clipReverseEcho){
+                bloom=Mathf.Clamp(1.13f-bloomProgress,.13f,1f);
+                weights=Vector4.Lerp(new Vector4(0,1,0,0),new Vector4(1,0,0,0),Mathf.InverseLerp(.13f,1f,bloom));
+                light=weights;
+            }
+            clipEchoBloom=bloom;
+#endif
             EchoWeights=weights;
             var look=BlendLook(weights);
             if(!frozen) echoYaw=Mathf.Repeat(echoYaw+look.yawSpeed*dt,360);
