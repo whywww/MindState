@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.Rendering;
 namespace MindState
 {
-    // One silk thread of light drawn around the bloom like a pen stroke: a bright head slides
-    // back and forth along an open arc while the tail behind it fades out.
+    // One silk thread of light drawn around the bloom like a pen stroke: a bright head travels
+    // forward around the ring while the tail behind it fades out.
     public sealed partial class FlowerAssembler
     {
         const int RibbonSegments=192;
@@ -23,7 +23,7 @@ namespace MindState
         SilkThread ribbonThread;
         Material ribbonMaterial;
         float ribbonFade,ribbonBloomRadius=1.7f,ribbonCurrentRadius=1.7f;
-        float ribbonTime,ribbonYawTurns,ribbonHeadVelocity,ribbonPrevHeadTurns,ribbonHeadTurn;
+        float ribbonTime,ribbonTurns,ribbonHeadVelocity,ribbonPrevHeadTurns,ribbonHeadTurn;
         bool ribbonStepValid,ribbonHeadValid;
         float ribbonTrailTurns,ribbonWaveAmplitude,ribbonMeanRadius,ribbonMeanHeight;
         internal int VisibleRibbonCount=>ribbonThread!=null&&ribbonRoot!=null&&ribbonRoot.gameObject.activeSelf&&ribbonThread.renderer.enabled?1:0;
@@ -56,7 +56,7 @@ namespace MindState
         }
         internal void ResetRibbonThread()
         {
-            ribbonTime=0;ribbonYawTurns=0;ribbonHeadVelocity=0;ribbonPrevHeadTurns=0;
+            ribbonTime=0;ribbonTurns=0;ribbonHeadVelocity=0;ribbonPrevHeadTurns=0;
             ribbonHeadValid=false;ribbonStepValid=false;
         }
         void ShowRibbons()
@@ -156,19 +156,18 @@ namespace MindState
             float tense=attention*(1f-relaxation);
             ribbonCurrentRadius=CurrentBloomRadius();
             float radiusUnit=ribbonCurrentRadius;
-            // The head ping-pongs inside a bounded arc; smoothstep eases both turnarounds so the
-            // thread never snaps when it changes direction.
+            // The head only ever travels forward: EEG changes how fast the ring is circled, never
+            // its direction. Accumulating dt/period (instead of dividing an absolute clock by a
+            // moving period) also keeps the rate positive when attention or relaxation changes.
             float period=16f-4f*attention+4f*relaxation;
+            float advance=0f;
             if(!frozen)
             {
                 ribbonTime+=dt;
-                ribbonYawTurns=Mathf.Repeat(ribbonYawTurns+dt*(.008f+.012f*relaxation),1f);
+                advance=dt/Mathf.Max(1f,period);
+                ribbonTurns+=advance;
             }
-            float cycle=Mathf.Repeat(ribbonTime/Mathf.Max(1f,period),1f);
-            float triangle=1f-Mathf.Abs(2f*cycle-1f);
-            float eased=triangle*triangle*(3f-2f*triangle);
-            float sweepHalf=.5f*(1f+.35f*(1f-attention));
-            float headTurns=ribbonYawTurns+Mathf.Lerp(-sweepHalf,sweepHalf,eased);
+            float headTurns=ribbonTurns;
             ribbonHeadTurn=headTurns;
             if(dt>.00001f)
             {
@@ -176,7 +175,11 @@ namespace MindState
                 ribbonPrevHeadTurns=headTurns;
                 ribbonHeadValid=true;
             }
-            ribbonTrailTurns=Mathf.Min(RibbonTrailMaxTurns,RibbonTrailMinTurns+RibbonTrailPerRelax*relaxation);
+            float targetTrail=Mathf.Min(RibbonTrailMaxTurns,RibbonTrailMinTurns+RibbonTrailPerRelax*relaxation);
+            // The trail may lengthen no faster than the head advances, so its far end never slides
+            // backwards; shrinking follows immediately because the target itself moves smoothly.
+            if(!ribbonStepValid||targetTrail<=ribbonTrailTurns) ribbonTrailTurns=targetTrail;
+            else ribbonTrailTurns=Mathf.Min(targetTrail,ribbonTrailTurns+advance);
             // Shape parameters are continuous functions of the smoothed attention/relaxation, so
             // a violent raw signal only makes the stroke drift to a new route.
             float baseRadius=1.32f-.10f*attention+.08f*relaxation;
@@ -194,11 +197,11 @@ namespace MindState
             for(int i=0;i<=RibbonSegments;i++)
             {
                 float s=i/(float)RibbonSegments;
-                float turns=headTurns-ribbonTrailTurns*(1f-s);
+                float turns=Mathf.Repeat(headTurns-ribbonTrailTurns*(1f-s),1f);
                 float theta=turns*Mathf.PI*2;
-                float r=baseRadius*(1f+radiusRipple*Mathf.Sin(theta*3f+phase1)+radiusRipple2*Mathf.Sin(theta*5f-phase2));
+                float r=baseRadius*(1f+radiusRipple*Mathf.Sin(theta*3f-phase1)+radiusRipple2*Mathf.Sin(theta*5f-phase2));
                 r=Mathf.Max(r*radiusUnit,minRadius);
-                float y=(baseHeight+heightWave*Mathf.Sin(theta*2f+phase3)+heightWave2*Mathf.Sin(theta*5f+phase4))*radiusUnit;
+                float y=(baseHeight+heightWave*Mathf.Sin(theta*2f-phase3)+heightWave2*Mathf.Sin(theta*5f-phase4))*radiusUnit;
                 meanRadius+=r;meanHeight+=y;
                 thread.positions[i]=new Vector3(Mathf.Cos(theta)*r,y,Mathf.Sin(theta)*r);
             }

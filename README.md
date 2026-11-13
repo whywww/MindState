@@ -7,7 +7,7 @@ Unity 2022.3.62f3c1 / Windows x64。主场景是 `Assets/Flower/Scenes/FlowerGal
 启动 `Builds/Windows/MindState.exe`，保留同目录的数据与 DLL。
 
 - 四态按钮把虚拟脑电滑条在 9 秒内移到对应目标值，花朵实时跟随；1–4 等同按钮，Shift+1–4 直接注入四个角点。
-- 拖动环绕、滚轮缩放；R 重播标准开合，空格冻结，H 隐藏面板。
+- 拖动环绕、滚轮缩放；R 重播标准开合，空格冻结；面板默认隐藏，H 显示 / 隐藏。
 - 开合滑条直接控制 0%～100%；F9 切换 BrainLink 诊断面板，L 显示帧率。
 - 拖动专注/放松滑条作为脑电输入并核对四态映射；BrainLink 接管时滑条禁用，关闭组件后滑条重新生效。
 - BrainLink 默认关闭，在相机 Inspector 启用组件后接管输入。

@@ -171,7 +171,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   flower: {fileID: 4939438025147885352}
-  showInterface: 1
+  showInterface: 0
   azimuth: 22
   elevation: 55
   distance: 8.5

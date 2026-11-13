@@ -7,7 +7,7 @@ namespace MindState
     public sealed class FlowerGallery : MonoBehaviour
     {
         public FlowerAssembler flower;
-        public bool showInterface=true;
+        public bool showInterface;
         public float azimuth=22,elevation=55,distance=8.5f;
         public Vector3 focus=new Vector3(0,.65f,0);
         GUIStyle title,text,small,button,fpsLabel;
@@ -23,13 +23,20 @@ namespace MindState
         bool sliderOwnsBrain,lastBrainOwned,animatingSliders;
         static readonly string[] artStateNames={"澄明","凝聚","漫游","幽微"};
         BrainLinkFlowerInput brainLink;
+        Camera viewCamera;
         public bool BrainLinkOwnsInput => brainLink != null && brainLink.isActiveAndEnabled;
-        void Awake() { brainLink=GetComponent<BrainLinkFlowerInput>(); }
+        void Awake() { brainLink=GetComponent<BrainLinkFlowerInput>(); viewCamera=GetComponent<Camera>(); }
         void Start() { Application.targetFrameRate=240; SetView(azimuth,elevation); }
         public void SetView(float az,float el,float d=-1)
         {
             azimuth=az; elevation=el;
-            if(flower!=null&&flower.Ready) { var cameraComponent=GetComponent<Camera>(); float fit=flower.FitCameraDistance(ViewRotation(),cameraComponent.fieldOfView,cameraComponent.aspect); var rotation=ViewRotation(); distance=d>0?d:fit*1.02f; focus=d>0?flower.FullBloomBounds.center:flower.FullBloomBounds.center-rotation*Vector3.right*(fit*.20f)+rotation*Vector3.up*(fit*.03f); }
+            if(flower!=null&&flower.Ready)
+            {
+                var rotation=ViewRotation();
+                float fit=flower.FitCompositionDistance(rotation,viewCamera.fieldOfView,viewCamera.aspect,out var pivot);
+                distance=d>0?d:fit;
+                focus=d>0?flower.FullBloomBounds.center:pivot;
+            }
             else if(d>0) distance=d;
             PositionCamera();
         }
@@ -109,15 +116,9 @@ namespace MindState
             Vector3 dir=new Vector3(Mathf.Sin(a)*Mathf.Cos(e),Mathf.Sin(e),-Mathf.Cos(a)*Mathf.Cos(e));
             Vector3 up=Mathf.Abs(elevation)>89?Vector3.forward:Vector3.up;
             Quaternion rotation=Quaternion.LookRotation(-dir,up);
-            Vector3 target=focus-rotation*Vector3.right*(showInterface?.55f:0);
-            // The bud and the quiet flower sit back in a slightly closer frame.
-            float dolly=1f;
-            if(flower!=null&&flower.ArtActive)
-            {
-                var weights=flower.ArtWeights;
-                dolly=Mathf.Lerp(1f,.84f,weights.y)*Mathf.Lerp(1f,.96f,weights.w);
-            }
-            transform.SetPositionAndRotation(target+dir*(distance*dolly),rotation);
+            // The camera stays fixed across art states; the buds step toward it instead.
+            if(flower!=null) flower.SetViewFrame(dir,rotation*Vector3.up,rotation*Vector3.right,distance);
+            transform.SetPositionAndRotation(focus+dir*distance,rotation);
         }
         void Styles()
         {

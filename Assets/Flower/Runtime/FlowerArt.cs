@@ -47,10 +47,11 @@ namespace MindState
         float artTime,artYaw,lastValid=float.NegativeInfinity;
         Vector4 artTarget=new Vector4(1,0,0,0);
         Vector4 artFrom=new Vector4(1,0,0,0),artDestination=new Vector4(1,0,0,0);
+        Vector4 artVelocity,artLightVelocity;
         Color previewAccentFrom=Color.white,previewAccentTo=Color.white,artAccentCurrent=Color.white,artAccentSmooth=Color.white;
         int accentCommitted;
         float artTransitionTime=6;
-        const float ArtTransitionDuration=6,ArtStreamSmoothing=2.5f,ShapeSmoothing=2.5f,AccentSmoothing=1.8f,AccentCommitMargin=.45f;
+        const float ArtTransitionDuration=6,ArtStreamSmoothTime=6f,ArtPreviewLightSmoothing=2.5f,ShapeSmoothing=2.5f,AccentSmoothing=4f,AccentCommitMargin=.45f;
         // Raw attention/relaxation drive the silk thread's route. They are smoothed separately from
         // the four-state commitment so slider moves keep reshaping the path even while the picture
         // stays committed to one state.
@@ -107,7 +108,7 @@ namespace MindState
             margin=weights[top]-weights[second];
         }
         // Commits the color family only once a leader is clearly ahead; never mutates state so the
-        // delayed echo and validation can ask for a color without disturbing the live flower.
+        // history-summary echo and validation can ask for a color without disturbing the live flower.
         void CommitAccent(Vector4 weights)
         {
             LeadingPair(weights,out int top,out _,out float margin);
@@ -129,12 +130,25 @@ namespace MindState
         // One step of the shared color filter; exposed so validation can prove per-frame continuity.
         internal static Color SmoothAccentStep(Color current,Color target,float dt)
             =>Color.Lerp(current,target,1-Mathf.Exp(-Mathf.Max(0f,dt)/AccentSmoothing));
+        // Critically damped per-component smoothing. Unlike an exponential lerp it starts from
+        // rest, so a state change eases in instead of jumping to its fastest speed on frame one.
+        static Vector4 SmoothDampWeights(Vector4 current,Vector4 target,ref Vector4 velocity,float smoothTime,float dt)
+        {
+            // SmoothDamp divides by deltaTime in its overshoot guard, so a zero step must not run.
+            if(dt<=0f) return current;
+            return new Vector4(
+                Mathf.SmoothDamp(current.x,target.x,ref velocity.x,smoothTime,Mathf.Infinity,dt),
+                Mathf.SmoothDamp(current.y,target.y,ref velocity.y,smoothTime,Mathf.Infinity,dt),
+                Mathf.SmoothDamp(current.z,target.z,ref velocity.z,smoothTime,Mathf.Infinity,dt),
+                Mathf.SmoothDamp(current.w,target.w,ref velocity.w,smoothTime,Mathf.Infinity,dt));
+        }
+        void ResetArtVelocity(){artVelocity=artLightVelocity=Vector4.zero;}
         void AdvanceArtWeights(float dt)
         {
             if(ArtInput!=FlowerArtInput.Preview)
             {
                 // Streaming targets must not restart a timed transition every sample.
-                ArtWeights=Vector4.Lerp(ArtWeights,artTarget,1-Mathf.Exp(-dt/ArtStreamSmoothing));
+                ArtWeights=SmoothDampWeights(ArtWeights,artTarget,ref artVelocity,ArtStreamSmoothTime,dt);
                 artDestination=ArtWeights; artTransitionTime=ArtTransitionDuration;
                 return;
             }
@@ -155,9 +169,10 @@ namespace MindState
             previewAccentTo=artLooks[i].accent;
             accentCommitted=i;
             shapeAttentionTarget=ShapePresets[i].x;shapeRelaxationTarget=ShapePresets[i].y;
+            ResetArtVelocity();
             EnterArt(); ArtInput=FlowerArtInput.Preview; artTarget=Vector4.zero; artTarget[i]=1;
         }
-        public void WaitForArtBrain() { EnterArt(); ArtInput=FlowerArtInput.External; lastValid=float.NegativeInfinity; }
+        public void WaitForArtBrain() { ResetArtVelocity(); EnterArt(); ArtInput=FlowerArtInput.External; lastValid=float.NegativeInfinity; }
         public void SetBrainMetrics(float attention01,float relaxation01,bool signalValid=true)
         {
             EnterArt(); ArtInput=FlowerArtInput.External;
@@ -227,6 +242,10 @@ namespace MindState
         void EnterArt()
         {
             if(artActive) return;
+            // Captured before any bud offset: the rest pose of the root and the full-bloom centre
+            // the scale anchors on. Art mode always enters with the flower at rest.
+            restPosition=transform.localPosition; restCaptured=true;
+            bloomCenterLocal=transform.InverseTransformPoint(FullBloomBounds.center);
             autoPlay=false; bloomProgress=1; ApplyPose(); bottomProgress=-1; artActive=true;
             EnsureArtLooks();
             LeadingPair(ArtWeights,out int top,out _,out _);
@@ -237,7 +256,7 @@ namespace MindState
         void LeaveArt()
         {
             if(!artActive) return;
-            artActive=false; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localPosition=Vector3.zero; generated.localScale=Vector3.one;
+            artActive=false; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localPosition=Vector3.zero; generated.localScale=Vector3.one; if(restCaptured) transform.localPosition=restPosition;
             HideArtExtras();
             foreach(var l in layers) { l.progress=-1; foreach(var p in l.petals) {
                 p.block.SetVector(ArtWeightsId,Vector4.zero); p.block.SetVector("_ArtLightWeights",Vector4.zero);
@@ -247,9 +266,9 @@ namespace MindState
             if(naturalLights!=null) UpdateNaturalLights();
         }
         public void ResetArt()
-        { artTime=artYaw=0; ResetFlowPhase(); frozen=false; ArtWeights=ArtLightWeights=artFrom=artDestination=new Vector4(1,0,0,0); RawBrainWeights=new Vector4(1,0,0,0); artTransitionTime=ArtTransitionDuration; ArtExposureOffset=0;ArtSaturation=1;ArtAccentColor=Color.white;ArtLightGain=ArtLightDrift=1; ResetBrainBaseline(); SetArtState(FlowerArtState.Clarity); EnsureArtLooks(); accentCommitted=0; artAccentSmooth=artAccentCurrent=artLooks[0].accent; shapeAttention=shapeAttentionTarget=ShapePresets[0].x; shapeRelaxation=shapeRelaxationTarget=ShapePresets[0].y; ResetRibbonThread(); }
+        { artTime=artYaw=0; ResetFlowPhase(); frozen=false; ArtWeights=ArtLightWeights=artFrom=artDestination=new Vector4(1,0,0,0); RawBrainWeights=new Vector4(1,0,0,0); artTransitionTime=ArtTransitionDuration; ArtExposureOffset=0;ArtSaturation=1;ArtAccentColor=Color.white;ArtLightGain=ArtLightDrift=1; ResetBrainBaseline(); SetArtState(FlowerArtState.Clarity); EnsureArtLooks(); accentCommitted=0; artAccentSmooth=artAccentCurrent=artLooks[0].accent; shapeAttention=shapeAttentionTarget=ShapePresets[0].x; shapeRelaxation=shapeRelaxationTarget=ShapePresets[0].y; ResetRibbonThread(); ResetEchoHistory(); }
         public void SetArtPreviewImmediate(FlowerArtState state)
-        { SetArtState(state); ArtWeights=ArtLightWeights=artTarget; artFrom=artDestination=artTarget; artTransitionTime=ArtTransitionDuration; artTime=artYaw=0; ResetFlowPhase(); accentCommitted=(int)state; artAccentSmooth=artAccentCurrent=artLooks[(int)state].accent; shapeAttention=shapeAttentionTarget=ShapePresets[(int)state].x; shapeRelaxation=shapeRelaxationTarget=ShapePresets[(int)state].y; ResetRibbonThread(); UpdateArt(0); }
+        { SetArtState(state); ArtWeights=ArtLightWeights=artTarget; artFrom=artDestination=artTarget; artTransitionTime=ArtTransitionDuration; artTime=artYaw=0; ResetFlowPhase(); accentCommitted=(int)state; artAccentSmooth=artAccentCurrent=artLooks[(int)state].accent; shapeAttention=shapeAttentionTarget=ShapePresets[(int)state].x; shapeRelaxation=shapeRelaxationTarget=ShapePresets[(int)state].y; ResetRibbonThread(); ResetEchoHistory(); UpdateArt(0); }
         float FlowSpeed(){var periods=appearance!=null?appearance.flowPeriods:new Vector4(12,10,9,18);float speed=0;for(int i=0;i<4;i++)speed+=ArtLightWeights[i]/Mathf.Max(1,periods[i]);return speed;}
         void UpdateArt(float dt)
         {
@@ -257,7 +276,9 @@ namespace MindState
             {
                 artTime+=dt;
                 AdvanceArtWeights(dt);
-                ArtLightWeights=Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/ArtStreamSmoothing));
+                ArtLightWeights=ArtInput==FlowerArtInput.Preview
+                    ?Vector4.Lerp(ArtLightWeights,artTarget,1-Mathf.Exp(-dt/ArtPreviewLightSmoothing))
+                    :SmoothDampWeights(ArtLightWeights,artTarget,ref artLightVelocity,ArtStreamSmoothTime,dt);
                 artYaw=Mathf.Repeat(artYaw+BlendLook(ArtWeights).yawSpeed*dt,360);
                 ArtFlowPhase=Mathf.Repeat(ArtFlowPhase+dt*FlowSpeed(),1);
                 float shapeStep=1f-Mathf.Exp(-dt/ShapeSmoothing);
@@ -295,15 +316,24 @@ namespace MindState
             float pitch=suppress?0:4f*ArtWeights.w;
             float sideLean=suppress?0:5f*ArtWeights.z;
             float lift=suppress?0:(.01f*ArtWeights.z-.05f*ArtWeights.w);
-            generated.localRotation=Quaternion.Euler(pitch,artYaw,sideLean);
-            generated.localPosition=new Vector3(0,lift,0);
-            generated.localScale=Vector3.one;
             float gathering=ArtWeights.y;
-            float bud=artProfiles[1].openness+.03f*(1-Mathf.Cos(artTime*Mathf.PI*2/5))*.5f;
+            float budOpen=artProfiles[1].openness+.03f*(1-Mathf.Cos(artTime*Mathf.PI*2/5))*.5f;
             float other=ArtWeights.x+ArtWeights.z+ArtWeights.w;
             float open=other>1e-6f?(ArtWeights.x*artProfiles[0].openness+ArtWeights.z*artProfiles[2].openness+ArtWeights.w*artProfiles[3].openness)/other:1f;
             // A shared layer phase drives geometry, transform and sparse correction sampling.
-            bloomProgress=gathering>=1f?bud:Mathf.Lerp(open,bud,gathering);
+            bloomProgress=gathering>=1f?budOpen:Mathf.Lerp(open,budOpen,gathering);
+            // The camera stays put, so a closed bloom has to step toward the viewer and grow in place
+            // to keep its size; the drop is the old camera lift applied to the whole art cluster.
+            float bud=suppress?0:BudFactor(bloomProgress);
+            float budScale=1f+BudScaleGain*bud;
+            Vector3 rest=new Vector3(0,lift,0);
+            generated.localRotation=Quaternion.Euler(pitch,artYaw,sideLean);
+            // Lerp(rest,centre,1-scale) keeps the full-bloom centre fixed while the flower scales up.
+            generated.localPosition=Vector3.Lerp(rest,bloomCenterLocal,1f-budScale)+viewToCamera*(BudForwardGain*bud);
+            generated.localScale=Vector3.one*budScale;
+            // The frame leans toward the main bloom, so a tight bud still reads right of centre;
+            // slide the whole cluster back toward the middle while it is closed.
+            transform.localPosition=restPosition-viewPageUp*(viewDistance*BudDropGain*bud)-viewPageRight*(viewDistance*BudCenterGain*bud);
             ApplyPose(bloomProgress,false);ApplyBottomPatches();
             Vector4 stateTint=new Vector4(look.brightness,look.saturation,0,0);
             Vector4 stateAccent=(Vector4)look.accent.linear;
@@ -334,7 +364,7 @@ namespace MindState
             if(echoPetals!=null) UpdateEcho(dt);
             if(ribbonThread!=null) UpdateRibbons(dt);
         }
-        // Shared by the main flower and the delayed echo; i == 1 (Gathering) is carried by the bud shape.
+        // Shared by the main flower and the history-summary echo; i == 1 (Gathering) is carried by the bud shape.
         void PetalArtMotion(Vector4 weights,float time,float az,int layer,int petal,out float tilt,out float roll)
         {
             tilt=0;

@@ -55,7 +55,7 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
    f.SetArtPreviewImmediate((FlowerArtState)state);f.SyncEchoHistory();f.MotionStep(1.3f);
    Check(f.EchoPetalCount==18&&f.EchoVisible,"Echo flower visible with 18 petals state="+state);
    Check(Mathf.Abs(f.EchoScaleValue-.50f)<.01f,"Echo flower at 50% scale");
-   Check(f.EchoGap()>=1.55f,"Echo flower clears the bloom");
+   Check(f.EchoClearance()>=1f,"Echo flower clears the bloom state="+state+" clearance="+f.EchoClearance().ToString("F3"));
    Check(f.EchoMeshFinite(),"Echo mesh finite state="+state);
    Check(f.VisibleRibbonCount==1,"One silk thread in every state state="+state);
    Check(f.RibbonThreadVisible,"Silk thread stays visible state="+state);
@@ -94,16 +94,15 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
   }
   Check(accentStep<.03f,"Color changes continuously under a violent step "+accentStep.ToString("F3"));
   Check(routeStep<.12f,"Silk route moves continuously under a violent step "+routeStep.ToString("F3"));
-  // The bright head must travel back and forth over at least one full turn.
-  float minHead=float.MaxValue,maxHead=float.MinValue,previousVelocity=f.RibbonHeadVelocity;int reversals=0;
+  // The bright head must keep travelling forward, never reversing.
+  float travelled=0,worstBackstep=0,previousHead=f.RibbonHeadTurn;
   for(int frame=0;frame<1560;frame++){
    f.MotionStep(1/60f);
-   minHead=Mathf.Min(minHead,f.RibbonHeadTurn);maxHead=Mathf.Max(maxHead,f.RibbonHeadTurn);
-   float velocity=f.RibbonHeadVelocity;
-   if(frame>0&&Mathf.Abs(velocity)>.02f){if(Mathf.Sign(velocity)!=Mathf.Sign(previousVelocity)) reversals++;previousVelocity=velocity;}
+   float step=f.RibbonHeadTurn-previousHead;previousHead=f.RibbonHeadTurn;
+   travelled+=step;worstBackstep=Mathf.Min(worstBackstep,step);
   }
-  Check(maxHead-minHead>=.9f,"Silk head sweeps a full turn "+(maxHead-minHead).ToString("F2"));
-  Check(reversals>=1,"Silk head reverses direction");
+  Check(travelled>=.9f,"Silk head travels a full turn "+travelled.ToString("F2"));
+  Check(worstBackstep>=-1e-5f,"Silk head never moves backwards "+worstBackstep.ToString("F5"));
   // Attention/relaxation must reshape the route in the documented directions.
   f.SetBrainMetrics(.8f,.8f);
   for(int i=0;i<420;i++) f.MotionStep(1/60f);
@@ -123,9 +122,14 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
   f.SetArtPreviewImmediate(FlowerArtState.Clarity);f.SyncEchoHistory();
   for(int i=0;i<10;i++) f.MotionStep(1f);
   f.SetArtState(FlowerArtState.Gathering);f.MotionStep(1f);
-  Check(f.EchoWeights.x>.85f,"Echo holds the state from 8 s ago");
-  for(int i=0;i<15;i++) f.MotionStep(1f);
-  Check(f.EchoWeights.y>.85f,"Echo catches up after the delay");
+  Check(f.EchoWeights.x>.99f,"Echo ignores the live flower inside the 10 s hold");
+  for(int i=0;i<9;i++) f.MotionStep(1f);
+  Check(f.EchoWeights.x>.99f,"Echo still sees only the pre-hold history at 20 s");
+  for(int i=0;i<16;i++) f.MotionStep(1f);
+  Check(Mathf.Abs(f.EchoWeights.y-.5f)<.08f,"Echo reports the 10-45 s average across the transition");
+  Check(f.ArtWeights.y>.99f,"Live flower has already settled");
+  for(int i=0;i<25;i++) f.MotionStep(1f);
+  Check(f.EchoWeights.y>.98f,"Echo forgets Clarity once the old state leaves the window");
   for(int from=0;from<4;from++)for(int to=0;to<4;to++)if(from!=to){
    f.SetArtPreviewImmediate((FlowerArtState)from);f.SetFrozen(false);f.SetArtState((FlowerArtState)to);
    var weights=f.ArtWeights;f.MotionStep(0);Check(f.ArtWeights==weights,"Retarget continuous "+from+" to "+to);

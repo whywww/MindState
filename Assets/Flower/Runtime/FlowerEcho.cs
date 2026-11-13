@@ -3,17 +3,22 @@ using UnityEngine;
 using UnityEngine.Rendering;
 namespace MindState
 {
-    // A dim companion flower that replays the state from the last few seconds.
+    // A dim companion flower that summarizes the states from 10-45 seconds ago.
     public sealed partial class FlowerAssembler
     {
-        const float EchoScale=.50f,EchoDelay=8f,EchoSampleInterval=.5f,EchoFadeDuration=1.5f,EchoAccentSmoothing=1.5f;
+        // 128 samples at 0.5 s cover 64 s, enough for the 10-45 s window below.
+        const float EchoScale=.50f,EchoWindow=45f,EchoRecent=10f,EchoSampleInterval=.5f,EchoFadeDuration=1.5f,EchoAccentSmoothing=1.5f;
         const int EchoCols=33,EchoRows=21,EchoStride=4;
-        Vector3 echoOffset=new Vector3(-2.7f,.6f,-.34f);
+        // Horizontal gap from the main bloom, in bloom radii. The camera fit reuses it.
+        static readonly Vector3 EchoOffsetUnit=new Vector3(-1.70f,.35f,-.20f);
+        // The companion slides between the open gap and the closed-bud gap with the bloom.
+        const float EchoGapOpen=1.70f,EchoGapClosed=1.30f;
+        Vector3 echoOffset=EchoOffsetUnit*1.7f;
         float echoBloomRadius=1.7f;
         Color echoAccentSmooth=Color.white;
         sealed class EchoVariant { public Variant source; public Mesh mesh; public Vertex[] data; public int[] ids; public Vector3 root; public float lastProgress=-1; }
         sealed class EchoPetal { public Petal source; public int variant; public Transform anchor,body; public MeshRenderer renderer; public MaterialPropertyBlock block; }
-        struct EchoSample { public float clock,bloom,yaw; public Vector4 weights,light; }
+        struct EchoSample { public float clock,bloom; public Vector4 weights,light; }
         const int EchoCapacity=128;
         readonly EchoSample[] echoSamples=new EchoSample[EchoCapacity];
         Transform echoRoot;
@@ -21,16 +26,18 @@ namespace MindState
         int[] echoVariantBase;
         EchoPetal[] echoPetals;
         int echoHead,echoCount;
-        float lastEchoSample=float.NegativeInfinity,echoFade;
+        float lastEchoSample=float.NegativeInfinity,echoFade,echoYaw;
         internal Vector4 EchoWeights { get; private set; }=new Vector4(1,0,0,0);
         internal int EchoPetalCount=>echoPetals?.Length??0;
         internal bool EchoVisible=>echoRoot!=null&&echoRoot.gameObject.activeSelf;
         internal float EchoScaleValue=>EchoScale;
-        internal float EchoGap()
+        // Centre distance over the two current radii, so the check still holds when the pair closes.
+        internal float EchoClearance()
         {
-            if(echoRoot==null||echoBloomRadius<.01f) return 0f;
+            if(echoRoot==null) return 0f;
             var local=echoRoot.localPosition;
-            return new Vector2(local.x,local.z).magnitude/echoBloomRadius;
+            float radius=CurrentBloomRadius();
+            return new Vector2(local.x,local.z).magnitude/(radius*(1+EchoScale));
         }
         internal void SyncEchoHistory(){ResetEchoHistory();}
         internal bool EchoMeshFinite()
@@ -65,7 +72,7 @@ namespace MindState
             ReleaseEcho();
             if(layers==null||petalPrefab==null||petalPrefab.pearlMaterial==null) return;
             echoBloomRadius=MeasureBloomRadius();
-            echoOffset=new Vector3(-1.70f,.35f,-.20f)*echoBloomRadius;
+            echoOffset=EchoOffsetUnit*echoBloomRadius;
             echoRoot=new GameObject("Echo · recent memory").transform;
             echoRoot.SetParent(transform,false);
             echoRoot.localPosition=echoOffset;
@@ -173,12 +180,13 @@ namespace MindState
         {
             echoHead=echoCount=0;
             lastEchoSample=artTime;
+            echoYaw=artYaw;
             AppendEchoSample();
             echoAccentSmooth=CommittedAccent();
         }
         void AppendEchoSample()
         {
-            echoSamples[echoHead]=new EchoSample { clock=artTime,bloom=bloomProgress,yaw=artYaw,weights=ArtWeights,light=ArtLightWeights };
+            echoSamples[echoHead]=new EchoSample { clock=artTime,bloom=bloomProgress,weights=ArtWeights,light=ArtLightWeights };
             echoHead=(echoHead+1)%EchoCapacity;
             if(echoCount<EchoCapacity) echoCount++;
         }
@@ -189,24 +197,27 @@ namespace MindState
             lastEchoSample=artTime;
             AppendEchoSample();
         }
-        void SampleEchoHistory(float target,out Vector4 weights,out Vector4 light,out float bloom,out float yaw)
+        // A sliding mean of the 10-45 s old window: how much time was spent in each state, not a
+        // snapshot from a fixed delay. The most recent 10 s never participate.
+        void AverageEchoHistory(out Vector4 weights,out Vector4 light,out float bloom)
         {
-            weights=ArtWeights; light=ArtLightWeights; bloom=bloomProgress; yaw=artYaw;
-            if(echoCount==0) return;
-            int oldest=(echoHead-echoCount+EchoCapacity)%EchoCapacity;
-            var a=echoSamples[oldest]; var b=a;
+            weights=Vector4.zero; light=Vector4.zero; bloom=0;
+            int oldest=(echoHead-echoCount+EchoCapacity)%EchoCapacity,count=0;
+            float from=artTime-EchoWindow,to=artTime-EchoRecent;
             for(int i=0;i<echoCount;i++)
             {
                 var sample=echoSamples[(oldest+i)%EchoCapacity];
-                if(sample.clock<=target) { a=sample; b=sample; }
-                else { b=sample; break; }
+                if(sample.clock<from||sample.clock>to) continue;
+                weights+=sample.weights; light+=sample.light; bloom+=sample.bloom; count++;
             }
-            float span=b.clock-a.clock;
-            float t=span>1e-4f?Mathf.Clamp01((target-a.clock)/span):0f;
-            weights=Vector4.Lerp(a.weights,b.weights,t);
-            light=Vector4.Lerp(a.light,b.light,t);
-            bloom=Mathf.Lerp(a.bloom,b.bloom,t);
-            yaw=Mathf.Lerp(a.yaw,b.yaw,t);
+            // Before 10 s of history exists, hold the oldest remembered state instead of the live one.
+            if(count==0)
+            {
+                if(echoCount>0) { var sample=echoSamples[oldest]; weights=sample.weights; light=sample.light; bloom=sample.bloom; }
+                else { weights=ArtWeights; light=ArtLightWeights; bloom=bloomProgress; }
+                return;
+            }
+            weights/=count; light/=count; bloom/=count;
         }
         void UpdateEcho(float dt)
         {
@@ -215,12 +226,27 @@ namespace MindState
             echoRoot.gameObject.SetActive(true);
             echoFade=Mathf.MoveTowards(echoFade,1,dt/EchoFadeDuration);
             PushEchoHistory();
-            SampleEchoHistory(artTime-EchoDelay,out var weights,out var light,out var bloom,out var yaw);
+            AverageEchoHistory(out var weights,out var light,out var bloom);
             EchoWeights=weights;
             var look=BlendLook(weights);
-            echoRoot.localPosition=echoOffset+new Vector3(0,.005f*weights.z-.025f*weights.w,0);
-            echoRoot.localRotation=Quaternion.Euler(4f*weights.w,yaw,5f*weights.z);
-            // The companion keeps the shape of the old state but reads as a cool afterimage,
+            if(!frozen) echoYaw=Mathf.Repeat(echoYaw+look.yawSpeed*dt,360);
+            // Follow the echo's own averaged bloom: a large memory flower keeps the full gap and
+            // stays behind the main bloom, and only an echo that has closed slides in as a small
+            // companion.
+            float open=Mathf.SmoothStep(.10f,.55f,bloom);
+            float gap=Mathf.Lerp(EchoGapClosed,EchoGapOpen,open)/EchoGapOpen;
+            // The camera never dollies, so the companion only nudges itself: a remembered bud grows
+            // slightly and steps toward the viewer, but stays on its secondary side of the main bloom.
+            float bud=BudFactor(bloom);
+            // While the main bloom is closed the companion also steps back along the view axis
+            // (depth only, no page shift) and drifts toward the main, keeping it clearly secondary.
+            float close=BudFactor(bloomProgress);
+            echoRoot.localScale=Vector3.one*EchoScale*(1f+.08f*bud);
+            echoRoot.localPosition=new Vector3(echoOffset.x*gap,echoOffset.y,echoOffset.z)+viewToCamera*(.12f*bud)
+                -viewToCamera*(viewDistance*EchoBackGain*close)+viewPageRight*(viewDistance*EchoSideGain*close)
+                +new Vector3(0,.005f*weights.z-.025f*weights.w,0);
+            echoRoot.localRotation=Quaternion.Euler(4f*weights.w,echoYaw,5f*weights.z);
+            // The companion keeps the averaged silhouette but reads as a cool afterimage,
             // not as a second colored flower.
             var tint=new Vector4(.55f*echoFade,.40f,0,0);
             Color memory=new Color(.58f,.66f,.78f);
@@ -241,7 +267,7 @@ namespace MindState
                     PathPetalPose(l,petal.source,j,progress,out var position,out var rotation,out var scale);
                     position.y=layers[0].config.rootHeight+.0045f+l.config.rootStagger*RootStaggerSign(j,l.petals.Length);
                     float az=j*Mathf.PI*2/l.petals.Length;
-                    PetalArtMotion(weights,artTime-EchoDelay,az,k,j,out float tilt,out float roll);
+                    PetalArtMotion(weights,artTime,az,k,j,out float tilt,out float roll);
                     rotation=rotation*Quaternion.Euler(tilt,0,roll);
                     petal.anchor.SetLocalPositionAndRotation(position,rotation);
                     petal.body.localScale=scale;
@@ -252,7 +278,7 @@ namespace MindState
                     petal.block.SetVector("_StateSurface",surface);
                     petal.block.SetVector("_ArtWeights",weights);
                     petal.block.SetVector("_ArtLightWeights",light);
-                    petal.block.SetFloat("_ArtClock",artTime-EchoDelay);
+                    petal.block.SetFloat("_ArtClock",artTime);
                     petal.block.SetFloat("_ArtPhase",az+k*.5f);
                     petal.block.SetMatrix("_RootTrimWorldToFlower",worldToEcho);
                     petal.renderer.SetPropertyBlock(petal.block);
