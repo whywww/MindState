@@ -20,15 +20,22 @@ Shader "MindState/Radial Pearl Silk"
         _StateAccent ("State accent", Color) = (1,1,1,1)
         _StateSurface ("State surface (hue, rim, glow, gloss)", Vector) = (0,0,0,0)
         _Breath ("Breathing", Float) = 0
+        [HideInInspector] _FlowerPlayback ("Baked flower playback", Float) = 0
         _RootTrim ("Petal root cut", Vector) = (0,0,0,0)
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" "DisableBatching"="True" }
         Cull Back ZWrite On
         CGPROGRAM
-        #pragma surface surf StandardSpecular fullforwardshadows addshadow
-        #pragma target 3.0
+        #pragma surface surf StandardSpecular fullforwardshadows addshadow vertex:FlowerVert
+        #pragma target 4.5
+        #include "../../Flower/Resources/FlowerPlayback.cginc"
+        void FlowerVert(inout appdata_full v) {
+            #if defined(FLOWER_STRUCTURED_PLAYBACK)
+            if(_FlowerPlayback>.5) { FlowerVertex pose=SampleFlower((uint)v.texcoord1.x);v.vertex.xyz=pose.p;v.normal=pose.n;v.tangent=pose.t; }
+            #endif
+        }
         sampler2D _BumpMap,_DetailMask,_FlowPalette; float4 _FlowSettings;
         fixed4 _Color,_RootColor,_PinkColor;
         half _BumpStrength,_Smoothness,_SmoothnessVariation,_FineCount,_GrayMode,_Breath;

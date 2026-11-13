@@ -74,8 +74,11 @@ public sealed partial class FlowerAssembler {
  }
 
  void ApplyBottomPatches() {
+  if(gpuPlayback){ApplyPlayback(bloomProgress);return;}
   if(!bottomPreviewEnabled||bottomProgress==bloomProgress)return;bottomProgress=bloomProgress;
-  foreach(var patch in bottomPatches) {
+  foreach(var patch in bottomPatches) ApplyBottomPatch(patch);
+ }
+ void ApplyBottomPatch(BottomPatch patch) {
    float frame=Mathf.Clamp01(bloomProgress)*32;int a=Mathf.Min((int)frame,31);float f=frame-a;
    var g=SurfaceFor(layers[patch.layer],patch.index);Array.Copy(g.data,patch.work,g.data.Length);Array.Clear(patch.dirty,0,patch.dirty.Length);
    for(int k=0;k<patch.ids.Length;k++){int id=patch.ids[k];var d=Vector3.Lerp(patch.delta[a][k],patch.delta[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}
@@ -94,7 +97,6 @@ public sealed partial class FlowerAssembler {
     patch.work[k].n=patch.work[k+1].n=n;patch.work[k].t=patch.work[k+1].t=new Vector4(edge.x,edge.y,edge.z,1);
    }
    patch.mesh.SetVertexBufferData(patch.work,0,0,patch.work.Length,0,MeshUpdateFlags.DontRecalculateBounds);var bounds=g.mesh.bounds;bounds.Expand(2*Mathf.Max(patch.radius[a],patch.radius[a+1]));patch.mesh.bounds=bounds;MeshUpdates++;
-  }
  }
  Vector3 BottomDeltaAt(int layer,int index,float phase,int id){foreach(var patch in bottomPatches)if(patch.layer==layer&&patch.index==index){int k=Array.BinarySearch(patch.ids,id);if(k<0)return Vector3.zero;float q=phase*32;int a=Mathf.Min((int)q,31);return Vector3.Lerp(patch.delta[a][k],patch.delta[a+1][k],q-a);}return Vector3.zero;}
  internal void UpperCornerPreview(bool enabled){upperPreview=enabled;bottomProgress=-1;ApplyBottomPatches();}

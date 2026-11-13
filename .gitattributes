@@ -14,3 +14,9 @@ Assets/Flower/Runtime/FlowerLayerPatches.cs -text
 Assets/Flower/Baking/*.cs -text
 Assets/Flower/Validation/FlowerDiagnostics.cs -text
 Assets/Flower/Validation/FlowerSurfaceCollision.cs -text
+Assets/Flower/Runtime/FlowerPlayback.cs -text
+Assets/Flower/Baking/FlowerPlaybackBaking.cs -text whitespace=cr-at-eol
+Assets/Flower/Resources/FlowerPlayback.cginc -text
+Assets/HeroPetal/Shaders/Pearl.shader text eol=crlf
+Assets/Flower/Resources/FlowerPlaybackProvenance.txt -text
+Assets/StreamingAssets/FlowerPlayback.bin binary

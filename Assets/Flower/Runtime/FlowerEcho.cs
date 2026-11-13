@@ -16,7 +16,7 @@ namespace MindState
         Vector3 echoOffset=EchoOffsetUnit*1.7f;
         float echoBloomRadius=1.7f;
         Color echoAccentSmooth=Color.white;
-        sealed class EchoVariant { public Variant source; public Mesh mesh; public Vertex[] data; public int[] ids; public Vector3 root; public float lastProgress=-1; }
+        sealed class EchoVariant { public Variant source; public PlaybackClip playback; public Mesh mesh; public Vertex[] data; public int[] ids; public Vector3 root; public float lastProgress=-1; }
         sealed class EchoPetal { public Petal source; public int variant; public Transform anchor,body; public MeshRenderer renderer; public MaterialPropertyBlock block; }
         struct EchoSample { public float clock,bloom; public Vector4 weights,light; }
         const int EchoCapacity=128;
@@ -110,6 +110,7 @@ namespace MindState
                     renderer.receiveShadows=false;
                     var block=new MaterialPropertyBlock();
                     src.renderer.GetPropertyBlock(block);
+                    if(gpuPlayback) BindPlayback(block,echoVariant.playback);
                     block.SetVector("_FlowSettings",Vector4.zero);
                     block.SetFloat("_Breath",0);
                     block.SetVector("_ArtWeights",Vector4.zero);
@@ -162,13 +163,20 @@ namespace MindState
             mesh.SetVertexBufferData(uv,0,0,total,1,MeshUpdateFlags.DontRecalculateBounds);
             mesh.triangles=triangles;
             mesh.bounds=new Bounds(Vector3.zero,Vector3.one*3f);
-            return new EchoVariant { source=source,mesh=mesh,data=data,ids=ids,root=Vector3.zero };
+            PlaybackClip clip=null;
+            if(gpuPlayback){
+                Destroy(mesh);mesh=PlaybackMesh("Static GPU echo",data,uv,triangles,ids);
+                clip=new PlaybackClip{count=source.data.Length,times=new float[PoseCount],bounds=new Bounds[PoseCount]};
+                clip.buffer=new ComputeBuffer(PoseCount*clip.count,40,ComputeBufferType.Structured);playbackGpuBytes+=PoseCount*clip.count*40L;
+                for(int f=0;f<PoseCount;f++){clip.times[f]=f/(float)(PoseCount-1);clip.bounds[f]=source.poses[f].bounds;clip.buffer.SetData(source.poses[f].data,0,f*clip.count,clip.count);}
+            }
+            return new EchoVariant { source=source,playback=clip,mesh=mesh,data=data,ids=ids,root=Vector3.zero };
         }
         void ReleaseEcho()
         {
             if(echoRoot!=null) Destroy(echoRoot.gameObject);
             echoRoot=null;
-            if(echoVariants!=null) foreach(var variant in echoVariants) if(variant?.mesh!=null) Destroy(variant.mesh);
+            if(echoVariants!=null) foreach(var variant in echoVariants) { if(variant?.mesh!=null) Destroy(variant.mesh);if(variant?.playback!=null){variant.playback.buffer.Release();playbackGpuBytes-=PoseCount*variant.playback.count*40L;} }
             echoVariants=null;
             echoVariantBase=null;
             echoPetals=null;
@@ -197,31 +205,42 @@ namespace MindState
             lastEchoSample=artTime;
             AppendEchoSample();
         }
-        // A sliding mean of the 10-45 s old window: how much time was spent in each state, not a
-        // snapshot from a fixed delay. The most recent 10 s never participate.
+        // Integrate the piecewise-linear history over the moving 10-45 s window.
+        // Samples stay at 0.5 s; fractional boundary segments move every frame.
         void AverageEchoHistory(out Vector4 weights,out Vector4 light,out float bloom)
         {
-            weights=Vector4.zero; light=Vector4.zero; bloom=0;
-            int oldest=(echoHead-echoCount+EchoCapacity)%EchoCapacity,count=0;
-            float from=artTime-EchoWindow,to=artTime-EchoRecent;
-            for(int i=0;i<echoCount;i++)
+            int oldest=(echoHead-echoCount+EchoCapacity)%EchoCapacity;
+            if(echoCount==0) { weights=ArtWeights; light=ArtLightWeights; bloom=bloomProgress; return; }
+            var first=echoSamples[oldest];
+            float from=Mathf.Max(artTime-EchoWindow,first.clock),to=artTime-EchoRecent;
+            weights=first.weights; light=first.light; bloom=first.bloom;
+            // Preserve the initial ten-second hold and the single-sample case.
+            if(to<=from||echoCount==1) return;
+            weights=light=Vector4.zero; bloom=0;
+            float duration=0;
+            for(int i=1;i<echoCount;i++)
             {
-                var sample=echoSamples[(oldest+i)%EchoCapacity];
-                if(sample.clock<from||sample.clock>to) continue;
-                weights+=sample.weights; light+=sample.light; bloom+=sample.bloom; count++;
+                var next=echoSamples[(oldest+i)%EchoCapacity];
+                float left=Mathf.Max(from,first.clock),right=Mathf.Min(to,next.clock);
+                if(right>left)
+                {
+                    float a=Mathf.InverseLerp(first.clock,next.clock,left),b=Mathf.InverseLerp(first.clock,next.clock,right);
+                    float span=right-left;
+                    weights+=(Vector4.LerpUnclamped(first.weights,next.weights,a)+Vector4.LerpUnclamped(first.weights,next.weights,b))*(.5f*span);
+                    light+=(Vector4.LerpUnclamped(first.light,next.light,a)+Vector4.LerpUnclamped(first.light,next.light,b))*(.5f*span);
+                    bloom+=(Mathf.LerpUnclamped(first.bloom,next.bloom,a)+Mathf.LerpUnclamped(first.bloom,next.bloom,b))*(.5f*span);
+                    duration+=span;
+                }
+                first=next;
+                if(next.clock>=to) break;
             }
-            // Before 10 s of history exists, hold the oldest remembered state instead of the live one.
-            if(count==0)
-            {
-                if(echoCount>0) { var sample=echoSamples[oldest]; weights=sample.weights; light=sample.light; bloom=sample.bloom; }
-                else { weights=ArtWeights; light=ArtLightWeights; bloom=bloomProgress; }
-                return;
-            }
-            weights/=count; light/=count; bloom/=count;
+            if(duration>0) { weights/=duration; light/=duration; bloom/=duration; }
+            else { weights=first.weights; light=first.light; bloom=first.bloom; }
         }
         void UpdateEcho(float dt)
         {
             if(echoRoot==null) return;
+            if(frozen) dt=0;
             if(!artActive) { echoRoot.gameObject.SetActive(false); return; }
             echoRoot.gameObject.SetActive(true);
             echoFade=Mathf.MoveTowards(echoFade,1,dt/EchoFadeDuration);
@@ -264,6 +283,7 @@ namespace MindState
                     var petal=echoPetals[petalIndex];
                     var variant=echoVariants[petal.variant];
                     UpdateEchoMesh(variant,progress);
+                    if(gpuPlayback)petal.block.SetVector(PlaybackFrameId,PlaybackFrame(variant.playback,progress));
                     PathPetalPose(l,petal.source,j,progress,out var position,out var rotation,out var scale);
                     position.y=layers[0].config.rootHeight+.0045f+l.config.rootStagger*RootStaggerSign(j,l.petals.Length);
                     float az=j*Mathf.PI*2/l.petals.Length;
@@ -293,15 +313,16 @@ namespace MindState
         }
         void UpdateEchoMesh(EchoVariant variant,float progress)
         {
-            if(Mathf.Abs(progress-variant.lastProgress)<.00015f) return;
+            if(gpuPlayback?progress==variant.lastProgress:Mathf.Abs(progress-variant.lastProgress)<.00015f) return;
             variant.lastProgress=progress;
             float frame=progress*(PoseCount-1);
             int a=Mathf.Min((int)frame,PoseCount-2);
             float f=frame-a;
             var first=variant.source.poses[a];
             var next=variant.source.poses[a+1];
-            for(int i=0;i<variant.ids.Length;i++) Interpolate(ref first.data[variant.ids[i]],ref next.data[variant.ids[i]],f,out variant.data[i]);
-            variant.mesh.SetVertexBufferData(variant.data,0,0,variant.data.Length,0,MeshUpdateFlags.DontRecalculateBounds);
+            if(!gpuPlayback)for(int i=0;i<variant.ids.Length;i++) Interpolate(ref first.data[variant.ids[i]],ref next.data[variant.ids[i]],f,out variant.data[i]);
+            if(!gpuPlayback)variant.mesh.SetVertexBufferData(variant.data,0,0,variant.data.Length,0,MeshUpdateFlags.DontRecalculateBounds);
+            else {var bounds=first.bounds;bounds.Encapsulate(next.bounds);variant.mesh.bounds=bounds;}
             int center=EchoCols/2,front=EchoCols*EchoRows;
             Vector3 frontRoot=Vector3.LerpUnclamped(first.data[variant.ids[center]].p,next.data[variant.ids[center]].p,f);
             Vector3 backRoot=Vector3.LerpUnclamped(first.data[variant.ids[front+center]].p,next.data[variant.ids[front+center]].p,f);

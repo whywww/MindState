@@ -84,6 +84,25 @@ namespace MindState
         }
         float CurrentBloomRadius()
         {
+            // Playback culling bounds deliberately union an interval. They are not a
+            // motion signal: use the continuous pose envelope for the route and mask.
+            if(gpuPlayback&&playback!=null)
+            {
+                float continuousRadius=0;
+                var worldToFlower=transform.worldToLocalMatrix;
+                for(int l=0;l<layers.Length;l++) for(int p=0;p<layers[l].petals.Length;p++)
+                {
+                    var poseBounds=playback[l][p].motionBounds;
+                    var matrix=worldToFlower*layers[l].petals[p].body.localToWorldMatrix;
+                    for(int i=0;i<8;i++)
+                    {
+                        var corner=new Vector3((i&1)==0?poseBounds.min.x:poseBounds.max.x,(i&2)==0?poseBounds.min.y:poseBounds.max.y,(i&4)==0?poseBounds.min.z:poseBounds.max.z);
+                        var local=matrix.MultiplyPoint3x4(corner);
+                        continuousRadius=Mathf.Max(continuousRadius,Mathf.Max(Mathf.Abs(local.x),Mathf.Abs(local.z)));
+                    }
+                }
+                return continuousRadius>.1f?continuousRadius:ribbonBloomRadius;
+            }
             var bounds=WorldBounds;float radius=0;
             for(int i=0;i<8;i++)
             {
@@ -149,6 +168,7 @@ namespace MindState
         void UpdateRibbons(float dt)
         {
             if(ribbonRoot==null||ribbonThread==null) return;
+            if(frozen) dt=0;
             if(!artActive) { ribbonRoot.gameObject.SetActive(false); return; }
             ribbonRoot.gameObject.SetActive(true);
             ribbonFade=Mathf.MoveTowards(ribbonFade,1,dt/RibbonShowDuration);

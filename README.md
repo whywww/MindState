@@ -18,9 +18,12 @@ Unity 2022.3.62f3c1 / Windows x64。主场景是 `Assets/Flower/Scenes/FlowerGal
 
 ```powershell
 ./Tools/Bake.ps1                 # 修改几何或生成源码后重新生成缓存
+./Tools/Bake.ps1 -PlaybackOnly   # 仅重建播放缓存，保留已验证的底层补偿
 ./Tools/Verify.ps1               # 当前项目回归
 ./Tools/Build.ps1                # 正式 Windows 程序
 ./Tools/Build.ps1 -Validation    # 含诊断功能的测试程序
+./Tools/Performance.ps1 -Reference # 原 CPU 路径性能基线（验证程序）
+./Tools/Performance.ps1          # GPU 播放性能与四态截图
 ```
 
 烘焙会检查来源，构建拒绝过期缓存。`Outputs` 是可删除的本轮验证产物；`Builds` 是生成程序与 BrainLink 工具环境，均不纳入 Git。

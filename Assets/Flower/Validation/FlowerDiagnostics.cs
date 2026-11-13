@@ -53,6 +53,7 @@ namespace MindState
         { SampleDiagnosticSurface(layer,0,globalProgress,destination); }
         public void SampleDiagnosticSurface(int layer,int index,float globalProgress,Vector3[] destination)
         {
+            if(gpuPlayback){var data=SamplePlayback(playback[layer][index],globalProgress);int surfaceCount=(HeroPetal.WidthSegments+1)*(HeroPetal.LengthSegments+1);for(int k=0;k<surfaceCount;k++)destination[k]=(data[k].p+data[k+surfaceCount].p)*.5f;return;}
             var l=layers[layer]; var g=SurfaceFor(l,index); float p=Mathf.Clamp01((globalProgress*BloomDuration-l.config.delay)/l.config.duration);
             float frame=p*(PoseCount-1); int a=Mathf.Min((int)frame,PoseCount-2); float f=frame-a;
             int surface=(HeroPetal.WidthSegments+1)*(HeroPetal.LengthSegments+1);

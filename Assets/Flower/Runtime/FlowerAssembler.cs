@@ -25,7 +25,7 @@ namespace MindState
         public long LastUpdateAllocation { get; private set; }
         public long CacheBytes { get; private set; }
         public double InitializationMilliseconds { get; private set; }
-        public long GeometryBytes { get { long bytes=CacheBytes+BottomWorkingBytes; if(layers!=null) foreach(var l in layers) foreach(var g in l.variants) bytes+=g.data.Length*40L+UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(g.mesh); if(coreMesh!=null) bytes+=UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(coreMesh); if(stamenMesh!=null) bytes+=UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(stamenMesh); return bytes; } }
+        public long GeometryBytes { get { long bytes=CacheBytes+BottomWorkingBytes+playbackGpuBytes; if(layers!=null) foreach(var l in layers) foreach(var g in l.variants) bytes+=g.data.Length*40L+UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(g.mesh); if(coreMesh!=null) bytes+=UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(coreMesh); if(stamenMesh!=null) bytes+=UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(stamenMesh); return bytes; } }
         public float MaxCachePositionError { get; private set; }
         public float MaxCacheNormalAngle { get; private set; }
         public int LayerCount=>layers==null?0:layers.Length;
@@ -57,6 +57,10 @@ namespace MindState
         [ContextMenu("Rebuild Flower / 重建缓存与组装")]
         public void RebuildFlower()
         {
+            try { RebuildFlowerCore(); } catch { Release(); enabled=false; throw; }
+        }
+        void RebuildFlowerCore()
+        {
             if(!Application.isPlaying||preset==null||petalPrefab==null) return;
             long initStarted=System.Diagnostics.Stopwatch.GetTimestamp();
             Release(); CacheBytes=0; MaxCachePositionError=0; MaxCacheNormalAngle=0; BloomDuration=1;
@@ -77,6 +81,9 @@ namespace MindState
                     foldSeeds[i][variant]=unchecked(preset.randomSeed*486187739+i*104729+variant*15485863);
                 }
             }
+            gpuPlayback=!ReferenceGeometryRequested();
+            using var playbackReader=gpuPlayback?LoadPlaybackBases():null;
+            if(!gpuPlayback) {
             bool verifyPoses=PoseCacheVerificationRequested();
             var samplers=CreatePoseSamplers();
             var variantBytes=new long[layers.Length][];
@@ -131,6 +138,7 @@ namespace MindState
                 }
             }
             DestroyPoseSamplers(samplers);
+            }
             for(int i=0;i<layers.Length;i++)
             {
                 var l=layers[i];
@@ -170,7 +178,8 @@ namespace MindState
             float initialProgress=bloomProgress; bloomProgress=1; ApplyPose(); FullBloomBounds=WorldBounds;
             foreach(var l in layers) foreach(var p in l.petals) p.fullMatrix=p.body.localToWorldMatrix;
             bloomProgress=initialProgress; ApplyPose();
-            BuildBottomPatches();ApplyBottomPatches();
+            if(gpuPlayback) { LoadPlaybackPetals(playbackReader); ApplyPlayback(bloomProgress); }
+            else { BuildBottomPatches();ApplyBottomPatches(); }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || FLOWER_VALIDATION
             ApplyDiagnosticColors();
 #endif
@@ -281,12 +290,12 @@ namespace MindState
                 {
                     long interpolateStart=System.Diagnostics.Stopwatch.GetTimestamp();
                     Pose p0=g.poses[a],p1=g.poses[a+1];
-                    for(int i=0;i<g.data.Length;i++) Interpolate(ref p0.data[i],ref p1.data[i],f,out g.data[i]);
+                    if(!gpuPlayback) for(int i=0;i<g.data.Length;i++) Interpolate(ref p0.data[i],ref p1.data[i],f,out g.data[i]);
                     InterpolateMs+=Milliseconds(interpolateStart);
                     long uploadStart=System.Diagnostics.Stopwatch.GetTimestamp();
                     g.root=Vector3.LerpUnclamped(p0.root,p1.root,f);
-                    g.mesh.SetVertexBufferData(g.data,0,0,g.data.Length,0,MeshUpdateFlags.DontRecalculateBounds);
-                    Bounds bounds=p0.bounds; bounds.Encapsulate(p1.bounds); g.mesh.bounds=bounds; MeshUpdates++; UploadMs+=Milliseconds(uploadStart);
+                    if(!gpuPlayback) g.mesh.SetVertexBufferData(g.data,0,0,g.data.Length,0,MeshUpdateFlags.DontRecalculateBounds);
+                    Bounds bounds=p0.bounds; bounds.Encapsulate(p1.bounds); g.mesh.bounds=bounds; if(!gpuPlayback) MeshUpdates++; UploadMs+=Milliseconds(uploadStart);
                 }
                 if(!applyTransforms) continue;
                 long transformStart=System.Diagnostics.Stopwatch.GetTimestamp();
@@ -440,11 +449,11 @@ namespace MindState
             return distance*1.16f;
         }
         // Compatibility: the original layer query returns its first shared variant.
-        public Mesh LayerMesh(int index)=>layers[index].variants[0].mesh;
-        public Mesh PetalMesh(int layer,int index){foreach(var patch in bottomPatches)if(patch.layer==layer&&patch.index==index)return patch.mesh;return SurfaceFor(layers[layer],index).mesh;}
+        public Mesh LayerMesh(int index){var l=layers[index];var g=l.variants[0];if(gpuPlayback)MaterializeBaseDiagnostic(g,l.progress);return g.mesh;}
+        public Mesh PetalMesh(int layer,int index){if(gpuPlayback)return DiagnosticPlaybackMesh(layer,index);foreach(var patch in bottomPatches)if(patch.layer==layer&&patch.index==index)return patch.mesh;return SurfaceFor(layers[layer],index).mesh;}
         public Mesh SharedMesh(int index)
         {
-            foreach(var l in layers) { if(index<l.variants.Length) return l.variants[index].mesh; index-=l.variants.Length; }
+            foreach(var l in layers) { if(index<l.variants.Length) {var g=l.variants[index];if(gpuPlayback)MaterializeBaseDiagnostic(g,l.progress);return g.mesh;} index-=l.variants.Length; }
             throw new ArgumentOutOfRangeException(nameof(index));
         }
         public float RootAnchorError()
@@ -455,6 +464,7 @@ namespace MindState
         }
         void Release()
         {
+            ReleaseEcho(); ReleaseRibbons(); ReleasePlayback();
             ReleaseBottomPatches();
             if(generated!=null) { generated.gameObject.SetActive(false); Destroy(generated.gameObject); }
             if(layers!=null) foreach(var l in layers) if(l?.variants!=null) foreach(var g in l.variants) if(g?.mesh!=null) Destroy(g.mesh);

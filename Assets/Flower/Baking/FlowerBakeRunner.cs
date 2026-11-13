@@ -26,7 +26,8 @@ namespace MindState {
     flower.SetBloomProgress(phase);
     if(flower.RootAnchorError()>1e-5f)throw new Exception("Bake root attachment failed at "+phase);
    }
-   flower.SaveBottomCache();
+   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bakePlayback")<0)flower.SaveBottomCache();
+   flower.SavePlaybackCache();
    Debug.Log("FLOWER_BAKE_SUCCESS");UnityEditor.EditorApplication.Exit(0);
   }
  }

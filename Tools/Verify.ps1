@@ -10,3 +10,11 @@ $taskProcess=Start-Process -FilePath $Unity -ArgumentList $taskArgs -WorkingDire
 if($taskProcess.ExitCode -ne 0){throw 'Project validation failed. See Outputs/Verify.log.'}
 $taskChecks=Get-Content -LiteralPath (Join-Path $taskOutput 'Validation/Checks.txt')
 Write-Output ($taskChecks.Count.ToString()+' checks passed. See Outputs/Validation.')
+$taskGpuArgs=@('-batchmode','-projectPath',('"'+$taskRoot+'"'),'-executeMethod','MindState.FlowerPlaybackValidation.Run','-verifyPlayback','-logFile',('"'+(Join-Path $taskOutput 'PlaybackVerify.log')+'"'))
+$taskGpuProcess=Start-Process -FilePath $Unity -ArgumentList $taskGpuArgs -WorkingDirectory $taskRoot -WindowStyle Hidden -Wait -PassThru
+if($taskGpuProcess.ExitCode -ne 0){throw 'GPU playback validation failed. See Outputs/PlaybackVerify.log.'}
+Get-Content -LiteralPath (Join-Path $taskOutput 'PlaybackValidation/Result.txt')
+$taskMotionArgs=@('-batchmode','-projectPath',('"'+$taskRoot+'"'),'-executeMethod','MindState.FlowerMotionValidation.Run','-verifyMotion','-logFile',('"'+(Join-Path $taskOutput 'MotionVerify.log')+'"'))
+$taskMotionProcess=Start-Process -FilePath $Unity -ArgumentList $taskMotionArgs -WorkingDirectory $taskRoot -WindowStyle Hidden -Wait -PassThru
+if($taskMotionProcess.ExitCode -ne 0){throw 'Motion continuity validation failed. See Outputs/MotionVerify.log.'}
+Get-Content -LiteralPath (Join-Path $taskOutput 'MotionValidation/Result.txt')
