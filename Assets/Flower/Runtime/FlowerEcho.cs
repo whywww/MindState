@@ -18,6 +18,8 @@ namespace MindState
         Color echoAccentSmooth=Color.white;
         sealed class EchoVariant { public Variant source; public PlaybackClip playback; public Mesh mesh; public Vertex[] data; public int[] ids; public Vector3 root; public float lastProgress=-1; }
         sealed class EchoPetal { public Petal source; public int variant; public Transform anchor,body; public MeshRenderer renderer; public MaterialPropertyBlock block; }
+        MeshRenderer echoCore,echoStamen;
+        MaterialPropertyBlock echoCoreBlock,echoStamenBlock;
         struct EchoSample { public float clock,bloom; public Vector4 weights,light; }
         const int EchoCapacity=128;
         readonly EchoSample[] echoSamples=new EchoSample[EchoCapacity];
@@ -30,6 +32,7 @@ namespace MindState
         internal Vector4 EchoWeights { get; private set; }=new Vector4(1,0,0,0);
         internal int EchoPetalCount=>echoPetals?.Length??0;
         internal bool EchoVisible=>echoRoot!=null&&echoRoot.gameObject.activeSelf;
+        internal bool EchoHeartReady=>echoCore!=null&&echoStamen!=null&&echoCore.gameObject.activeInHierarchy&&echoStamen.gameObject.activeInHierarchy;
         internal float EchoScaleValue=>EchoScale;
         // Centre distance over the two current radii, so the check still holds when the pair closes.
         internal float EchoClearance()
@@ -120,9 +123,37 @@ namespace MindState
                     echoPetals[petalCursor++]=new EchoPetal { source=src,variant=echoVariantBase[k]+j%l.variants.Length,anchor=anchor,body=body,renderer=renderer,block=block };
                 }
             }
+            BuildEchoHeart();
             // Petal bodies are placed every frame; keep the companion out of the frame until art mode starts.
             echoRoot.gameObject.SetActive(false);
             ResetEchoHistory();
+        }
+        // The heart reuses the main flower's meshes: the echo root is exactly half scale, so the
+        // receptacle, filaments and anthers land where the decimated petals expect them.
+        void BuildEchoHeart()
+        {
+            if(coreMesh==null||coreMaterial==null||stamenMesh==null||stamenMaterial==null) return;
+            echoCore=AddEchoHeart("Echo receptacle · filaments",coreMesh,coreMaterial,out echoCoreBlock);
+            echoStamen=AddEchoHeart("Echo champagne anthers",stamenMesh,stamenMaterial,out echoStamenBlock);
+            echoCoreBlock.SetColor("_RootColor",Color.black);
+            echoCoreBlock.SetColor("_PinkColor",Color.black);
+            // Metallic champagne would read as black mirrors without a reflection probe; the memory
+            // anthers need a diffuse response to stay legible at half scale.
+            echoStamenBlock.SetFloat("_Metallic",.05f);
+            echoStamenBlock.SetFloat("_Glossiness",.22f);
+        }
+        MeshRenderer AddEchoHeart(string title,Mesh mesh,Material material,out MaterialPropertyBlock block)
+        {
+            var go=new GameObject(title); go.transform.SetParent(echoRoot,false);
+            go.AddComponent<MeshFilter>().sharedMesh=mesh;
+            var renderer=go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial=material;
+            renderer.shadowCastingMode=ShadowCastingMode.Off;
+            renderer.receiveShadows=false;
+            block=new MaterialPropertyBlock();
+            block.SetColor("_Color",Color.black);
+            renderer.SetPropertyBlock(block);
+            return renderer;
         }
         EchoVariant BuildEchoVariant(Layer layer,int variant)
         {
@@ -180,6 +211,8 @@ namespace MindState
             echoVariants=null;
             echoVariantBase=null;
             echoPetals=null;
+            echoCore=echoStamen=null;
+            echoCoreBlock=echoStamenBlock=null;
             echoHead=echoCount=0;
             lastEchoSample=float.NegativeInfinity;
             echoFade=0;
@@ -281,6 +314,7 @@ namespace MindState
             if(!frozen) echoAccentSmooth=Color.Lerp(echoAccentSmooth,artLooks[LeadingState(weights)].accent,1-Mathf.Exp(-dt/EchoAccentSmoothing));
             var accent=(Vector4)Color.Lerp(memory,echoAccentSmooth,.22f).linear;
             var surface=new Vector4(.88f,look.rim*.30f,0f,look.gloss*.30f);
+            UpdateEchoHeart(memory);
             var worldToEcho=echoRoot.worldToLocalMatrix;
             for(int k=0;k<layers.Length;k++)
             {
@@ -313,6 +347,34 @@ namespace MindState
                     petal.renderer.SetPropertyBlock(petal.block);
                 }
             }
+        }
+        // The heart's Pearl material sits on its plain branch, which ignores _StateTint/_StateAccent,
+        // so the memory tint is baked into _Color with the same order the echo petals use.
+        void UpdateEchoHeart(Color memory)
+        {
+            if(echoCore==null||echoStamen==null) return;
+            bool lit=appearanceEnabled&&appearance!=null;
+            var accent=Color.Lerp(memory,echoAccentSmooth,.22f);
+            var core=EchoGhost(lit?new Color(.97f,.58f,.50f):coreMaterial.color,accent,.55f*echoFade);
+            var stamen=EchoGhost(lit?new Color(1f,.86f,.52f):stamenMaterial.color,accent,.72f*echoFade);
+            var root=core*.92f;root.a=1f;
+            var pink=core*1.05f;pink.a=1f;
+            echoCoreBlock.SetColor("_Color",core);
+            echoCoreBlock.SetColor("_RootColor",root);
+            echoCoreBlock.SetColor("_PinkColor",pink);
+            echoCore.SetPropertyBlock(echoCoreBlock);
+            echoStamenBlock.SetColor("_Color",stamen);
+            echoStamen.SetPropertyBlock(echoStamenBlock);
+        }
+        // SetColor converts to linear on upload, so mix in linear space like the petal shader and
+        // convert back once; mixing the gamma literals would dim the heart twice.
+        static Color EchoGhost(Color baseColor,Color memory,float brightness)
+        {
+            var c=Color.Lerp(baseColor.linear,memory.linear,.88f);
+            float lum=.2126f*c.r+.7152f*c.g+.0722f*c.b;
+            c=Color.Lerp(new Color(lum,lum,lum,1f),c,.40f);
+            c*=brightness;c.a=1f;
+            return c.gamma;
         }
         int LayerPetalOffset(int layer)
         {

@@ -54,6 +54,7 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
   for(int state=0;state<4;state++){
    f.SetArtPreviewImmediate((FlowerArtState)state);f.SyncEchoHistory();f.MotionStep(1.3f);
    Check(f.EchoPetalCount==18&&f.EchoVisible,"Echo flower visible with 18 petals state="+state);
+   Check(f.EchoHeartReady,"Echo heart visible state="+state);
    Check(Mathf.Abs(f.EchoScaleValue-.50f)<.01f,"Echo flower at 50% scale");
    Check(f.EchoClearance()>=1f,"Echo flower clears the bloom state="+state+" clearance="+f.EchoClearance().ToString("F3"));
    Check(f.EchoMeshFinite(),"Echo mesh finite state="+state);
