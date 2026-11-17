@@ -1,0 +1,2 @@
+PASS: Gpu local flex active: L1-P3; target, neighbours, roots and transitions passed
+Formal caches unchanged during this preview.

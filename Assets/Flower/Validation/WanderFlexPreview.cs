@@ -41,7 +41,7 @@ public sealed class WanderFlexPreview:MonoBehaviour {
   string[] paths={"Assets/Flower/Resources/BottomOverlap.bytes","Assets/Flower/Resources/BottomOverlapProvenance.txt","Assets/StreamingAssets/FlowerPlayback.bin","Assets/Flower/Resources/FlowerPlaybackProvenance.txt"};var cacheHashes=Array.ConvertAll(paths,p=>FlowerAssembler.FlexFileHash(p));
   string mode=GpuRequested?"Gpu":FinalRequested?"FormalGpu":"Cpu";File.WriteAllText("Outputs/WanderFlex/"+mode+"Result.txt","RUNNING; not approved");
   if(BestRequested){bestFlower=f;bestGallery=gallery;yield return BuildBestClip();yield break;}
-  if(Array.IndexOf(Environment.GetCommandLineArgs(),"-flexBuild")>=0){f.BuildFlexCandidate();File.WriteAllText("Outputs/WanderFlex/BuildResult.txt","CPU parameter interpolation passed; no formal cache published");if(Application.isBatchMode)EditorApplication.Exit(0);yield break;}
+  if(Array.IndexOf(Environment.GetCommandLineArgs(),"-flexBuild")>=0){f.BuildFlexCandidate();File.WriteAllText("Outputs/WanderFlex/BuildResult.txt",Array.IndexOf(Environment.GetCommandLineArgs(),"-retainFlexCandidate")>=0?"Full candidate grid built; inspect RetainedFailures.txt for acceptance limitations. No formal cache published.":"CPU parameter interpolation passed; no formal cache published");if(Application.isBatchMode)EditorApplication.Exit(0);yield break;}
   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-flexDiagnose")>=0||Array.IndexOf(Environment.GetCommandLineArgs(),"-flexCorners")>=0){
    bool all=true;bool corners=Array.IndexOf(Environment.GetCommandLineArgs(),"-flexCorners")>=0;
    if(corners){foreach(var p in new[]{new Vector3(-4,-4,4),new Vector3(-4,4,4),new Vector3(4,4,-4),new Vector3(4,-4,-4)}){f.SetArtPreviewImmediate(FlowerArtState.Wandering);f.MotionStep(5);bool ok=false;foreach(float fraction in new[]{1f,.75f,.5f,.25f,0f}){ok=f.SolveFlexPose(100+p.x+p.y*.1f+p.z*.01f,fraction,p);if(ok)break;}Debug.Log("FLEX_CORNER "+p+" passed="+ok);all&=ok;yield return null;}}
@@ -129,7 +129,7 @@ public sealed partial class FlowerAssembler {
    // Keep the nearby outer neighbour in the active band before a sheet
    // actually touches it. Contact-only activation made the minimal bend
    // disappear abruptly as a contact moved across a triangle boundary.
-   if(renderedContacts)for(int id=20*129;id<BottomSurface;id++)if(Mathf.Abs(scalar[id])>1e-6f){float d=trees[2].OutsideDistance(world[10][id],directions[id].normalized,out float alignment);if(alignment>.2f&&Mathf.Abs(d)<.08f&&d*alignment>-.012f)masks[2][id]=true;}
+   if(renderedContacts)for(int id=20*129;id<BottomSurface;id++){float d=trees[2].OutsideDistance(world[10][id],directions[id].normalized,out float alignment);if(alignment>.2f&&Mathf.Abs(d)<.08f&&d*alignment>-.012f)masks[2][id]=true;}
    var sum=new float[FlexField.Count];var counts=new int[FlexField.Count];float violation=0;
    for(int n=0;n<4;n++)for(int id=20*129;id<BottomSurface;id++)if(masks[n][id]){var dir=directions[id];float length=dir.magnitude;float d=trees[n].OutsideDistance(world[10][id],dir*(signs[n]/length),out float alignment);if(d>-clearance/Mathf.Max(.02f,alignment)&&d<2f){float correction=(d+clearance/Mathf.Max(.02f,alignment))/length;violation=Mathf.Max(violation,correction);if(Mathf.Abs(field.Height(id)+signs[n]*correction)>.1001f)outsideLimit=true;field.Propose(id,signs[n]*correction,sum,counts);}}
    // Soft membrane strain penalty; ordinary bending below 25% edge strain

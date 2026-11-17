@@ -14,7 +14,7 @@ namespace MindState {
    if(type==LogType.Exception||type==LogType.Error) UnityEditor.EditorApplication.Exit(2);
   }
   [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)] static void Boot() {
-   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bakeFlower")>=0) {
+   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bakeFlower")>=0||Array.IndexOf(Environment.GetCommandLineArgs(),"-showWanderingGpu")>=0) {
     Application.logMessageReceived+=Fail;Camera.main.gameObject.AddComponent<FlowerBakeRunner>();
    }
   }
@@ -28,6 +28,11 @@ namespace MindState {
    yield return null;
    var flower=FindObjectOfType<FlowerAssembler>();
    if(flower==null||!flower.Ready) {UnityEditor.EditorApplication.Exit(2);yield break;}
+   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-showWanderingGpu")>=0){
+    if(!flower.UsesGpuPlayback)throw new InvalidOperationException("Formal review requires GPU playback");
+    flower.SetArtPreviewImmediate(FlowerArtState.Wandering);var gallery=FindObjectOfType<FlowerGallery>();gallery.SetView(22,25);gallery.showInterface=true;
+    yield return new WaitForSeconds(15);WanderFlexPreview.Shot("FormalGpuAfter");Debug.Log("FORMAL_WANDERING_GPU_REVIEW_READY");yield break;
+   }
    if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bakePlayback")>=0&&!File.Exists(Path.Combine(Application.streamingAssetsPath,"WanderingFlex.bin")))throw new InvalidOperationException("Initial flexible correction requires a complete cache rebuild; -PlaybackOnly is insufficient.");
    ValidateReference(flower);
    flower.PrepareFlexBake();
