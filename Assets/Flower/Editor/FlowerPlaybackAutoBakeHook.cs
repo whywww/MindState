@@ -18,7 +18,9 @@ namespace MindState.Editor
 
         static void OnPlayModeChanged(PlayModeStateChange change)
         {
+            if(change==PlayModeStateChange.EnteredEditMode) { SessionState.SetBool(FlowerOpenClearancePreview.Key,false); SessionState.SetBool(FlowerOpenClearancePreview.BaselineKey,false); }
             if(change!=PlayModeStateChange.ExitingEditMode||Application.isBatchMode) return;
+            if(FlowerOpenClearancePreview.Requested) { SessionState.SetBool(FlowerPlaybackAutoBake.PendingKey,false); return; }
             if(FlowerCacheProvenance.PlaybackMatches()) return;
             if(!FlowerCacheProvenance.Matches())
             {

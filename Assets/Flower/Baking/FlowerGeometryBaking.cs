@@ -213,6 +213,7 @@ new BottomSeed(2,4,2,3,1.0f,0.4718481f,-0.53011085f,0.08362270000000002f,0.05961
   SmoothMiddleFlow();
   BuildInnerResidualPatches();
   SmoothInnerFlow();
+  BuildFullLocalPatch();
   }
  sealed class BottomTree {
   struct Node { public Bounds bounds;public int x0,x1,y0,y1,left,right; }

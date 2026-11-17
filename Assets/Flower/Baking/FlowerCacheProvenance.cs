@@ -11,6 +11,8 @@ namespace MindState {
    "Flower/Resources/FlowerPlayback.cginc", "HeroPetal/Shaders/Pearl.shader",
    "Flower/Runtime/FlowerBottomPatches.cs", "Flower/Runtime/FlowerLayerPatches.cs",
    "Flower/Baking/FlowerGeometryBaking.cs", "Flower/Baking/FlowerLayerBaking.cs",
+   "Flower/Baking/FullBloomLocalPatch.cs", "Flower/Runtime/FlowerArt.cs",
+   "Flower/Scenes/FlowerGallery.unity",
    "Flower/Baking/FlowerCacheProvenance.cs", "HeroPetal/Runtime/HeroPetal.cs",
    "Flower/Validation/FlowerDiagnostics.cs", "Flower/Validation/FlowerSurfaceCollision.cs",
    "Flower/Runtime/FlowerAssembler.cs", "Flower/Runtime/FlowerPreset.cs",

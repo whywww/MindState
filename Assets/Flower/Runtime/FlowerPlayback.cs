@@ -25,6 +25,9 @@ public sealed partial class FlowerAssembler {
  bool ReferenceGeometryRequested(){
 #if UNITY_EDITOR || FLOWER_VALIDATION
   if(forceCpuReference)return true;
+#if UNITY_EDITOR
+  if(FlowerOpenClearancePreview.Requested)return true;
+#endif
   var args=Environment.GetCommandLineArgs();
   return Array.IndexOf(args,"-bakeFlower")>=0||Array.IndexOf(args,"-verifyProject")>=0||Array.IndexOf(args,"-flowerCpuReference")>=0;
 #else

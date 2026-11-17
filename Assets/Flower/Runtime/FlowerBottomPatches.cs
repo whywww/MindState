@@ -32,7 +32,7 @@ public sealed partial class FlowerAssembler {
  void BuildBottomPatches() {
 #if UNITY_EDITOR
   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-rebuildBottom")>=0) { BakeBottomPatches();return; }
-  if(!FlowerCacheProvenance.Matches()) throw new InvalidOperationException("Geometry sources changed. Run Tools/Bake.ps1 before playback or build.");
+  if(!FlowerOpenClearancePreview.Requested&&!FlowerCacheProvenance.Matches()) throw new InvalidOperationException("Geometry sources changed. Run Tools/Bake.ps1 before playback or build.");
 #endif
   if(!LoadBottomCache()) throw new InvalidOperationException("Current BottomOverlap cache is missing or incompatible. Rebuild it in the Editor.");
  }
