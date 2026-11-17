@@ -464,7 +464,7 @@ namespace MindState
         }
         void Release()
         {
-            ReleaseEcho(); ReleaseRibbons(); ReleasePlayback();
+            ReleaseFlex(); ReleaseEcho(); ReleaseRibbons(); ReleasePlayback();
             ReleaseBottomPatches();
             if(generated!=null) { generated.gameObject.SetActive(false); Destroy(generated.gameObject); }
             if(layers!=null) foreach(var l in layers) if(l?.variants!=null) foreach(var g in l.variants) if(g?.mesh!=null) Destroy(g.mesh);

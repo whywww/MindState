@@ -256,10 +256,10 @@ namespace MindState
         void LeaveArt()
         {
             if(!artActive) return;
-            artActive=false; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localPosition=Vector3.zero; generated.localScale=Vector3.one; if(restCaptured) transform.localPosition=restPosition;
+            artActive=false; flexWeight=flexPreviousWeight=0; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localPosition=Vector3.zero; generated.localScale=Vector3.one; if(restCaptured) transform.localPosition=restPosition;
             HideArtExtras();
             foreach(var l in layers) { l.progress=-1; foreach(var p in l.petals) {
-                p.block.SetVector(ArtWeightsId,Vector4.zero); p.block.SetVector("_ArtLightWeights",Vector4.zero);
+                p.block.SetFloat(FlexWeightId,0); p.block.SetVector(ArtWeightsId,Vector4.zero); p.block.SetVector("_ArtLightWeights",Vector4.zero);
                 p.block.SetVector("_StateTint",new Vector4(1,1,0,0)); p.block.SetVector("_StateAccent",(Vector4)Color.white.linear); p.block.SetVector("_StateSurface",Vector4.zero);
                 p.renderer.SetPropertyBlock(p.block); } }
             ArtExposureOffset=0;ArtSaturation=1;ArtAccentColor=Color.white;ArtLightGain=ArtLightDrift=1;
@@ -335,6 +335,7 @@ namespace MindState
             // slide the whole cluster back toward the middle while it is closed.
             transform.localPosition=restPosition-viewPageUp*(viewDistance*BudDropGain*bud)-viewPageRight*(viewDistance*BudCenterGain*bud);
             ApplyPose(bloomProgress,false);ApplyBottomPatches();
+            PrepareArtMotion();
             Vector4 stateTint=new Vector4(look.brightness,look.saturation,0,0);
             Vector4 stateAccent=(Vector4)look.accent.linear;
             Vector4 stateSurface=new Vector4(look.huePull,look.rim,look.selfGlow,look.gloss);
@@ -344,7 +345,7 @@ namespace MindState
                 for(int j=0;j<l.petals.Length;j++)
                 {
                     var p=l.petals[j]; float az=j*Mathf.PI*2/l.petals.Length;
-                    PetalArtMotion(ArtWeights,artTime,az,k,j,out float tilt,out float roll);
+                    float tilt=desiredArtMotion[k][j].x,roll=desiredArtMotion[k][j].y;
                     PathPetalPose(l,p,j,StandardLayerProgress(l.config,bloomProgress),out var position,out var rotation,out var scale);
 #if UNITY_EDITOR || FLOWER_VALIDATION
                     if(suppressArtMotion){ tilt=0; roll=0; }
@@ -361,6 +362,7 @@ namespace MindState
                     p.renderer.SetPropertyBlock(p.block);
                 }
             }
+            FinishFlex();
             if(echoPetals!=null) UpdateEcho(dt);
             if(ribbonThread!=null) UpdateRibbons(dt);
         }

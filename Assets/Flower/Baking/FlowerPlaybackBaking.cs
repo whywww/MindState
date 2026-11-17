@@ -50,6 +50,7 @@ public sealed partial class FlowerAssembler {
   RefinePlayback(layer,petal,a,mid,frames,depth+1);RefinePlayback(layer,petal,mid,b,frames,depth+1);
  }
  internal void SavePlaybackCache(){
+  PrepareFlexBake();
   if(gpuPlayback)throw new InvalidOperationException("Bake requires CPU reference geometry");
   string path=PlaybackPath;Directory.CreateDirectory(Path.GetDirectoryName(path));string temp=path+".tmp";
   var report=new List<string>{"Final geometry cache; Float32 positions/normals/tangents; quarter/mid/three-quarter refinement; position <= 0.0001, direction <= 1 degree"};

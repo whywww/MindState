@@ -21,6 +21,7 @@ namespace MindState.Editor
             if(change==PlayModeStateChange.EnteredEditMode) { SessionState.SetBool(FlowerOpenClearancePreview.Key,false); SessionState.SetBool(FlowerOpenClearancePreview.BaselineKey,false); }
             if(change!=PlayModeStateChange.ExitingEditMode||Application.isBatchMode) return;
             if(FlowerOpenClearancePreview.Requested) { SessionState.SetBool(FlowerPlaybackAutoBake.PendingKey,false); return; }
+            if(WanderFlexPreview.GpuRequested&&WanderFlexPreview.StagedPlaybackAvailable()) { SessionState.SetBool(FlowerPlaybackAutoBake.PendingKey,false); return; }
             if(FlowerCacheProvenance.PlaybackMatches()) return;
             if(!FlowerCacheProvenance.Matches())
             {

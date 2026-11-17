@@ -33,7 +33,7 @@ Shader "MindState/Radial Pearl Silk"
         #include "../../Flower/Resources/FlowerPlayback.cginc"
         void FlowerVert(inout appdata_full v) {
             #if defined(FLOWER_STRUCTURED_PLAYBACK)
-            if(_FlowerPlayback>.5) { FlowerVertex pose=SampleFlower((uint)v.texcoord1.x);v.vertex.xyz=pose.p;v.normal=pose.n;v.tangent=pose.t; }
+            if(_FlowerPlayback>.5) { FlowerVertex pose=SampleFlexibleFlower((uint)v.texcoord1.x);v.vertex.xyz=pose.p;v.normal=pose.n;v.tangent=pose.t; }
             #endif
         }
         sampler2D _BumpMap,_DetailMask,_FlowPalette; float4 _FlowSettings;

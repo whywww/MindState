@@ -58,7 +58,7 @@ public sealed partial class FlowerAssembler {
  BinaryReader LoadPlaybackBases(){
   if(SystemInfo.graphicsShaderLevel<45)throw new NotSupportedException("Flower GPU playback requires shader model 4.5.");
   #if UNITY_EDITOR
-  if(!FlowerCacheProvenance.PlaybackMatches())throw new InvalidOperationException("Flower playback cache is stale. Run Tools/Bake.ps1.");
+  if(!FlowerCacheProvenance.PlaybackMatches()&&!(WanderFlexPreview.GpuRequested&&FlexStagedPlaybackAvailable()))throw new InvalidOperationException("Flower playback cache is stale. Run Tools/Bake.ps1.");
 #endif
   var r=OpenPlayback();
   try{
@@ -115,7 +115,8 @@ public sealed partial class FlowerAssembler {
  }
  Mesh DiagnosticPlaybackMesh(int layer,int index){
   var clip=playback[layer][index];if(clip.diagnostic==null){clip.diagnostic=Instantiate(clip.mesh);clip.diagnostic.name="On demand diagnostic flower";}
-  clip.diagnostic.SetVertexBufferData(SamplePlayback(clip,bloomProgress),0,0,clip.count,0);clip.diagnostic.bounds=clip.mesh.bounds;return clip.diagnostic;
+  var data=SamplePlayback(clip,bloomProgress);if(layer==1&&index==3)ApplyFlexVertices(data,flexWeight);
+  clip.diagnostic.SetVertexBufferData(data,0,0,clip.count,0);clip.diagnostic.bounds=clip.mesh.bounds;return clip.diagnostic;
  }
  void MaterializeBaseDiagnostic(Variant g,float progress){
   float frame=Mathf.Clamp01(progress)*(PoseCount-1);int a=Mathf.Min((int)frame,PoseCount-2);

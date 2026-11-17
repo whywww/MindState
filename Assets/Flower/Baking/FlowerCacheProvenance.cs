@@ -13,6 +13,10 @@ namespace MindState {
    "Flower/Baking/FlowerGeometryBaking.cs", "Flower/Baking/FlowerLayerBaking.cs",
    "Flower/Baking/FullBloomLocalPatch.cs", "Flower/Runtime/FlowerArt.cs",
    "Flower/Scenes/FlowerGallery.unity",
+   "Flower/Runtime/FlowerFlexField.cs", "Flower/Runtime/FlowerFlexRuntime.cs",
+   "Flower/Baking/FlowerFlexBaking.cs", "Flower/Baking/FlowerFlexRayTree.cs",
+   "Flower/Baking/FlowerFlexValidation.cs", "Flower/Runtime/FlowerEcho.cs",
+   "Flower/Validation/WanderFlexPreview.cs",
    "Flower/Baking/FlowerCacheProvenance.cs", "HeroPetal/Runtime/HeroPetal.cs",
    "Flower/Validation/FlowerDiagnostics.cs", "Flower/Validation/FlowerSurfaceCollision.cs",
    "Flower/Runtime/FlowerAssembler.cs", "Flower/Runtime/FlowerPreset.cs",
@@ -37,7 +41,7 @@ namespace MindState {
   }
   public static bool PlaybackMatches() {
    string path=Path.Combine(Application.dataPath,"Flower/Resources/FlowerPlaybackProvenance.txt");
-   return File.Exists(Path.Combine(Application.streamingAssetsPath,"FlowerPlayback.bin"))&&File.Exists(path)&&File.ReadAllText(path).Trim()==Signature();
+   return File.Exists(Path.Combine(Application.streamingAssetsPath,"WanderingFlex.bin"))&&File.Exists(Path.Combine(Application.streamingAssetsPath,"FlowerPlayback.bin"))&&File.Exists(path)&&File.ReadAllText(path).Trim()==Signature();
   }
  }
 }

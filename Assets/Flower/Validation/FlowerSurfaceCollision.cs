@@ -163,21 +163,16 @@ namespace MindState
         // Solver proposals are already in one common flower frame. This avoids publishing
         // temporary vertex offsets to meshes merely to inspect a simultaneous proposal.
         internal void SamplePositions(Vector3[][] positions)
+        { for(int p=0;p<instances.Length;p++) SamplePetalPositions(p,positions[p]); }
+        internal void SamplePetalPositions(int petal,Vector3[] positions)
         {
-            for(int p=0;p<instances.Length;p++)
+            var surface=instances[petal];Array.Copy(positions,surface.v,Count);
+            for(int k=nodes.Length-1;k>=0;k--)
             {
-                var surface=instances[p]; Array.Copy(positions[p],surface.v,Count);
-                for(int k=nodes.Length-1;k>=0;k--)
-                {
-                    var n=nodes[k]; Bounds b;
-                    if(n.left>=0){b=surface.bounds[n.left];b.Encapsulate(surface.bounds[n.right]);}
-                    else
-                    {
-                        b=new Bounds(surface.v[n.y0*Cols+n.x0],Vector3.zero);
-                        for(int y=n.y0;y<=n.y1;y++)for(int x=n.x0;x<=n.x1;x++)b.Encapsulate(surface.v[y*Cols+x]);
-                    }
-                    b.Expand(.000004f);surface.bounds[k]=b;
-                }
+                var n=nodes[k];Bounds b;
+                if(n.left>=0){b=surface.bounds[n.left];b.Encapsulate(surface.bounds[n.right]);}
+                else{b=new Bounds(surface.v[n.y0*Cols+n.x0],Vector3.zero);for(int y=n.y0;y<=n.y1;y++)for(int x=n.x0;x<=n.x1;x++)b.Encapsulate(surface.v[y*Cols+x]);}
+                b.Expand(.000004f);surface.bounds[k]=b;
             }
         }
         public void Sample(float progress,FlowerLayer[] layout=null,int focusLayer=-1)=>SampleGeometry(progress,layout,focusLayer,false);

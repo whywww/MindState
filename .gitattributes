@@ -20,3 +20,10 @@ Assets/Flower/Resources/FlowerPlayback.cginc -text
 Assets/HeroPetal/Shaders/Pearl.shader text eol=crlf
 Assets/Flower/Resources/FlowerPlaybackProvenance.txt -text
 Assets/StreamingAssets/FlowerPlayback.bin binary
+
+# Preserve retained flexible candidate source signatures.
+Assets/Flower/Runtime/FlowerArt.cs -text
+Assets/Flower/Runtime/FlowerEcho.cs -text
+Assets/Flower/Runtime/FlowerFlex*.cs -text
+Assets/Flower/Validation/WanderFlexPreview.cs -text
+Assets/StreamingAssets/WanderingFlex.bin binary
