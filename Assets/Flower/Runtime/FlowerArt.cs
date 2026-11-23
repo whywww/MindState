@@ -73,9 +73,9 @@ namespace MindState
         float StandardLayerProgress(FlowerLayer c,float global)=>Mathf.Clamp01((global*BloomDuration-c.delay)/Mathf.Max(1,c.duration));
         static FlowerArtLook[] CreateDefaultLooks()=>new[]{
             new FlowerArtLook(new Color(.62f,.91f,.99f),.86f,.98f,1.08f,.25f,.40f,0f,.04f,1.12f,.5f,0f,0f,2f),
-            new FlowerArtLook(new Color(.98f,.68f,.32f),.82f,.98f,.98f,.12f,.18f,.06f,.02f,1.05f,.35f,0f,0f,0f),
+            new FlowerArtLook(new Color(1f,.96f,.92f),.82f,1.04f,.95f,.18f,.26f,.07f,.05f,1.12f,.35f,0f,0f,0f),
             new FlowerArtLook(new Color(.52f,.60f,1f),.86f,1.01f,1.08f,.10f,.20f,.03f,0f,1.02f,1.8f,0f,2.5f,.4f),
-            new FlowerArtLook(new Color(.58f,.42f,.62f),.82f,.82f,.80f,-.04f,.04f,.01f,-.10f,.74f,.3f,-7.5f,0f,0f)};
+            new FlowerArtLook(new Color(.98f,.74f,.83f),.82f,.94f,.92f,.02f,.10f,.02f,-.02f,.92f,.3f,-7.5f,0f,0f)};
         public void EnsureArtLooks()
         {
             if(artLooks!=null&&artLooks.Length==4&&artLooks[0].lightGain>.01f&&artLooks[0].brightness>.01f) return;

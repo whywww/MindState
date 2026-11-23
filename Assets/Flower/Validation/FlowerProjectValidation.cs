@@ -72,7 +72,7 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
   f.SetBrainMetrics(.55f,.45f);var display55=f.DisplayWeights;
   Check(Mathf.Abs(display55.x+display55.y+display55.z+display55.w-1)<1e-4f,"Display weights normalize");
   Check(display55.y>=.60f,"55/45 commits to Gathering");
-  var gatheringAccent=new Color(.98f,.68f,.32f);
+  var gatheringAccent=new Color(1f,.96f,.92f);
   var accent55=f.AccentFor(display55);
   Check(ChannelDistance(accent55,gatheringAccent)<.10f,"55/45 keeps the Gathering accent");
   f.SetBrainMetrics(.65f,.35f);
