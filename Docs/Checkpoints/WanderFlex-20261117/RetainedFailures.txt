@@ -1,1 +1,0 @@
-Maximum grid refinement: residual interpolation violations; candidate is NOT clearance approved.

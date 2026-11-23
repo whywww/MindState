@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using UnityEngine;
 namespace MindState {
 public sealed partial class FlowerAssembler {
- const float FlexNormalClearance=.003f,FlexNormalMinimum=.0022f;
+ const float FlexNormalClearance=.015f,FlexNormalMinimum=.0022f;
  internal void PrepareFlexBake(){
   if(flexData!=null)return;
   if(Array.IndexOf(Environment.GetCommandLineArgs(),"-retainFlexCandidate")>=0){BuildFlexCandidate();SetBloomProgress(1);return;}
@@ -60,9 +60,9 @@ public sealed partial class FlowerAssembler {
   if(RootAnchorError()>1e-5f){message="transition root detached";return false;}
   if(FlexGate<=0||ArtWeights.z<=1e-5f){message="baseline region retained progress="+bloomProgress+" W="+ArtWeights.z;return true;}
   // Compare to the identical mixed state. Existing non-Wandering animation is
-  // retained at weight zero; it is not silently classified as a new defect.
+  // retained in mixed states; pure Wandering must be clear of every constrained neighbour.
   flexBypass=true;UpdateArt(0);var scan=new FlowerSurfaceCollision(this);scan.SampleRendered();var hits=new List<FlowerSurfaceCollision.Contact>();var oldPairs=new HashSet<int>();foreach(int other in FlexNeighbours){scan.FindPairContacts(Mathf.Min(other,10),Mathf.Max(other,10),hits);if(hits.Exists(h=>(other<10?h.lengthB:h.lengthA)>=.25f&&(other==3||(other<10?h.lengthA:h.lengthB)>=.25f)))oldPairs.Add(other);}
-  flexBypass=false;UpdateArt(0);scan.SampleRendered();foreach(int other in FlexNeighbours){scan.FindPairContacts(Mathf.Min(other,10),Mathf.Max(other,10),hits);if(hits.Exists(h=>(other<10?h.lengthB:h.lengthA)>=.25f&&(other==3||(other<10?h.lengthA:h.lengthB)>=.25f))&&(ArtWeights.z>=.5f||!oldPairs.Contains(other))){message="new/mature-W transition contact="+other+":10 progress="+bloomProgress+" W="+ArtWeights.z;return false;}}
+  flexBypass=false;UpdateArt(0);scan.SampleRendered();foreach(int other in FlexNeighbours){scan.FindPairContacts(Mathf.Min(other,10),Mathf.Max(other,10),hits);if(hits.Exists(h=>(other<10?h.lengthB:h.lengthA)>=.25f&&(other==3||(other<10?h.lengthA:h.lengthB)>=.25f))&&(ArtWeights.z>=.9999f||!oldPairs.Contains(other))){message="new/mature-W transition contact="+other+":10 progress="+bloomProgress+" W="+ArtWeights.z;return false;}}
   message="transition no added contact progress="+bloomProgress+" W="+ArtWeights.z;return true;
  }
 }

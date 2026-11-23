@@ -24,7 +24,7 @@ public sealed class FlowerOpenClearancePreview : MonoBehaviour {
   EditorApplication.EnterPlaymode();
  }
  [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
- static void Boot(){if(Requested&&!FullBloomLocalPreview.Requested&&!WanderFollowPreview.Requested&&!WanderFlexPreview.Requested)Camera.main.gameObject.AddComponent<FlowerOpenClearancePreview>();}
+ static void Boot(){if(Requested&&!OuterPairValidation.Requested&&!FullBloomLocalPreview.Requested&&!WanderFollowPreview.Requested&&!WanderFlexPreview.Requested)Camera.main.gameObject.AddComponent<FlowerOpenClearancePreview>();}
  IEnumerator Start() {
   yield return null;
   var flower=FindObjectOfType<FlowerAssembler>();

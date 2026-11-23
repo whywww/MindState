@@ -321,7 +321,7 @@ namespace MindState
             position.y=layers[0].config.rootHeight+.0045f+l.config.rootStagger*RootStaggerSign(index,l.petals.Length);
             p.anchor.SetLocalPositionAndRotation(position,rotation);
             p.scale=scale; p.body.localScale=scale;
-            p.body.localPosition=-Vector3.Scale(SurfaceFor(l,index).root,scale);
+            p.body.localPosition=-Vector3.Scale(l==layers[2]&&index==4?Pair24PoseRoot():SurfaceFor(l,index).root,scale);
             p.block.SetMatrix("_RootTrimWorldToFlower",p.anchor.parent.worldToLocalMatrix);
             p.renderer.SetPropertyBlock(p.block);
         }
@@ -459,7 +459,7 @@ namespace MindState
         public float RootAnchorError()
         {
             float max=0; foreach(var l in layers) for(int j=0;j<l.petals.Length;j++)
-            { var p=l.petals[j]; max=Mathf.Max(max,Vector3.Distance(p.body.TransformPoint(SurfaceFor(l,j).root),p.anchor.position)); }
+            { var p=l.petals[j]; max=Mathf.Max(max,Vector3.Distance(p.body.TransformPoint(l==layers[2]&&j==4?Pair24PoseRoot():SurfaceFor(l,j).root),p.anchor.position)); }
             return max;
         }
         void Release()

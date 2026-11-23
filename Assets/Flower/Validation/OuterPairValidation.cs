@@ -1,0 +1,98 @@
+#if UNITY_EDITOR
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+namespace MindState {
+// Isolated CPU regression; never publishes caches or changes the open editor.
+public sealed class OuterPairValidation:MonoBehaviour {
+ internal static bool Requested=>Array.IndexOf(Environment.GetCommandLineArgs(),"-outerPair")>=0;
+ public static void RunReview(){SessionState.SetBool(FlowerOpenClearancePreview.Key,false);SessionState.SetBool(FlowerOpenClearancePreview.BaselineKey,false);UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/Flower/Scenes/FlowerGallery.unity");EditorApplication.EnterPlaymode();}
+ public static void Run(){SessionState.SetBool(FlowerOpenClearancePreview.Key,true);SessionState.SetBool(FlowerOpenClearancePreview.BaselineKey,true);UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/Flower/Scenes/FlowerGallery.unity");EditorApplication.EnterPlaymode();}
+ [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]static void Boot(){if(Requested)Camera.main.gameObject.AddComponent<OuterPairValidation>();}
+ IEnumerator Start(){yield return null;var f=FindObjectOfType<FlowerAssembler>();f.enabled=false;try{if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair24Final")>=0){Directory.CreateDirectory("Outputs/Pair24");File.WriteAllText("Outputs/Pair24/FinalSuite.txt","RUNNING");f.VerifyPair24CurlGpu();f.VerifyPair24();f.VerifyPair24Envelope();f.VerifyPair10();f.VerifyPair12();File.WriteAllText("Outputs/Pair24/FinalSuite.txt","PASS: GPU parity, 120-second two-sided L2-P4 contacts, stable-state breathing, adjacent Pair10/12 regressions.");File.WriteAllText("Outputs/Pair24/FinalSuiteSource.txt",FlowerCacheProvenance.Signature());}else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair24CurlGpu")>=0)f.VerifyPair24CurlGpu();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair12Review")>=0)f.CapturePair12();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair12Transitions")>=0)f.VerifyPair12Transitions();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair12")>=0){f.VerifyPair12Transitions();f.VerifyPair12Envelope();f.VerifyPair12();}else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair10Review")>=0)f.CapturePair10();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair10Transitions")>=0)f.VerifyPair10Transitions();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair10")>=0){f.VerifyPair10Transitions();f.VerifyPair10Envelope();f.VerifyPair10();}else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair24Transitions")>=0)f.VerifyPair24Transitions();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair24Review")>=0)f.CapturePair24();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair24")>=0){f.VerifyPair24();f.VerifyPair24Envelope();f.VerifyPair24Transitions();}else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair20Transitions")>=0)f.VerifyPair20Transitions();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair20Envelope")>=0)f.VerifyPair20Envelope();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair20Review")>=0)f.CapturePair20();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair20")>=0)f.VerifyPair20();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair55Envelope")>=0)f.VerifyPair55Envelope();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair55Transitions")>=0)f.VerifyPair55Transitions();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair55Review")>=0)f.CapturePair55();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair55")>=0)f.VerifyPair55();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair01Envelope")>=0)f.VerifyPair01Envelope();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair01Transitions")>=0)f.VerifyPair01Transitions();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair01Review")>=0)f.CapturePair01();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-pair01Verify")>=0)f.VerifyPair01();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-outerTransitionsFlex")>=0){f.LoadFlexCandidate();f.VerifyOuterTransitions(true);}else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-outerProof")>=0)f.VerifyOuterCandidateProof();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-outerFlexTimeline")>=0)f.VerifyOuterFlexTimeline();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-outerReview")>=0)f.CaptureOuterPair();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-outerTransitions")>=0)f.VerifyOuterTransitions();else if(Array.IndexOf(Environment.GetCommandLineArgs(),"-outerEnvelope")>=0)f.VerifyOuterEnvelope();else f.VerifyOuterPair();EditorApplication.Exit(0);}catch(Exception e){Debug.LogException(e);Directory.CreateDirectory("Outputs/OuterPair");File.WriteAllText("Outputs/OuterPair/Result.txt","FAIL: "+e);EditorApplication.Exit(2);}}
+}
+public sealed partial class FlowerAssembler {
+ internal void VerifyOuterCandidateProof(){
+  Directory.CreateDirectory("Outputs/OuterPair");Directory.CreateDirectory("Outputs/WanderFlex");
+  var before=WanderFlexPreview.StandardHashes(this);LoadFlexCandidate();ValidateFlexShape();var after=WanderFlexPreview.StandardHashes(this);for(int i=0;i<before.Length;i++)if(before[i]!=after[i])throw new Exception("Static baseline changed");
+  foreach(float time in new[]{0f,3.5f,10f,15f})if(!ValidateFlexAt(time,out string message))throw new Exception(message);
+  if(UsesGpuPlayback){SetArtPreviewImmediate(FlowerArtState.Wandering);VerifyOuterGpuFlex();}
+  string mode=UsesGpuPlayback?"Gpu":"Cpu";File.WriteAllText("Outputs/WanderFlex/"+mode+"Result.txt","PASS: static geometry hashes, shape regularity and rendered contact probes; dense 120-second CPU timeline recorded separately; GPU mode also verifies the actual flexible shader and zero steady-state GC/uploads.");File.WriteAllText("Outputs/WanderFlex/"+mode+"ValidatedSource.txt",FlowerCacheProvenance.Signature());File.WriteAllText("Outputs/WanderFlex/"+mode+"ValidatedCandidate.sha256",FlexFileHash("Outputs/WanderFlex/Candidate.bin"));File.WriteAllLines("Outputs/WanderFlex/"+mode+"StandardHashes.txt",after);
+  if(Array.IndexOf(Environment.GetCommandLineArgs(),"-outerStageBake")>=0){if(!Application.dataPath.Replace('\\','/').Contains("/.validation/"))throw new Exception("Staged bake must use an isolated validation project");if(!File.ReadAllText("Outputs/OuterPair/FlexTimeline.txt").StartsWith("PASS:"))throw new Exception("Dense timeline not passed");SetBloomProgress(1);SavePlaybackCache();SavePreparedFlex();}
+ }
+ internal void VerifyOuterFlexTimeline(){
+  LoadFlexCandidate();SetArtPreviewImmediate(FlowerArtState.Wandering);var scan=new FlowerSurfaceCollision(this);var petals=scan.Petals;var hits=new List<FlowerSurfaceCollision.Contact>();var local=new Vector3[PetalCount][];var world=new Vector3[PetalCount][];
+  for(int p=0;p<PetalCount;p++){local[p]=new Vector3[BottomSurface];world[p]=new Vector3[BottomSurface];SampleDiagnosticSurface(petals[p].layer,petals[p].index,1,local[p]);}
+  for(int step=0;step<=1200;step++){
+   artTime=step*.1f;QueryFlex(flexData,FlexParameter(),flexField.controls,out float correctedTilt);
+   for(int p=0;p<PetalCount;p++){var item=petals[p];PetalArtMotion(new Vector4(0,0,1,0),artTime,item.index*Mathf.PI*2/layers[item.layer].petals.Length,item.layer,item.index,out float tilt,out float roll);var matrix=p==1?Pair01ValidationMatrix(1,tilt,roll):p==5?Pair55ValidationMatrix(1,tilt,roll):p==14?Pair20ValidationMatrix(1,tilt,roll):p==17?Pair24ValidationMatrix(1,tilt,roll):p==8?Pair10ValidationMatrix(1,tilt,roll):OpenMatrix(item.layer,item.index,1,p==10?correctedTilt:tilt,roll);for(int k=0;k<BottomSurface;k++)world[p][k]=matrix.MultiplyPoint3x4(local[p][k]+(p==10?flexData.normals[k]*flexField.Height(k):Vector3.zero));scan.SamplePetalPositions(p,world[p]);}
+   foreach(int other in FlexNeighbours){scan.FindPairContacts(Mathf.Min(other,10),Mathf.Max(other,10),hits);if(hits.Exists(h=>(other<10?h.lengthB:h.lengthA)>=.25f&&(other==3||(other<10?h.lengthA:h.lengthB)>=.25f)))throw new Exception("Flex timeline contact at "+artTime+" pair="+other+":10");}
+   if(step%100==0)Debug.Log("OUTER_FLEX_TIMELINE "+artTime);
+  }
+  Directory.CreateDirectory("Outputs/OuterPair");File.WriteAllText("Outputs/OuterPair/FlexTimeline.txt","PASS: 1201 actual four-parameter lookup samples across 120 seconds; L1-P3 clear of all four constrained neighbours including their independent motion.");
+ }
+ internal void VerifyOuterGpuFlex(){
+  var shader=Resources.Load<ComputeShader>("FlowerPlaybackVerify");int kernel=shader.FindKernel("SampleFlex");float maxPosition=0,maxAngle=0;
+  foreach(float time in new[]{0f,3.5f,10f,15f}){
+   SetArtPreviewImmediate(FlowerArtState.Wandering);MotionStep(time);var clip=playback[1][3];var expected=SamplePlayback(clip,bloomProgress);ApplyFlexVertices(expected,flexWeight);
+   using(var output=new ComputeBuffer(clip.count,40)){shader.SetBuffer(kernel,"_FlowerPoses",clip.buffer);shader.SetVector("_FlowerFrame",PlaybackFrame(clip,bloomProgress));shader.SetBuffer(kernel,"_FlexNormals",flexNormalsBuffer);shader.SetBuffer(kernel,"_FlexWall",flexWallBuffer);var packed=new Vector4[FlexField.Count];for(int c=0;c<packed.Length;c++)packed[c]=new Vector4(flexField.controls[c],0,0,0);shader.SetVectorArray("_FlexControls",packed);shader.SetFloat("_FlexWeight",flexWeight);shader.SetInt("_FlexVertexCount",clip.count);shader.SetInt("_Count",clip.count);shader.SetBuffer(kernel,"_Result",output);shader.Dispatch(kernel,(clip.count+63)/64,1,1);var result=new Vertex[clip.count];output.GetData(result);for(int i=0;i<result.Length;i++){maxPosition=Mathf.Max(maxPosition,Vector3.Distance(result[i].p,expected[i].p));maxAngle=Mathf.Max(maxAngle,DirectionError(result[i].n,expected[i].n),DirectionError(new Vector3(result[i].t.x,result[i].t.y,result[i].t.z),new Vector3(expected[i].t.x,expected[i].t.y,expected[i].t.z)));}}
+  }
+  if(maxPosition>.0001f||maxAngle>1)throw new Exception("Flex GPU mismatch: "+maxPosition+", "+maxAngle);
+  for(int i=0;i<60;i++)MotionStep(1f/60);int uploads=MeshUpdates;long before=GC.GetAllocatedBytesForCurrentThread();for(int i=0;i<240;i++)MotionStep(1f/60);long allocated=GC.GetAllocatedBytesForCurrentThread()-before;if(allocated!=0||MeshUpdates!=uploads)throw new Exception("Wandering allocated/uploaded vertices: "+allocated);
+  File.WriteAllText("Outputs/OuterPair/GpuFlex.txt","PASS: GPU shader/CPU flexible positions max error="+maxPosition+", normals="+maxAngle+" degrees; 240 warmed Wandering frames: GC=0, vertex uploads=0.");
+ }
+ internal void CaptureOuterPair(){
+  if(!UsesGpuPlayback)throw new Exception("Review requires formal GPU playback");
+  Directory.CreateDirectory("Outputs/OuterPair");Directory.CreateDirectory("Outputs/WanderFollow");SetArtPreviewImmediate(FlowerArtState.Wandering);
+  VerifyOuterGpuFlex();
+  var gallery=FindObjectOfType<FlowerGallery>();gallery.enabled=false;gallery.showInterface=false;
+  var labels=new GameObject("Outer pair review labels");
+  foreach(int index in new[]{2,3}){var item=new GameObject("L0-P"+index);item.transform.SetParent(labels.transform);var text=item.AddComponent<TextMesh>();text.text=item.name;text.fontSize=48;text.characterSize=.045f;text.anchor=TextAnchor.MiddleCenter;text.color=Color.yellow;}
+  void Label(){foreach(Transform child in labels.transform){int index=child.name.EndsWith("2")?2:3;var p=layers[0].petals[index];var v=PetalMesh(0,index).vertices;child.position=p.body.TransformPoint(v[48*129+64])+Camera.main.transform.up*.05f;child.rotation=Camera.main.transform.rotation;}}
+  void Shot(string name){Label();WanderFollowPreview.Shot(name);File.Copy("Outputs/WanderFollow/"+name+".png","Outputs/OuterPair/"+name+".png",true);}
+  foreach(var view in new[]{new Vector2(22,55),new Vector2(0,90),new Vector2(22,8)}){
+   SetArtPreviewImmediate(FlowerArtState.Wandering);MotionStep(10);gallery.SetView(view.x,view.y);string suffix=view.y.ToString("F0");Shot("After"+suffix);
+   var l=layers[0];var p=l.petals[3];PetalArtMotion(ArtWeights,artTime,3*Mathf.PI*2/l.petals.Length,0,3,out float tilt,out float roll);PathPetalPose(l,p,3,1,out var position,out var rotation,out var scale);ApplyPetalPose(l,p,3,position,rotation*Quaternion.Euler(tilt-OuterPairTiltBias,0,roll),scale);Shot("Before"+suffix);
+  }
+  SetArtPreviewImmediate(FlowerArtState.Wandering);gallery.SetView(22,55);
+  for(int frame=0;frame<120;frame++){MotionStep(.1f);Shot("Frame"+frame.ToString("D3"));}
+  DestroyImmediate(labels);File.WriteAllText("Outputs/OuterPair/Review.txt","PASS: formal GPU captures, 3 labelled before/after views and 120 animation frames at 10 Hz.");
+ }
+ internal void VerifyOuterTransitions(bool withFlex=false){
+  Directory.CreateDirectory("Outputs/OuterPair");File.WriteAllText("Outputs/OuterPair/Transitions.txt","RUNNING");
+  flexBypass=!withFlex;var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();int samples=0;
+  foreach(var state in new[]{FlowerArtState.Clarity,FlowerArtState.Gathering,FlowerArtState.Quiet})foreach(bool entering in new[]{true,false}){
+   SetArtPreviewImmediate(entering?state:FlowerArtState.Wandering);SetArtState(entering?FlowerArtState.Wandering:state);
+   for(int step=0;step<=60;step++){MotionStep(.1f);scan.SampleRendered();scan.FindPairContacts(2,3,hits);bool contact=hits.Exists(h=>h.lengthA>=.25f&&h.lengthB>=.25f);bool baseline=false;if(contact){var l=layers[0];var p=l.petals[3];PetalArtMotion(ArtWeights,artTime,3*Mathf.PI*2/l.petals.Length,0,3,out float tilt,out float roll);PathPetalPose(l,p,3,StandardLayerProgress(l.config,bloomProgress),out var position,out var rotation,out var scale);ApplyPetalPose(l,p,3,position,rotation*Quaternion.Euler(tilt-ArtWeights.z*OuterPairTiltBias,0,roll),scale);scan.SampleRendered();scan.FindPairContacts(2,3,hits);baseline=hits.Exists(h=>h.lengthA>=.25f&&h.lengthB>=.25f);ApplyPetalPose(l,p,3,position,rotation*Quaternion.Euler(tilt,0,roll),scale);}if(contact&&(ArtWeights.z>=.5f||!baseline))throw new Exception("Transition target contact: "+state+" entering="+entering+" t="+artTime+" W="+ArtWeights.z);if(RootAnchorError()>1e-5f)throw new Exception("Transition root drift");if(withFlex){flexBypass=true;UpdateArt(0);scan.SampleRendered();var old=new HashSet<int>();foreach(int other in FlexNeighbours){scan.FindPairContacts(Mathf.Min(other,10),Mathf.Max(other,10),hits);if(hits.Exists(h=>h.lengthA>=.25f&&h.lengthB>=.25f))old.Add(other);}flexBypass=false;UpdateArt(0);scan.SampleRendered();foreach(int other in FlexNeighbours){scan.FindPairContacts(Mathf.Min(other,10),Mathf.Max(other,10),hits);if(!old.Contains(other)&&hits.Exists(h=>h.lengthA>=.25f&&h.lengthB>=.25f))throw new Exception("New transition pair "+other+":10 at "+artTime);}}samples++;}
+  }
+  SetArtPreviewImmediate(FlowerArtState.Wandering);MotionStep(10);float clock=artTime;var pose=layers[0].petals[3].body.localToWorldMatrix;SetFrozen(true);for(int i=0;i<60;i++)MotionStep(1f/60);if(artTime!=clock||layers[0].petals[3].body.localToWorldMatrix!=pose)throw new Exception("Frozen petal moved");SetFrozen(false);
+  Directory.CreateDirectory("Outputs/OuterPair");File.WriteAllText("Outputs/OuterPair/"+(withFlex?"TransitionsWithFlex.txt":"Transitions.txt"),"PASS: "+samples+" transition samples across all six directions; attached roots and frozen pose unchanged. CPU reference; existing bud contacts below 50% Wandering are compared to the same baseline pose.");
+ }
+ internal void VerifyOuterEnvelope(){
+  SetBloomProgress(1);EnsureArtLooks();var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();var a=new Vector3[BottomSurface];var b=new Vector3[BottomSurface];var wa=new Vector3[BottomSurface];var wb=new Vector3[BottomSurface];SampleDiagnosticSurface(0,2,1,a);SampleDiagnosticSurface(0,3,1,b);
+  for(int x=0;x<=16;x++)for(int y=0;y<=16;y++){float ta=-4+x*.5f,tb=OuterPairTiltBias-4+y*.5f;var ma=OpenMatrix(0,2,1,ta,OpenRoll(0,2));var mb=OpenMatrix(0,3,1,tb,OpenRoll(0,3));for(int k=0;k<BottomSurface;k++){wa[k]=ma.MultiplyPoint3x4(a[k]);wb[k]=mb.MultiplyPoint3x4(b[k]);}scan.SamplePetalPositions(2,wa);scan.SamplePetalPositions(3,wb);scan.FindPairContacts(2,3,hits);if(hits.Exists(h=>h.lengthA>=.25f&&h.lengthB>=.25f))throw new Exception("Independent envelope contact at "+ta+","+tb);}
+  Directory.CreateDirectory("Outputs/OuterPair");File.WriteAllText("Outputs/OuterPair/Envelope.txt","PASS: 17 x 17 independent tilt samples, including extrema.");
+ }
+ internal void VerifyOuterPair(){
+  Directory.CreateDirectory("Outputs/OuterPair");File.WriteAllText("Outputs/OuterPair/Result.txt","RUNNING");SetBloomProgress(1);EnsureArtLooks();
+  var scan=new FlowerSurfaceCollision(this);var hits=new List<FlowerSurfaceCollision.Contact>();var local=new Vector3[PetalCount][];var world=new Vector3[PetalCount][];var petals=scan.Petals;
+  for(int p=0;p<petals.Length;p++){local[p]=new Vector3[BottomSurface];world[p]=new Vector3[BottomSurface];SampleDiagnosticSurface(petals[p].layer,petals[p].index,1,local[p]);}
+  void Pose(int p,float time,bool baseline){var petal=petals[p];PetalArtMotion(new Vector4(0,0,1,0),time,petal.index*Mathf.PI*2/layers[petal.layer].petals.Length,petal.layer,petal.index,out float tilt,out float roll);if(baseline&&p==3)tilt-=OuterPairTiltBias;var m=p==1?Pair01ValidationMatrix(1,tilt,roll):p==5?Pair55ValidationMatrix(1,tilt,roll):p==14?Pair20ValidationMatrix(1,tilt,roll):p==17?Pair24ValidationMatrix(1,tilt,roll):p==8?Pair10ValidationMatrix(1,tilt,roll):OpenMatrix(petal.layer,petal.index,1,tilt,roll);for(int k=0;k<BottomSurface;k++)world[p][k]=m.MultiplyPoint3x4(local[p][k]);scan.SamplePetalPositions(p,world[p]);}
+  bool Contact(int a,int b){scan.FindPairContacts(Mathf.Min(a,b),Mathf.Max(a,b),hits);return hits.Exists(h=>h.lengthA>=.25f&&h.lengthB>=.25f);}
+  int baselineTarget=0;var report=new List<string>{"time,baselineTarget,candidateTarget,newNeighbourPairs"};
+  for(int step=0;step<=1200;step++){
+   float time=step*.1f;for(int p=0;p<PetalCount;p++)Pose(p,time,true);
+   bool oldTarget=Contact(2,3);if(oldTarget)baselineTarget++;
+   var old=new HashSet<string>();foreach(int p in new[]{2,3})for(int other=0;other<PetalCount;other++)if(other!=p&&Contact(p,other))old.Add(Mathf.Min(p,other)+":"+Mathf.Max(p,other));
+   Pose(2,time,false);Pose(3,time,false);if(Contact(2,3))throw new Exception("Target contact at "+time);
+   foreach(int p in new[]{2,3})for(int other=0;other<PetalCount;other++)if(other!=p&&other!=2&&other!=3&&Contact(p,other)&&!old.Contains(Mathf.Min(p,other)+":"+Mathf.Max(p,other)))throw new Exception("New neighbour contact "+p+":"+other+" at "+time);
+   report.Add(time+","+oldTarget+",false,0");if(step%100==0){File.WriteAllLines("Outputs/OuterPair/Timeline.csv",report);Debug.Log("OUTER_PAIR_VALIDATED "+time);}
+  }
+  File.WriteAllLines("Outputs/OuterPair/Timeline.csv",report);File.WriteAllText("Outputs/OuterPair/Result.txt","PASS: 1201 samples at 0.1 s across 120 s; no target contacts, no new neighbour contacts; original target failed at "+baselineTarget+" samples. CPU reference, no flex cache loaded.");
+ }
+}
+}
+#endif

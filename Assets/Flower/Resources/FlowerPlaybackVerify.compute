@@ -1,6 +1,9 @@
 #pragma kernel Sample
+#pragma kernel SampleFlex
 #include "FlowerPlayback.cginc"
 RWStructuredBuffer<FlowerVertex> _Result;
 uint _Count;
 [numthreads(64,1,1)]
 void Sample(uint3 id:SV_DispatchThreadID) { if(id.x<_Count)_Result[id.x]=SampleFlower(id.x); }
+[numthreads(64,1,1)]
+void SampleFlex(uint3 id:SV_DispatchThreadID) { if(id.x<_Count)_Result[id.x]=SampleFlexibleFlower(id.x); }

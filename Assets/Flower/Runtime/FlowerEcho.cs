@@ -113,7 +113,7 @@ namespace MindState
                     renderer.receiveShadows=false;
                     var block=new MaterialPropertyBlock();
                     src.renderer.GetPropertyBlock(block);
-                    block.SetFloat(FlexWeightId,0);
+                    block.SetFloat(FlexWeightId,0);block.SetFloat(Pair24CurlId,0);
                     if(gpuPlayback) BindPlayback(block,echoVariant.playback);
                     block.SetVector("_FlowSettings",Vector4.zero);
                     block.SetFloat("_Breath",0);

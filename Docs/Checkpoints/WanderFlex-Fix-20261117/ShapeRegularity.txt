@@ -1,1 +1,0 @@
-max relative edge length change=0.257921 frame=4; displacement <=0.10; fixed root fade unchanged

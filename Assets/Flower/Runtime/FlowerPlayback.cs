@@ -15,6 +15,8 @@ public sealed partial class FlowerAssembler {
   public int count;
   public Mesh mesh,diagnostic;
   public Bounds motionBounds;
+  public Vector3[] pair24TipCenters;
+  public Bounds[] pair24Rows;
  }
  PlaybackClip[][] playback;
  bool gpuPlayback;
@@ -86,7 +88,12 @@ public sealed partial class FlowerAssembler {
     for(int f=0;f<frames;f++){clip.times[f]=r.ReadSingle();clip.bounds[f]=ReadBounds(r);if(!Finite(clip.times[f])||(f>0&&clip.times[f]<=clip.times[f-1]))throw new InvalidDataException("Unordered playback frames");}
     if(clip.times[0]!=0||clip.times[frames-1]!=1)throw new InvalidDataException("Playback endpoints missing");
     clip.buffer=new ComputeBuffer(checked(frames*count),40,ComputeBufferType.Structured);playbackGpuBytes+=frames*count*40L;
-    for(int f=0;f<frames;f++)clip.buffer.SetData(ReadVertices(r,count),0,f*count,count);
+    int[] rowIds=null;
+    if(l==2&&p==4){clip.pair24TipCenters=new Vector3[frames];clip.pair24Rows=new Bounds[frames*81];rowIds=new int[count];var uv=SurfaceFor(layers[l],p).mesh.uv;for(int i=0;i<count;i++)rowIds[i]=i<BottomSurface*2?i%BottomSurface/129:Mathf.RoundToInt(uv[i].y*80);}
+    for(int f=0;f<frames;f++){
+     var data=ReadVertices(r,count);clip.buffer.SetData(data,0,f*count,count);
+     if(rowIds!=null){clip.pair24TipCenters[f]=data[48*129+64].p;for(int row=0;row<=80;row++)clip.pair24Rows[f*81+row]=new Bounds(data[row*129].p,Vector3.zero);for(int i=0;i<count;i++)clip.pair24Rows[f*81+rowIds[i]].Encapsulate(data[i].p);}
+    }
     clip.mesh=Instantiate(SurfaceFor(layers[l],p).mesh);clip.mesh.name="GPU flower "+l+"-"+p;
     layers[l].petals[p].body.GetComponent<MeshFilter>().sharedMesh=clip.mesh;
     BindPlayback(layers[l].petals[p].block,clip);
@@ -102,7 +109,7 @@ public sealed partial class FlowerAssembler {
  void ApplyPlayback(float progress){
   if(playback==null)return;
   for(int l=0;l<layers.Length;l++)for(int p=0;p<layers[l].petals.Length;p++){
-   var clip=playback[l][p];var frame=PlaybackFrame(clip,progress);int a=(int)frame.x;
+   var clip=playback[l][p];var frame=PlaybackFrame(clip,l==2&&p==4?Pair24PlaybackProgress(progress):progress);int a=(int)frame.x;
    clip.motionBounds=InterpolatePlaybackBounds(clip.bounds[a],clip.bounds[a+1],frame.z);
    var bounds=clip.bounds[a];bounds.Encapsulate(clip.bounds[a+1]);clip.mesh.bounds=bounds;
    var petal=layers[l].petals[p];petal.block.SetVector(PlaybackFrameId,frame);petal.renderer.SetPropertyBlock(petal.block);
@@ -115,7 +122,7 @@ public sealed partial class FlowerAssembler {
  }
  Mesh DiagnosticPlaybackMesh(int layer,int index){
   var clip=playback[layer][index];if(clip.diagnostic==null){clip.diagnostic=Instantiate(clip.mesh);clip.diagnostic.name="On demand diagnostic flower";}
-  var data=SamplePlayback(clip,bloomProgress);if(layer==1&&index==3)ApplyFlexVertices(data,flexWeight);
+  var data=SamplePlayback(clip,layer==2&&index==4?Pair24PlaybackProgress(bloomProgress):bloomProgress);if(layer==1&&index==3)ApplyFlexVertices(data,flexWeight);if(layer==2&&index==4)ApplyPair24CurlVertices(data);
   clip.diagnostic.SetVertexBufferData(data,0,0,clip.count,0);clip.diagnostic.bounds=clip.mesh.bounds;return clip.diagnostic;
  }
  void MaterializeBaseDiagnostic(Variant g,float progress){

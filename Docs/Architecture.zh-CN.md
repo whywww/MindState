@@ -55,7 +55,7 @@ flower.ResetArt();
 
 `Tools/Verify.ps1` 先验证原 CPU 参考路径，再通过与顶点着色器共享的采样函数执行 GPU 回读比较，检查主花与回声花、根部、包围盒、切线方向、跳转/反向进度、零顶点上传以及释放后重建。新增 GPU 运动连续性回归验证 30/60/120 Hz 下的闭合、呼吸、历史窗口边界、所有缓存节点、冻结恢复和更新率一致性；历史线性信号使用解析积分作独立对照，并检查花瓣零上传、更新零分配。原有回归验证标准路径、四态切换、冻结与根部连接，并检查回声花历史概括与间隙、单条丝线的离花间隙与逐帧路线连续性、亮头单向前行、专注/放松对路线形状的驱动、颜色提交与逐帧连续性、显示层映射和截图产物。接触扫描是离散采样，不能据此宣称连续时间、所有角度零穿插；已接受的动态接触见当前问题文档。
 
-验证结果、烘焙统计及日志按需生成到 `Outputs`，重复执行覆盖本轮输出。清理后的目录只保留最终演示 `Outputs/ClosingContinuity_10s.mp4`；帧序列、历史视频、临时报告与日志均可重新生成。正式程序仅保留 `Builds/Windows`，BrainLink 的本机环境保留在 `Builds/BrainLinkTools`。验证构建可以重新生成。
+验证结果、烘焙统计及日志按需生成到 `Outputs`，重复执行覆盖本轮输出。清理后保留 `Outputs/Pair24` 的六段当前最终录像、报告和精简验证证书，`Outputs/WanderFlex` 的当前缓存与认证，以及最终构建/验证日志。历史帧序列、试验视频和回滚快照删除；当前文件清单见 `Outputs/Pair24/FinalEvidenceManifest.json`。正式程序仅保留 `Builds/Windows`，BrainLink 的本机环境保留在 `Builds/BrainLinkTools`。验证构建可以重新生成。
 
 ## 性能对比
 
@@ -71,6 +71,6 @@ flower.ResetArt();
 
 项目是 Linear 色彩空间。离屏 ARGBHalf 目标保存已经过后处理的线性数值，不能直接 ReadPixels 后当作显示 PNG 编码。`FlowerCaptureReadback` 先以显式 sRGB 写入将其复制到 ARGB32 sRGB 目标，再读回编码像素；读取前后恢复 RenderTexture.active 和 GL.sRGBWrite。不更改材质、灯光或曝光，也不再做一次色调映射。相同工具用于闭合录像和性能测试结束后的截图，不加入性能测量的每帧路径。
 
-运动检查增加已知暗阶/中灰/白色色阶校验、sRGB 输入往返校验以防重复转换；录像中间帧还与同帧 SDR 显示目标比较。视频输出使用 BT.709 原色/YCbCr 矩阵、有限范围，并把已编码的 sRGB 传递函数标记为 IEC 61966-2-1。最终视频为 `Outputs/ClosingContinuity_10s.mp4`；旧版本和色彩对照图已清理。
+运动检查增加已知暗阶/中灰/白色色阶校验、sRGB 输入往返校验以防重复转换；录像中间帧还与同帧 SDR 显示目标比较。视频输出使用 BT.709 原色/YCbCr 矩阵、有限范围，并把已编码的 sRGB 传递函数标记为 IEC 61966-2-1。当前最终视频为 `Outputs/Pair24/FixedSizeFinal{Clarity,Gathering,Quiet}{Full,Close}.mp4`；旧闭合演示和色彩对照图已清理，上述闭合录制步骤仍可按需重新生成检查资料。
 
 慢速录制使用 `-closingTimeScale 0.6666667`，每个输出帧推进 1/90 秒动画，6 秒预览过渡在成片中延长到约 9 秒。源帧按需生成到 `Outputs/ClosingFramesSlow`，轨迹生成到 `Outputs/MotionValidation/ClosingSlow.csv`；以 60 FPS 编码前 600 帧即得到最终 10 秒演示。不会修改应用的开合时间常量，也不使用重复帧或光流补帧。

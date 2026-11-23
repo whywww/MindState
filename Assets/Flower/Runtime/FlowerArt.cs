@@ -256,10 +256,10 @@ namespace MindState
         void LeaveArt()
         {
             if(!artActive) return;
-            artActive=false; flexWeight=flexPreviousWeight=0; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localPosition=Vector3.zero; generated.localScale=Vector3.one; if(restCaptured) transform.localPosition=restPosition;
+            artActive=false; flexWeight=flexPreviousWeight=pair24CurlAmount=pair24CurlPrevious=0; bottomProgress=-1; generated.localRotation=Quaternion.identity; generated.localPosition=Vector3.zero; generated.localScale=Vector3.one; if(restCaptured) transform.localPosition=restPosition;
             HideArtExtras();
             foreach(var l in layers) { l.progress=-1; foreach(var p in l.petals) {
-                p.block.SetFloat(FlexWeightId,0); p.block.SetVector(ArtWeightsId,Vector4.zero); p.block.SetVector("_ArtLightWeights",Vector4.zero);
+                p.block.SetFloat(FlexWeightId,0); p.block.SetFloat(Pair24CurlId,0); p.block.SetVector(ArtWeightsId,Vector4.zero); p.block.SetVector("_ArtLightWeights",Vector4.zero);
                 p.block.SetVector("_StateTint",new Vector4(1,1,0,0)); p.block.SetVector("_StateAccent",(Vector4)Color.white.linear); p.block.SetVector("_StateSurface",Vector4.zero);
                 p.renderer.SetPropertyBlock(p.block); } }
             ArtExposureOffset=0;ArtSaturation=1;ArtAccentColor=Color.white;ArtLightGain=ArtLightDrift=1;
@@ -335,7 +335,7 @@ namespace MindState
             // slide the whole cluster back toward the middle while it is closed.
             transform.localPosition=restPosition-viewPageUp*(viewDistance*BudDropGain*bud)-viewPageRight*(viewDistance*BudCenterGain*bud);
             ApplyPose(bloomProgress,false);ApplyBottomPatches();
-            PrepareArtMotion();
+            PrepareArtMotion(); PreparePair24Pose(ArtWeights,suppress);
             Vector4 stateTint=new Vector4(look.brightness,look.saturation,0,0);
             Vector4 stateAccent=(Vector4)look.accent.linear;
             Vector4 stateSurface=new Vector4(look.huePull,look.rim,look.selfGlow,look.gloss);
@@ -350,7 +350,13 @@ namespace MindState
 #if UNITY_EDITOR || FLOWER_VALIDATION
                     if(suppressArtMotion){ tilt=0; roll=0; }
 #endif
+                    AdjustPair01ArtPose(k,j,suppress?0:ArtWeights.z*WanderingSeamPoseGate,ref rotation,ref scale);
+                    AdjustPair55ArtPose(k,j,suppress?0:ArtWeights.z*WanderingSeamPoseGate,ref rotation,ref scale);
+                    AdjustPair20ArtPose(k,j,suppress?0:ArtWeights.z*Pair20PoseGate,ref rotation,ref scale);
+                    if(!suppress&&k==2&&j==4)AdjustPair24MainPose(ref rotation,ref scale,ref tilt,ref roll);
+                    AdjustPair10ArtPose(k,j,suppress?0:ArtWeights.z*Pair10PoseGate,ref rotation,ref scale);
                     rotation=rotation*Quaternion.Euler(tilt,0,roll);
+                    if(k==2&&j==4)rotation=pair24CounterRotation*rotation;
                     ApplyPetalPose(l,p,j,position,rotation,scale);
                     if(appearance!=null) {
                         float v=Mathf.Repeat((j+1)*.618034f+k*.37f+appearance.seed*.013f,1);
@@ -362,26 +368,126 @@ namespace MindState
                     p.renderer.SetPropertyBlock(p.block);
                 }
             }
-            FinishFlex();
+            FinishFlex(); FinishPair24Curl(suppress);
             if(echoPetals!=null) UpdateEcho(dt);
             if(ribbonThread!=null) UpdateRibbons(dt);
         }
         // Shared by the main flower and the history-summary echo; i == 1 (Gathering) is carried by the bud shape.
-        void PetalArtMotion(Vector4 weights,float time,float az,int layer,int petal,out float tilt,out float roll)
+        void PetalArtMotion(Vector4 weights,float time,float az,int layer,int petal,out float tilt,out float roll,float pair12Weight=-1)
         {
             tilt=0;
+            float pair12Gate=layer==1&&petal==2?Pair12MotionGate(pair12Weight<0?weights.z:pair12Weight):0;
             for(int i=0;i<4;i++)
             {
                 if(i==1) continue;
                 var profile=artProfiles[i]; float period=profile.period;
                 if(i==2) period=7f+4*Mathf.Repeat((petal+1)*.618034f+layer*.37f,1);
                 float phase=i==2?az+layer*.9f:i==3?-az-layer*.5f:0;
-                tilt+=weights[i]*profile.amplitude*Mathf.Sin(time*Mathf.PI*2/period+phase);
+                float motionScale=1;
+                if(i==2&&layer==0){if(petal==1)motionScale=Mathf.Lerp(1,OuterPair01BreathScale,WanderingSeamPoseGate);else if(petal==5)motionScale=Mathf.Lerp(1,Pair55BreathScale,WanderingSeamPoseGate);}
+                if(i==2&&layer==2&&petal==1)motionScale=Mathf.Lerp(1,Pair20BreathScale,Pair20PoseGate);
+                if(i==2&&layer==2&&petal==4)motionScale=Mathf.Lerp(1,Pair24BreathScale,Pair24PoseGate*Pair24StateGate(weights.z));
+                if(i==2&&layer==1&&petal==1)motionScale=Mathf.Lerp(1,Pair10BreathScale,Pair10PoseGate);
+                if(i==2&&layer==1&&petal==2)motionScale=Mathf.Lerp(1,Pair12BreathScale,pair12Gate);
+                tilt+=weights[i]*profile.amplitude*motionScale*Mathf.Sin(time*Mathf.PI*2/period+phase);
             }
+            if(layer==0&&petal==3) tilt+=weights.z*OuterPairTiltBias;
+            if(layer==0&&petal==1) tilt+=weights.z*WanderingSeamPoseGate*OuterPair01TiltBias;
+            if(layer==0&&petal==5) tilt+=weights.z*WanderingSeamPoseGate*Pair55TiltBias;
+            if(layer==2&&petal==1) tilt+=weights.z*Pair20PoseGate*Pair20TiltBias;
+            if(layer==2&&petal==4) tilt+=Pair24Weight(weights)*Pair24TiltBias;
+            if(layer==1&&petal==1) tilt+=weights.z*Pair10PoseGate*Pair10TiltBias;
+            if(layer==1&&petal==2) tilt+=weights.z*pair12Gate*Pair12TiltBias;
             var look=BlendLook(weights);
             // Quiet droops from the outer layer inward; Wandering adds a deterministic per-petal roll.
             tilt+=look.droop*(layer==0?1.2f:.7f);
             roll=look.asym*Mathf.Sin((petal+1)*1.7f+layer*.9f);
+            if(layer==0&&petal==1) roll+=weights.z*WanderingSeamPoseGate*OuterPair01RollBias;
+            if(layer==0&&petal==5) roll+=weights.z*WanderingSeamPoseGate*Pair55RollBias;
+            if(layer==2&&petal==1) roll+=weights.z*Pair20PoseGate*Pair20RollBias;
+            if(layer==2&&petal==4) roll+=Pair24Weight(weights)*Pair24RollBias;
+            if(layer==1&&petal==1) roll+=weights.z*Pair10PoseGate*Pair10RollBias;
+        }
+        // Keep P3 below P2 through the independent Wandering breathing cycles.
+        const float OuterPairTiltBias=7f;
+        // Root-preserving P1 calibration, validated against every neighbour over 120 s.
+        const float OuterPair01TiltBias=9.725545f,OuterPair01BreathScale=.0168886f,OuterPair01RollBias=.6179104f;
+        float WanderingSeamPoseGate=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.7f,.9f,bloomProgress));
+        // L0-P5 clears L1-P5 without changing the middle ring or either earlier repair.
+        const float Pair55TiltBias=10.29227f,Pair55BreathScale=.1206378f,Pair55RollBias=6.352293f;
+        // L2-P1 keeps its attachment and most of its breathing while clearing L2-P0.
+        const float Pair20TiltBias=-8.556192f,Pair20BreathScale=.7187908f,Pair20RollBias=-2.445637f;
+        float Pair20PoseGate=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,bloomProgress));
+        // L2-P4 keeps a stable seam with L2-P0, with its root fixed.
+        const float Pair24TiltBias=-6.971874f,Pair24BreathScale=.491653055f,Pair24RollBias=-4.892811f;
+        float Pair24PoseGate=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,bloomProgress));
+        static float Pair24StateGate(float weight)=>Mathf.SmoothStep(0,1,Mathf.Clamp01(weight));
+        float Pair24Weight(Vector4 weights)=>weights.z*Pair24PoseGate*Pair24StateGate(weights.z);
+        // Fixed scale through breathing and state changes. Quiet keeps this petal tucked.
+        const float Pair24QuietYaw=24,Pair24QuietPower=3;
+        float Pair24PlaybackProgress(float progress){
+#if UNITY_EDITOR || FLOWER_VALIDATION
+            if(suppressArtMotion)return progress;
+#endif
+            return artActive?Mathf.Clamp01(progress-.22f*ArtWeights.w):progress;
+        }
+        Vector3 Pair24PoseRoot(){var g=SurfaceFor(layers[2],4);float progress=Pair24PlaybackProgress(bloomProgress);if(progress==bloomProgress)return g.root;float frame=StandardLayerProgress(layers[2].config,progress)*(PoseCount-1);int first=Mathf.Min((int)frame,PoseCount-2);return Vector3.LerpUnclamped(g.poses[first].root,g.poses[first+1].root,frame-first);}
+        Quaternion pair24CounterRotation=Quaternion.identity;
+        Vector3 pair24Rotation,pair24Scale;
+        float pair24RotationWeight;
+        static readonly Vector3 Pair24FixedScale=new Vector3(.9f*.711982548f,.8257039f,1.075196f);
+        static readonly Vector3 Pair24End=new Vector3(14.63435f,24.1214657f,21.0392628f);
+        void PreparePair24Pose(Vector4 weights,bool suppressed){
+            pair24CounterRotation=Quaternion.identity;
+            if(suppressed){pair24Rotation=Vector3.zero;pair24Scale=Vector3.one;pair24RotationWeight=0;return;}
+            float sum=weights.x+weights.y+weights.w,power=3;
+            Vector3 rest=Vector3.zero,arc=Vector3.zero;
+            if(sum>0){
+                float a=weights.x/sum,b=weights.y/sum,c=weights.w/sum;
+                rest=new Vector3(9.04858f,-13.8673325f,5.318752f)*a+new Vector3(.0177443027f,-.468444824f,1.0314554f)*b+new Vector3(6.65284348f-3.6351f,-20.8164654f+20.348f,8.960873f-7.9294f)*c;
+                arc=new Vector3(-.75f,0,0)*a+new Vector3(0,24,0)*b+new Vector3(0,Pair24QuietYaw,0)*c;
+                power=a+3*b+Pair24QuietPower*c;
+                pair24CounterRotation=Quaternion.Inverse(Quaternion.Euler((b+c)*Mathf.Sin(Mathf.PI*weights.z),0,-2.688581f*(b+c)*Mathf.Sin(Mathf.PI*weights.z)));
+            }
+            float q=Mathf.Clamp01(weights.z),w=Mathf.SmoothStep(0,1,Mathf.Pow(q,power));
+            pair24RotationWeight=w;pair24Rotation=rest*(1-w)+Pair24End*w+arc*Mathf.Sin(Mathf.PI*w);
+            pair24Scale=Pair24FixedScale;
+        }
+        void AdjustPair24MainPose(ref Quaternion rotation,ref Vector3 scale,ref float tilt,ref float roll){
+            float period=7+4*Mathf.Repeat(5*.618034f+2*.37f,1);
+            float raw=artProfiles[2].amplitude*Mathf.Sin(artTime*Mathf.PI*2/period+4*Mathf.PI*2/5+1.8f);
+            float original=Pair24Weight(ArtWeights),w=pair24RotationWeight;
+            tilt=(tilt-original*(Pair24TiltBias+(Pair24BreathScale-1)*raw))*.5f+w*(Pair24TiltBias+(Pair24BreathScale-1)*raw*.5f)+pair24Rotation.x;
+            roll=roll-original*Pair24RollBias+w*Pair24RollBias+pair24Rotation.z;
+            rotation=Quaternion.AngleAxis(-16.3266544f*w+pair24Rotation.y,Vector3.up)*rotation;
+            scale=Vector3.Scale(PetalScale(layers[2].config,layers[2].petals[4],4,1),pair24Scale);
+        }
+        // L1-P1 clears L1-P0 while keeping its attachment fixed.
+        const float Pair10TiltBias=3.68836641f,Pair10BreathScale=0.3280386f,Pair10RollBias=10.9942226f;
+        float Pair10PoseGate=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,bloomProgress));
+        // P2 stays inside the independently baked P3 neighbour-tilt interval.
+        const float Pair12TiltBias=1.5f,Pair12BreathScale=0.5f;
+        float Pair12PoseGate=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,bloomProgress));
+        float Pair12MotionGate(float weight)=>Pair12PoseGate*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,weight));
+        static void AdjustPair10ArtPose(int layer,int petal,float weight,ref Quaternion rotation,ref Vector3 scale){
+            if(layer!=1||petal!=1||weight<=0)return;
+            rotation=Quaternion.AngleAxis(20.2531967f*weight,Vector3.up)*rotation;
+            scale=Vector3.Scale(scale,Vector3.Lerp(Vector3.one,new Vector3(0.731844366f,0.955875039f,0.9241903f),weight));
+        }
+        static void AdjustPair20ArtPose(int layer,int petal,float weight,ref Quaternion rotation,ref Vector3 scale){
+            if(layer!=2||petal!=1||weight<=0)return;
+            rotation=Quaternion.AngleAxis(-6.325974f*weight,Vector3.up)*rotation;
+            scale=Vector3.Scale(scale,Vector3.Lerp(Vector3.one,new Vector3(.7496356f,.8110957f,1.09828f),weight));
+        }
+        static void AdjustPair55ArtPose(int layer,int petal,float weight,ref Quaternion rotation,ref Vector3 scale){
+            if(layer!=0||petal!=5||weight<=0)return;
+            rotation=Quaternion.AngleAxis(-18.17691f*weight,Vector3.up)*rotation;
+            scale=Vector3.Scale(scale,Vector3.Lerp(Vector3.one,new Vector3(.8766819f,1.129184f,1.090139f),weight));
+        }
+        static void AdjustPair01ArtPose(int layer,int petal,float weight,ref Quaternion rotation,ref Vector3 scale){
+            if(layer!=0||petal!=1||weight<=0)return;
+            rotation=Quaternion.AngleAxis(-14.81485f*weight,Vector3.up)*rotation;
+            scale=Vector3.Scale(scale,Vector3.Lerp(Vector3.one,new Vector3(.8745521f,1.250042f,.9350485f),weight));
         }
     }
 }

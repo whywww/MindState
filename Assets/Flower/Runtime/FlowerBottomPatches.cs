@@ -79,8 +79,11 @@ public sealed partial class FlowerAssembler {
   foreach(var patch in bottomPatches) ApplyBottomPatch(patch);
  }
  void ApplyBottomPatch(BottomPatch patch) {
-   float frame=Mathf.Clamp01(bloomProgress)*32;int a=Mathf.Min((int)frame,31);float f=frame-a;
-   var g=SurfaceFor(layers[patch.layer],patch.index);Array.Copy(g.data,patch.work,g.data.Length);Array.Clear(patch.dirty,0,patch.dirty.Length);
+   float progress=patch.layer==2&&patch.index==4?Pair24PlaybackProgress(bloomProgress):bloomProgress;float frame=Mathf.Clamp01(progress)*32;int a=Mathf.Min((int)frame,31);float f=frame-a;
+   var g=SurfaceFor(layers[patch.layer],patch.index);var baseBounds=g.mesh.bounds;
+   if(progress==bloomProgress)Array.Copy(g.data,patch.work,g.data.Length);
+   else {float phase=StandardLayerProgress(layers[patch.layer].config,progress)*32;int first=Mathf.Min((int)phase,31);var p0=g.poses[first];var p1=g.poses[first+1];for(int i=0;i<patch.work.Length;i++)Interpolate(ref p0.data[i],ref p1.data[i],phase-first,out patch.work[i]);baseBounds=p0.bounds;baseBounds.Encapsulate(p1.bounds);}
+   Array.Clear(patch.dirty,0,patch.dirty.Length);
    for(int k=0;k<patch.ids.Length;k++){int id=patch.ids[k];var d=Vector3.Lerp(patch.delta[a][k],patch.delta[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}
    if(upperPreview&&patch.upper!=null)for(int k=0;k<patch.upperIds.Length;k++){int id=patch.upperIds[k];var d=Vector3.Lerp(patch.upper[a][k],patch.upper[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}
    if(extraPreview&&patch.extra!=null)for(int k=0;k<patch.extraIds.Length;k++){int id=patch.extraIds[k];var d=Vector3.Lerp(patch.extra[a][k],patch.extra[a+1][k],f);patch.work[id].p+=d;patch.work[id+BottomSurface].p+=d;if(d.sqrMagnitude>0){patch.dirty[id]=true;patch.dirty[Mathf.Max(0,id-129)]=true;patch.dirty[Mathf.Min(BottomSurface-1,id+129)]=true;if(id%129>0)patch.dirty[id-1]=true;if(id%129<128)patch.dirty[id+1]=true;}}
@@ -96,7 +99,7 @@ public sealed partial class FlowerAssembler {
     var edge=(patch.work[next].p-patch.work[previous].p).normalized;var n=Vector3.Cross(edge,-patch.work[id].n).normalized;
     patch.work[k].n=patch.work[k+1].n=n;patch.work[k].t=patch.work[k+1].t=new Vector4(edge.x,edge.y,edge.z,1);
    }
-   patch.mesh.SetVertexBufferData(patch.work,0,0,patch.work.Length,0,MeshUpdateFlags.DontRecalculateBounds);var bounds=g.mesh.bounds;bounds.Expand(2*Mathf.Max(patch.radius[a],patch.radius[a+1]));patch.mesh.bounds=bounds;MeshUpdates++;
+   patch.mesh.SetVertexBufferData(patch.work,0,0,patch.work.Length,0,MeshUpdateFlags.DontRecalculateBounds);var bounds=baseBounds;bounds.Expand(2*Mathf.Max(patch.radius[a],patch.radius[a+1]));patch.mesh.bounds=bounds;MeshUpdates++;
  }
  Vector3 BottomDeltaAt(int layer,int index,float phase,int id){foreach(var patch in bottomPatches)if(patch.layer==layer&&patch.index==index){int k=Array.BinarySearch(patch.ids,id);if(k<0)return Vector3.zero;float q=phase*32;int a=Mathf.Min((int)q,31);return Vector3.Lerp(patch.delta[a][k],patch.delta[a+1][k],q-a);}return Vector3.zero;}
  internal void UpperCornerPreview(bool enabled){upperPreview=enabled;bottomProgress=-1;ApplyBottomPatches();}

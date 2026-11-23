@@ -4,7 +4,7 @@ using MindState.BCI.BrainLink;
 namespace MindState
 {
     [DefaultExecutionOrder(20),RequireComponent(typeof(Camera))]
-    public sealed class FlowerGallery : MonoBehaviour
+    public sealed partial class FlowerGallery : MonoBehaviour
     {
         public FlowerAssembler flower;
         public bool showInterface;
@@ -45,6 +45,7 @@ namespace MindState
             if(Input.GetKeyDown(KeyCode.L)) showFps=!showFps;
             fpsFrames++; fpsTime+=Time.unscaledDeltaTime;
             if(fpsTime>=.5f) { fps=fpsFrames/fpsTime; fpsFrames=0; fpsTime=0; }
+            if(Input.GetKeyDown(KeyCode.N)) showPetalLabels=!showPetalLabels;
             if(Input.GetKeyDown(KeyCode.H)) showInterface=!showInterface;
             if(Input.GetKeyDown(KeyCode.Space)) flower.frozen=!flower.frozen;
             if(Input.GetKeyDown(KeyCode.F9)&&brainLink!=null) brainLink.ToggleDiagnostics();
@@ -136,6 +137,7 @@ namespace MindState
             if(title==null) Styles(); var saved=GUI.matrix; GUI.matrix=Matrix4x4.Scale(new Vector3(Screen.width/1920f,Screen.height/1080f,1));
             if(showFps) GUI.Label(new Rect(1676,1026,220,30),Mathf.RoundToInt(fps)+" FPS",fpsLabel);
             if(flower==null||!flower.Ready) { GUI.matrix=saved; return; }
+            DrawPetalLabels();
             if(brainLink!=null) brainLink.DrawDiagnostics(text);
             if(!showInterface) { GUI.matrix=saved; return; }
             GUI.DrawTexture(new Rect(24,30,280,960),panel);
@@ -180,7 +182,7 @@ namespace MindState
             if(!Mathf.Approximately(relaxationNow,relaxation)) { animatingSliders=false; relaxation=relaxationNow; sliderOwnsBrain=true; flower.BrainBaselineFrozen=true; flower.ResetBrainBaseline(); flower.SetBrainMetrics(attention,relaxation); }
             GUI.Label(new Rect(254,850,46,24),Mathf.RoundToInt(relaxation*100)+"%",small);
             GUI.enabled=controlsEnabled;
-            GUI.Label(new Rect(46,879,230,65),"拖动环绕 · 滚轮缩放\nR 重播 · 空格冻结 · H 隐藏\nF9 BrainLink 数值",small);
+            GUI.Label(new Rect(46,879,230,65),"拖动环绕 · 滚轮缩放\nR 重播 · 空格冻结 · H 隐藏\nN 花瓣编号 · F9 BrainLink 数值",small);
             GUI.matrix=saved;
         }
         void OnDestroy() { if(panel!=null) Destroy(panel); if(font!=null) Destroy(font); }

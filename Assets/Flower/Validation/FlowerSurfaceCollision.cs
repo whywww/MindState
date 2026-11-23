@@ -37,7 +37,7 @@ namespace MindState
         public bool NearCandidates { get; private set; }
         public FlowerSurfaceCollision(FlowerAssembler flower,int cellStep=1)
         {
-            this.flower=flower; petals=flower.GetDiagnosticPetals();
+            this.flower=flower; petals=flower.GetDiagnosticPetals();trimMatrices=new Matrix4x4[petals.Length];trimSettings=new Vector4[petals.Length];trimUV=new Vector2[petals.Length];
             repeatedSurface=new bool[petals.Length];
             for(int i=0;i<petals.Length;i++) for(int j=0;j<i;j++)
                 if(flower.PetalMesh(petals[i].layer,petals[i].index)==flower.PetalMesh(petals[j].layer,petals[j].index)) repeatedSurface[i]=true;
@@ -239,6 +239,7 @@ namespace MindState
             else for(int a=0;a<instances.Length;a++) inspect(a);
             result.Sort((a,b)=>a.petalA!=b.petalA?a.petalA.CompareTo(b.petalA):a.petalB!=b.petalB?a.petalB.CompareTo(b.petalB):a.rootRegion.CompareTo(b.rootRegion));
         }
+        internal bool PairHasNonRootContact(int a,int b,out Contact contact)=>Cross(a,0,b,0,false,out contact);
         internal void FindPairContacts(int a,int b,List<Contact> output){output.Clear();Collect(a,0,b,0,output);}
         internal void FindAllPairContacts(List<Contact> output) {
             output.Clear();for(int a=0;a<instances.Length;a++)for(int b=a+1;b<instances.Length;b++)Collect(a,0,b,0,output);
@@ -279,6 +280,67 @@ namespace MindState
                 float la=LengthAt(point,sa.v[a0],sa.v[a1],sa.v[a2],a0,a1,a2),lb=LengthAt(point,sb.v[b0],sb.v[b1],sb.v[b2],b0,b1,b2);
                 float wa=WidthAt(point,sa.v[a0],sa.v[a1],sa.v[a2],a0,a1,a2),wb=WidthAt(point,sb.v[b0],sb.v[b1],sb.v[b2],b0,b1,b2);
                 bool root=IsRoot(la,lb); if(root!=roots) continue;
+                contact=new Contact { point=point,lengthA=la,lengthB=lb,widthA=wa,widthB=wb,rootRegion=root }; return true;
+            }
+            return false;
+        }
+        readonly Matrix4x4[] trimMatrices;
+        readonly Vector4[] trimSettings;
+        readonly Vector2[] trimUV;
+        readonly MaterialPropertyBlock trimBlock=new MaterialPropertyBlock();
+        internal void RefreshRenderRootTrim(){for(int i=0;i<petals.Length;i++){var renderer=petals[i].body.GetComponent<Renderer>();renderer.GetPropertyBlock(trimBlock);trimMatrices[i]=trimBlock.GetMatrix("_RootTrimWorldToFlower");trimSettings[i]=trimBlock.GetVector("_RootTrim");var material=renderer.sharedMaterial;trimUV[i]=new Vector2(material.GetTextureScale("_BumpMap").y,material.GetTextureOffset("_BumpMap").y);}}
+        internal bool PairHasVisibleContact(int a,int b,out Contact contact)=>CrossVisible(a,0,b,0,out contact);
+        bool SurfaceVisible(int petal,Vector3 point,float length){var trim=trimSettings[petal];if(trim.x<=.5f)return true;var root=trimMatrices[petal].MultiplyPoint3x4(point);float radius=new Vector2(root.x,root.z).magnitude,uv=length*trimUV[petal].x+trimUV[petal].y;if((uv<=.25f||radius<trim.z*1.15f)&&root.y<trim.y+.004f)return false;if(uv<=.25f&&root.y<trim.w&&radius>trim.z)return false;return true;}
+        bool VisibleIntersection(int a,int a0,int a1,int a2,int b,int b0,int b1,int b2,ref Vector3 point){
+            var av=instances[a].v;var bv=instances[b].v;
+            float LA(Vector3 p)=>LengthAt(p,av[a0],av[a1],av[a2],a0,a1,a2);
+            float LB(Vector3 p)=>LengthAt(p,bv[b0],bv[b1],bv[b2],b0,b1,b2);
+            bool Visible(Vector3 p){float la=LA(p),lb=LB(p);return !IsRoot(la,lb)&&SurfaceVisible(a,p,la)&&SurfaceVisible(b,p,lb);}
+            bool SegmentVisible(Vector3 first,Vector3 last,out Vector3 visible){
+                var cuts=new List<float>{0,1};var delta=last-first;
+                void Linear(float firstValue,float lastValue,float threshold){float d=lastValue-firstValue;if(Mathf.Abs(d)<1e-12f)return;float t=(threshold-firstValue)/d;if(t>0&&t<1)cuts.Add(t);}
+                void SurfaceCuts(int petal,float l0,float l1){Linear(l0,l1,.08f);var uv=trimUV[petal];Linear(l0*uv.x+uv.y,l1*uv.x+uv.y,.25f);var trim=trimSettings[petal];if(trim.x<=.5f)return;var p=trimMatrices[petal].MultiplyPoint3x4(first);var q=trimMatrices[petal].MultiplyPoint3x4(last);Linear(p.y,q.y,trim.y+.004f);Linear(p.y,q.y,trim.w);var d=q-p;double aa=(double)d.x*d.x+(double)d.z*d.z,bb=2*((double)p.x*d.x+(double)p.z*d.z);foreach(float radius in new[]{trim.z,trim.z*1.15f}){double cc=(double)p.x*p.x+(double)p.z*p.z-(double)radius*radius,disc=bb*bb-4*aa*cc;if(aa<1e-24||disc<0)continue;double root=Math.Sqrt(disc);foreach(double t in new[]{(-bb-root)/(2*aa),(-bb+root)/(2*aa)})if(t>0&&t<1)cuts.Add((float)t);}}
+                SurfaceCuts(a,LA(first),LA(last));SurfaceCuts(b,LB(first),LB(last));cuts.Sort();for(int i=0;i<cuts.Count;i++){var p=first+delta*cuts[i];if(Visible(p)){visible=p;return true;}if(i+1<cuts.Count){p=first+delta*((cuts[i]+cuts[i+1])*.5f);if(Visible(p)){visible=p;return true;}}}visible=default;return false;
+            }
+            if(Visible(point))return true;
+            var an=Vector3.Cross(av[a1]-av[a0],av[a2]-av[a0]).normalized;var bn=Vector3.Cross(bv[b1]-bv[b0],bv[b2]-bv[b0]).normalized;
+            bool coplanar=Mathf.Abs(Vector3.Dot(bn,av[a0]-bv[b0]))<1e-6f&&Mathf.Abs(Vector3.Dot(bn,av[a1]-bv[b0]))<1e-6f&&Mathf.Abs(Vector3.Dot(bn,av[a2]-bv[b0]))<1e-6f&&Mathf.Abs(Vector3.Dot(an,bv[b0]-av[a0]))<1e-6f&&Mathf.Abs(Vector3.Dot(an,bv[b1]-av[a0]))<1e-6f&&Mathf.Abs(Vector3.Dot(an,bv[b2]-av[a0]))<1e-6f;
+            var intersections=new List<Vector3>(6);
+            for(int pass=0;pass<2;pass++)for(int edge=0;edge<3;edge++){Vector3 p0=pass==0?av[a0]:bv[b0],p1=pass==0?av[a1]:bv[b1],p2=pass==0?av[a2]:bv[b2],q0=pass==0?bv[b0]:av[a0],q1=pass==0?bv[b1]:av[a1],q2=pass==0?bv[b2]:av[a2];if(Segment(edge==0?p0:edge==1?p1:p2,edge==0?p1:edge==1?p2:p0,q0,q1,q2,out var hit))intersections.Add(hit);}
+            float farthest=0;Vector3 first=default,last=default;for(int i=0;i<intersections.Count;i++)for(int j=i+1;j<intersections.Count;j++){float distance=(intersections[i]-intersections[j]).sqrMagnitude;if(distance>farthest){farthest=distance;first=intersections[i];last=intersections[j];}}
+            if(!coplanar&&farthest>1e-10f){if(SegmentVisible(first,last,out var hit)){point=hit;return true;}return false;}
+            // Coplanar overlap: inspect its polygon boundary, then only discard a
+            // polygon when a shader clipping region provably contains all of it.
+            var polygon=CoplanarPolygon(av[a0],av[a1],av[a2],bv[b0],bv[b1],bv[b2]);
+            for(int i=0;i<polygon.Count;i++)if(SegmentVisible(polygon[i],polygon[(i+1)%polygon.Count],out var hit)){point=hit;return true;}
+            bool AllHidden(int petal,Func<Vector3,float> length){var trim=trimSettings[petal];if(trim.x<=.5f||polygon.Count==0)return false;bool rootUV=true,belowLow=true,belowHigh=true,insideWide=true;float minX=float.PositiveInfinity,maxX=float.NegativeInfinity,minZ=float.PositiveInfinity,maxZ=float.NegativeInfinity;foreach(var p in polygon){var v=trimMatrices[petal].MultiplyPoint3x4(p);rootUV&=length(p)*trimUV[petal].x+trimUV[petal].y<=.25f;belowLow&=v.y<trim.y+.004f;belowHigh&=v.y<trim.w;insideWide&=v.x*v.x+v.z*v.z<trim.z*trim.z*1.15f*1.15f;minX=Mathf.Min(minX,v.x);maxX=Mathf.Max(maxX,v.x);minZ=Mathf.Min(minZ,v.z);maxZ=Mathf.Max(maxZ,v.z);}float x=minX>0?minX:maxX<0?-maxX:0,z=minZ>0?minZ:maxZ<0?-maxZ:0;return belowLow&&(rootUV||insideWide)||rootUV&&belowHigh&&x*x+z*z>trim.z*trim.z;}
+            bool allJoint=polygon.Count>0;foreach(var p in polygon)allJoint&=IsRoot(LA(p),LB(p));if(allJoint||AllHidden(a,LA)||AllHidden(b,LB))return false;
+            return true; // Conservative failure for an unresolved clipped coplanar region.
+        }
+        static List<Vector3> CoplanarPolygon(Vector3 a,Vector3 b,Vector3 c,Vector3 d,Vector3 e,Vector3 f){var normal=Vector3.Cross(b-a,c-a);int axis=Mathf.Abs(normal.x)>Mathf.Abs(normal.y)?0:1;if(Mathf.Abs(normal.z)>Mathf.Abs(normal[axis]))axis=2;var polygon=new List<Vector3>{a,b,c};var clip=new[]{d,e,f};float orientation=Mathf.Sign(Cross2(Project(e-d,axis),Project(f-d,axis)));for(int edge=0;edge<3&&polygon.Count>0;edge++){var output=new List<Vector3>();var p=Project(clip[edge],axis);var q=Project(clip[(edge+1)%3],axis);var previous=polygon[polygon.Count-1];float dp=Cross2(q-p,Project(previous,axis)-p)*orientation;foreach(var current in polygon){float dc=Cross2(q-p,Project(current,axis)-p)*orientation;if((dc>=0)!=(dp>=0))output.Add(Vector3.LerpUnclamped(previous,current,dp/(dp-dc)));if(dc>=0)output.Add(current);previous=current;dp=dc;}polygon=output;}return polygon;}
+        bool CrossVisible(int a,int ia,int b,int ib,out Contact contact)
+        {
+            contact=default; var sa=instances[a]; var sb=instances[b];
+            if(!sa.bounds[ia].Intersects(sb.bounds[ib])) return false;
+            var na=nodes[ia]; var nb=nodes[ib];
+            if(na.y1<=6&&nb.y1<=6) return false;
+            if(a==b&&ia==ib&&na.left>=0)
+                return CrossVisible(a,na.left,b,na.left,out contact)||CrossVisible(a,na.left,b,na.right,out contact)||CrossVisible(a,na.right,b,na.right,out contact);
+            if(na.left>=0&&(nb.left<0||sa.bounds[ia].size.sqrMagnitude>=sb.bounds[ib].size.sqrMagnitude))
+                return CrossVisible(a,na.right,b,ib,out contact)||CrossVisible(a,na.left,b,ib,out contact);
+            if(nb.left>=0) return CrossVisible(a,ia,b,nb.right,out contact)||CrossVisible(a,ia,b,nb.left,out contact);
+            for(int ta=0;ta<2;ta++) for(int tb=0;tb<2;tb++)
+            {
+                int a0=na.y0*Cols+na.x0,a1=na.y1*Cols+na.x0,a2=na.y0*Cols+na.x1;
+                if(ta==1) { a0=a2; a2=na.y1*Cols+na.x1; }
+                int b0=nb.y0*Cols+nb.x0,b1=nb.y1*Cols+nb.x0,b2=nb.y0*Cols+nb.x1;
+                if(tb==1) { b0=b2; b2=nb.y1*Cols+nb.x1; }
+                if(a==b&&(ia==ib||Adjacent(a0,a1,a2,b0,b1,b2))) continue;
+                if(!Triangle(sa.v[a0],sa.v[a1],sa.v[a2],sb.v[b0],sb.v[b1],sb.v[b2],out Vector3 point)) continue;
+                if(!VisibleIntersection(a,a0,a1,a2,b,b0,b1,b2,ref point))continue;
+                float la=LengthAt(point,sa.v[a0],sa.v[a1],sa.v[a2],a0,a1,a2),lb=LengthAt(point,sb.v[b0],sb.v[b1],sb.v[b2],b0,b1,b2);
+                float wa=WidthAt(point,sa.v[a0],sa.v[a1],sa.v[a2],a0,a1,a2),wb=WidthAt(point,sb.v[b0],sb.v[b1],sb.v[b2],b0,b1,b2);
+                bool root=IsRoot(la,lb);
                 contact=new Contact { point=point,lengthA=la,lengthB=lb,widthA=wa,widthB=wb,rootRegion=root }; return true;
             }
             return false;
