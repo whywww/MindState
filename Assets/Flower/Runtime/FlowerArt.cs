@@ -43,6 +43,7 @@ namespace MindState
         bool artActive;
 #if UNITY_EDITOR || FLOWER_VALIDATION
         internal bool suppressArtMotion;
+        internal bool quietPair12Bypass;
 #endif
         float artTime,artYaw,lastValid=float.NegativeInfinity;
         Vector4 artTarget=new Vector4(1,0,0,0);
@@ -377,6 +378,10 @@ namespace MindState
         {
             tilt=0;
             float pair12Gate=layer==1&&petal==2?Pair12MotionGate(pair12Weight<0?weights.z:pair12Weight):0;
+            float quietPair12Gate=layer==1&&petal==2?QuietPair12StateGate(weights.w):0;
+#if UNITY_EDITOR || FLOWER_VALIDATION
+            if(quietPair12Bypass)quietPair12Gate=0;
+#endif
             for(int i=0;i<4;i++)
             {
                 if(i==1) continue;
@@ -389,6 +394,7 @@ namespace MindState
                 if(i==2&&layer==2&&petal==4)motionScale=Mathf.Lerp(1,Pair24BreathScale,Pair24PoseGate*Pair24StateGate(weights.z));
                 if(i==2&&layer==1&&petal==1)motionScale=Mathf.Lerp(1,Pair10BreathScale,Pair10PoseGate);
                 if(i==2&&layer==1&&petal==2)motionScale=Mathf.Lerp(1,Pair12BreathScale,pair12Gate);
+                if(i==3&&layer==1&&petal==2)motionScale=Mathf.Lerp(1,QuietPair12BreathScale,quietPair12Gate);
                 tilt+=weights[i]*profile.amplitude*motionScale*Mathf.Sin(time*Mathf.PI*2/period+phase);
             }
             if(layer==0&&petal==3) tilt+=weights.z*OuterPairTiltBias;
@@ -407,6 +413,7 @@ namespace MindState
             if(layer==2&&petal==1) roll+=weights.z*Pair20PoseGate*Pair20RollBias;
             if(layer==2&&petal==4) roll+=Pair24Weight(weights)*Pair24RollBias;
             if(layer==1&&petal==1) roll+=weights.z*Pair10PoseGate*Pair10RollBias;
+            if(layer==1&&petal==2){tilt+=quietPair12Gate*QuietPair12TiltBias;roll+=quietPair12Gate*QuietPair12RollBias;}
         }
         // Keep P3 below P2 through the independent Wandering breathing cycles.
         const float OuterPairTiltBias=7f;
@@ -469,6 +476,9 @@ namespace MindState
         const float Pair12TiltBias=1.5f,Pair12BreathScale=0.5f;
         float Pair12PoseGate=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,bloomProgress));
         float Pair12MotionGate(float weight)=>Pair12PoseGate*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,weight));
+        // Quiet keeps L1-P2 clear of L1-P1 in the closed droop pose, root fixed.
+        const float QuietPair12TiltBias=-9.6f,QuietPair12BreathScale=0.1f,QuietPair12RollBias=-9.5f;
+        static float QuietPair12StateGate(float weight)=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,weight));
         static void AdjustPair10ArtPose(int layer,int petal,float weight,ref Quaternion rotation,ref Vector3 scale){
             if(layer!=1||petal!=1||weight<=0)return;
             rotation=Quaternion.AngleAxis(20.2531967f*weight,Vector3.up)*rotation;
