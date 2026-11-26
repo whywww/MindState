@@ -44,6 +44,7 @@ namespace MindState
 #if UNITY_EDITOR || FLOWER_VALIDATION
         internal bool suppressArtMotion;
         internal bool quietPair12Bypass;
+        internal bool quietLayerBypass;
 #endif
         float artTime,artYaw,lastValid=float.NegativeInfinity;
         Vector4 artTarget=new Vector4(1,0,0,0);
@@ -356,6 +357,7 @@ namespace MindState
                     AdjustPair20ArtPose(k,j,suppress?0:ArtWeights.z*Pair20PoseGate,ref rotation,ref scale);
                     if(!suppress&&k==2&&j==4)AdjustPair24MainPose(ref rotation,ref scale,ref tilt,ref roll);
                     AdjustPair10ArtPose(k,j,suppress?0:ArtWeights.z*Pair10PoseGate,ref rotation,ref scale);
+                    AdjustQuietLayerArtPose(k,j,suppress?0:QuietPair12StateGate(ArtWeights.w),ref scale);
                     rotation=rotation*Quaternion.Euler(tilt,0,roll);
                     if(k==2&&j==4)rotation=pair24CounterRotation*rotation;
                     ApplyPetalPose(l,p,j,position,rotation,scale);
@@ -379,8 +381,10 @@ namespace MindState
             tilt=0;
             float pair12Gate=layer==1&&petal==2?Pair12MotionGate(pair12Weight<0?weights.z:pair12Weight):0;
             float quietPair12Gate=layer==1&&petal==2?QuietPair12StateGate(weights.w):0;
+            float quietLayerGate=layer==1?QuietPair12StateGate(weights.w):0;
 #if UNITY_EDITOR || FLOWER_VALIDATION
             if(quietPair12Bypass)quietPair12Gate=0;
+            if(quietLayerBypass)quietLayerGate=0;
 #endif
             for(int i=0;i<4;i++)
             {
@@ -395,6 +399,7 @@ namespace MindState
                 if(i==2&&layer==1&&petal==1)motionScale=Mathf.Lerp(1,Pair10BreathScale,Pair10PoseGate);
                 if(i==2&&layer==1&&petal==2)motionScale=Mathf.Lerp(1,Pair12BreathScale,pair12Gate);
                 if(i==3&&layer==1&&petal==2)motionScale=Mathf.Lerp(1,QuietPair12BreathScale,quietPair12Gate);
+                if(i==3&&layer==1)motionScale=Mathf.Lerp(motionScale,QuietLayerBreathScale[petal],quietLayerGate);
                 tilt+=weights[i]*profile.amplitude*motionScale*Mathf.Sin(time*Mathf.PI*2/period+phase);
             }
             if(layer==0&&petal==3) tilt+=weights.z*OuterPairTiltBias;
@@ -414,6 +419,10 @@ namespace MindState
             if(layer==2&&petal==4) roll+=Pair24Weight(weights)*Pair24RollBias;
             if(layer==1&&petal==1) roll+=weights.z*Pair10PoseGate*Pair10RollBias;
             if(layer==1&&petal==2){tilt+=quietPair12Gate*QuietPair12TiltBias;roll+=quietPair12Gate*QuietPair12RollBias;}
+            if(layer==1){tilt+=quietLayerGate*QuietLayerTiltBias[petal];roll+=quietLayerGate*QuietLayerRollBias[petal];}
+            // Mid-transition outward arc so P2 swings around the outside of P1 during the
+            // Gathering<->Quiet blend; zero at both endpoints.
+            if(layer==1&&petal==2)tilt+=Mathf.Sin(Mathf.PI*Mathf.Clamp01(weights.w))*QuietTransitionArc;
         }
         // Keep P3 below P2 through the independent Wandering breathing cycles.
         const float OuterPairTiltBias=7f;
@@ -477,8 +486,21 @@ namespace MindState
         float Pair12PoseGate=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,bloomProgress));
         float Pair12MotionGate(float weight)=>Pair12PoseGate*Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,weight));
         // Quiet keeps L1-P2 clear of L1-P1 in the closed droop pose, root fixed.
-        const float QuietPair12TiltBias=-9.6f,QuietPair12BreathScale=0.1f,QuietPair12RollBias=-9.5f;
-        static float QuietPair12StateGate(float weight)=>Mathf.SmoothStep(0,1,Mathf.InverseLerp(.9f,1f,weight));
+        const float QuietPair12TiltBias=0f,QuietPair12BreathScale=1f,QuietPair12RollBias=0f;
+        const float QuietTransitionArc=6f;
+        static float QuietPair12StateGate(float weight)=>Mathf.SmoothStep(0,1,weight);
+        // Quiet calibration for all six L1 petals (P2 included, kept on the outside of P1).
+        // Elements are mutable only so the editor search can probe candidates; the committed
+        // values are the fix. Gate ramps smoothly with the Quiet weight for fluid transitions.
+        internal static readonly float[] QuietLayerTiltBias=new float[]{2,2,0,2,0,0};
+        internal static readonly float[] QuietLayerBreathScale=new float[]{0.5f,0,0.75f,0,0.25f,0.25f};
+        internal static readonly float[] QuietLayerRollBias=new float[]{2,6,2,4,2,0};
+        // Slight root-fixed narrowing so the ring can sit tighter with less outward splay.
+        internal const float QuietLayerWidthScale=.9f;
+        static void AdjustQuietLayerArtPose(int layer,int petal,float weight,ref Vector3 scale){
+            if(layer!=1||weight<=0)return;
+            scale=Vector3.Scale(scale,new Vector3(Mathf.Lerp(1,QuietLayerWidthScale,weight),1,1));
+        }
         static void AdjustPair10ArtPose(int layer,int petal,float weight,ref Quaternion rotation,ref Vector3 scale){
             if(layer!=1||petal!=1||weight<=0)return;
             rotation=Quaternion.AngleAxis(20.2531967f*weight,Vector3.up)*rotation;
