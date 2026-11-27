@@ -37,7 +37,7 @@ flower.SetFrozen(true);
 flower.ResetArt();
 ```
 
-注意力 A、放松度 R 的原始权重为 AR、A(1−R)、(1−A)R、(1−A)(1−R)。显示层再叠加 180 秒中位数基线、绝对/相对增益，并在四个象限上做带主态加成的 softmax（β=16）与 2% 迟滞，使 55/45 这样的输入也落在明确主态而不是平均态；除非挑战态领先 2%，否则保持已提交主态。原始权重保留在 `RawBrainWeights` 供界面与诊断使用。无效值不刷新有效时间；外部输入五秒无有效数据后保持上一状态，状态栏显示「正在重新感知」，有效数据恢复后继续跟随。
+注意力 A、放松度 R 的原始权重为 AR、A(1−R)、(1−A)R、(1−A)(1−R)。显示层再叠加 180 秒中位数基线、绝对/相对增益，并在四个象限上做带主态加成的 softmax（β=16）与 2% 迟滞，使 55/45 这样的输入也落在明确主态而不是平均态；除非挑战态领先 2%，否则保持已提交主态。原始权重保留在 `RawBrainWeights` 供界面与诊断使用。无效值不刷新有效时间；外部输入五秒无有效数据后保持上一状态，状态栏显示「正在重新感知」，有效数据恢复后继续跟随——这是花朵 API 层的行为；接 BrainLink 时面板在无可用数据时回落手动并持续供值，不会触发该等待态。
 
 ## 缓存维护
 
@@ -53,24 +53,12 @@ flower.ResetArt();
 
 ## 验证与产物
 
-`Tools/Verify.ps1` 先验证原 CPU 参考路径，再通过与顶点着色器共享的采样函数执行 GPU 回读比较，检查主花与回声花、根部、包围盒、切线方向、跳转/反向进度、零顶点上传以及释放后重建。新增 GPU 运动连续性回归验证 30/60/120 Hz 下的闭合、呼吸、历史窗口边界、所有缓存节点、冻结恢复和更新率一致性；历史线性信号使用解析积分作独立对照，并检查花瓣零上传、更新零分配。原有回归验证标准路径、四态切换、冻结与根部连接，并检查回声花历史概括与间隙、单条丝线的离花间隙与逐帧路线连续性、亮头单向前行、专注/放松对路线形状的驱动、颜色提交与逐帧连续性、显示层映射和截图产物。接触扫描是离散采样，不能据此宣称连续时间、所有角度零穿插；已接受的动态接触见当前问题文档。
+`Tools/Verify.ps1` 运行项目回归验证（`FlowerProjectValidation`）：标准开合路径、四态切换、冻结与根部连接，回声花历史概括与间隙、单条丝线的离花间隙与逐帧路线连续性、亮头单向前行、专注/放松对路线形状的驱动、颜色提交与逐帧连续性、显示层映射和截图产物。加 `-Contacts` 时额外做离散接触扫描，输出 `Outputs/Validation/Contacts.csv`；接触扫描是离散采样，不能据此宣称连续时间、所有角度零穿插，已接受的动态接触见当前问题文档。原 GPU 播放回读比较与运动连续性验证入口已删除，第一轮验证后直接构建。
 
-验证结果、烘焙统计及日志按需生成到 `Outputs`，重复执行覆盖本轮输出。清理后保留 `Outputs/Pair24` 的六段当前最终录像、报告和精简验证证书，`Outputs/WanderFlex` 的当前缓存与认证，以及最终构建/验证日志。历史帧序列、试验视频和回滚快照删除；当前文件清单见 `Outputs/Pair24/FinalEvidenceManifest.json`。正式程序仅保留 `Builds/Windows`，BrainLink 的本机环境保留在 `Builds/BrainLinkTools`。验证构建可以重新生成。
+验证结果、烘焙统计及日志按需生成到 `Outputs`，重复执行覆盖本轮输出。正式程序仅保留 `Builds/Windows`，BrainLink 的本机环境保留在 `Builds/BrainLinkTools`。验证构建可以重新生成。
 
-## 性能对比
+## 录制与色彩输出
 
-先运行 `Tools/Build.ps1 -Validation`，随后依次运行 `Tools/Performance.ps1 -Reference` 和 `Tools/Performance.ps1`，不要同时运行两组测试或另一份 Unity 场景。两组均使用相同的 Development 验证程序，在 1920×1080、原有 4×MSAA 和相同画质下关闭垂直同步、统一使用场景原有的 240 FPS 上限，预热 10 秒后采集 120 秒，覆盖往返开合、四态切换、脑电跳变和冻结恢复。隐藏/最小化窗口会跳过正常呈现，因此采集程序显式渲染 1080p HDR 目标，并通过单像素读回等待 GPU 完成。这种测量包含同步成本、取消通常的 CPU/GPU 重叠，属于保守帧耗时，不等同于窗口呈现 FPS。之后另行截图四态，不把截图耗时计入性能结果。
+项目是 Linear 色彩空间。离屏 ARGBHalf 目标保存已经过后处理的线性数值，不能直接 ReadPixels 后当作显示 PNG 编码。`FlowerCaptureReadback` 先以显式 sRGB 写入将其复制到 ARGB32 sRGB 目标，再读回编码像素；读取前后恢复 RenderTexture.active 和 GL.sRGBWrite。不更改材质、灯光或曝光，也不再做一次色调映射。
 
-结果写入 `Outputs/PerformanceBefore` 和 `Outputs/PerformanceAfter`，包含逐帧 CSV、六个测试阶段各自的帧耗时分位数、CPU/GPU/墙钟时间分位数、花朵更新分配和顶点上传次数、几何内存及初始化耗时。GPU 计时不可用时明确标为 unavailable。验收目标为帧耗时 P95 ≤16.67 ms、P99 ≤20 ms；正式花瓣播放应无顶点上传、无持续 GC 分配。不能用编辑器或禁用渲染的批处理速度代替独立程序的帧率。
-
-## 闭合连续性录像
-
-先构建验证程序，再运行 `Builds/Validation/MindState.exe -verifyMotion -captureClosing -logFile Outputs/ClosingCapture.log`。该检查先执行运动回归，然后用预热的非恒定历史录制 600 张 1280×720、4×MSAA 图像，固定步长为 1/60 秒，覆盖从澄明到凝聚及其呼吸。图像位于 `Outputs/ClosingFrames`，半径/回声开合/亮头进度位于 `Outputs/MotionValidation/Closing.csv`。用 FFmpeg 以 60 FPS 编码为 `Outputs/ClosingContinuity.mp4`，不使用补帧或运动模糊。录像是固定步长视觉检查，性能仍需单独运行 120 秒采集。
-
-## 录制色彩输出
-
-项目是 Linear 色彩空间。离屏 ARGBHalf 目标保存已经过后处理的线性数值，不能直接 ReadPixels 后当作显示 PNG 编码。`FlowerCaptureReadback` 先以显式 sRGB 写入将其复制到 ARGB32 sRGB 目标，再读回编码像素；读取前后恢复 RenderTexture.active 和 GL.sRGBWrite。不更改材质、灯光或曝光，也不再做一次色调映射。相同工具用于闭合录像和性能测试结束后的截图，不加入性能测量的每帧路径。
-
-运动检查增加已知暗阶/中灰/白色色阶校验、sRGB 输入往返校验以防重复转换；录像中间帧还与同帧 SDR 显示目标比较。视频输出使用 BT.709 原色/YCbCr 矩阵、有限范围，并把已编码的 sRGB 传递函数标记为 IEC 61966-2-1。当前最终视频为 `Outputs/Pair24/FixedSizeFinal{Clarity,Gathering,Quiet}{Full,Close}.mp4`；旧闭合演示和色彩对照图已清理，上述闭合录制步骤仍可按需重新生成检查资料。
-
-慢速录制使用 `-closingTimeScale 0.6666667`，每个输出帧推进 1/90 秒动画，6 秒预览过渡在成片中延长到约 9 秒。源帧按需生成到 `Outputs/ClosingFramesSlow`，轨迹生成到 `Outputs/MotionValidation/ClosingSlow.csv`；以 60 FPS 编码前 600 帧即得到最终 10 秒演示。不会修改应用的开合时间常量，也不使用重复帧或光流补帧。
+录制使用 `Tools/Record.ps1` 和 `Assets/Flower/Validation/FlowerClipCapture.cs`：离线逐帧捕获 PNG 序列，再用 FFmpeg 编码；先预热 13 秒让丝线拖尾与回声历史就位，固定步长推进动画，不使用重复帧或光流补帧。四种模式：默认 10 秒四态蒙太奇；`-ArtShowcase` 10 秒四态展示（可加 `-PreviewOnly` 只出预览帧）；`-Continuous` 10 秒连续开合；`-Morph` 49 秒一镜到底四态渐变。帧序列与成片输出到 `Outputs`，`-EncodeOnly` 可对已有帧序列重新编码。视频输出使用 BT.709 原色/YCbCr 矩阵、有限范围，展示类成片把已编码的 sRGB 传递函数标记为 IEC 61966-2-1。当前保留成片为 `Outputs/MindState.mp4`。
