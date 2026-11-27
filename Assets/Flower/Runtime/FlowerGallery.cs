@@ -21,11 +21,17 @@ namespace MindState
         float sliderFromA=.5f,sliderFromR=.5f,sliderTargetA=.5f,sliderTargetR=.5f,sliderAnim=SliderSyncDuration;
         int fpsFrames;
         bool sliderOwnsBrain,lastBrainOwned,animatingSliders;
-        static readonly string[] artStateNames={"澄明","凝聚","漫游","幽微"};
         BrainLinkFlowerInput brainLink;
         Camera viewCamera;
-        public bool BrainLinkOwnsInput => brainLink != null && brainLink.isActiveAndEnabled;
-        void Awake() { brainLink=GetComponent<BrainLinkFlowerInput>(); viewCamera=GetComponent<Camera>(); }
+        GUIStyle barText,barValue;
+        public bool BrainLinkOwnsInput => brainLink != null && brainLink.isActiveAndEnabled
+            && !brainLink.ManualWindowActive && brainLink.ReadSnapshot().Usable;
+        void Awake()
+        {
+            brainLink=GetComponent<BrainLinkFlowerInput>(); viewCamera=GetComponent<Camera>();
+            // The connection stays on for the whole run; the scene switch stays off so the geometry cache hash is untouched.
+            if(brainLink!=null) brainLink.enabled=true;
+        }
         void Start() { Application.targetFrameRate=240; SetView(azimuth,elevation); }
         public void SetView(float az,float el,float d=-1)
         {
@@ -49,8 +55,8 @@ namespace MindState
             if(Input.GetKeyDown(KeyCode.H)) showInterface=!showInterface;
             if(Input.GetKeyDown(KeyCode.Space)) flower.frozen=!flower.frozen;
             if(Input.GetKeyDown(KeyCode.F9)&&brainLink!=null) brainLink.ToggleDiagnostics();
-            if(Input.GetKeyDown(KeyCode.R)&&!BrainLinkOwnsInput) { animatingSliders=false; sliderOwnsBrain=false; flower.PlayBloom(); }
-            if(flower!=null&&flower.Ready&&!BrainLinkOwnsInput)
+            if(Input.GetKeyDown(KeyCode.R)) { animatingSliders=false; flower.PlayBloom(); }
+            if(flower!=null&&flower.Ready)
             {
                 bool shift=Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift);
                 for(int i=0;i<4;i++) if(Input.GetKeyDown(KeyCode.Alpha1+i))
@@ -68,6 +74,7 @@ namespace MindState
             PositionCamera();
             if(animatingSliders)
             {
+                if(brainLink!=null) brainLink.NoteManualInteraction();
                 sliderAnim=Mathf.Min(SliderSyncDuration,sliderAnim+Time.unscaledDeltaTime);
                 float t=Mathf.SmoothStep(0,1,sliderAnim/SliderSyncDuration);
                 attention=Mathf.Lerp(sliderFromA,sliderTargetA,t);
@@ -75,12 +82,24 @@ namespace MindState
                 if(sliderAnim>=SliderSyncDuration) animatingSliders=false;
             }
             bool owns=BrainLinkOwnsInput;
-            if(lastBrainOwned&&!owns&&flower!=null&&flower.Ready) { animatingSliders=false; sliderOwnsBrain=true; flower.SetBrainMetrics(attention,relaxation); }
-            if(owns&&!lastBrainOwned) { animatingSliders=false; sliderOwnsBrain=false; }
+            if(flower!=null&&flower.Ready)
+            {
+                if(owns)
+                {
+                    animatingSliders=false; sliderOwnsBrain=false;
+                    var sample=brainLink.ReadSnapshot();
+                    attention=sample.Attention/100f; relaxation=sample.Meditation/100f;
+                    flower.BrainBaselineFrozen=false;
+                }
+                else
+                {
+                    if(lastBrainOwned) sliderOwnsBrain=true;
+                    flower.BrainBaselineFrozen=sliderOwnsBrain;
+                    if(sliderOwnsBrain&&flower.ArtInput==FlowerArtInput.External)
+                        flower.SetBrainMetrics(attention,relaxation);
+                }
+            }
             lastBrainOwned=owns;
-            if(flower!=null) flower.BrainBaselineFrozen=sliderOwnsBrain;
-            if(sliderOwnsBrain&&!owns&&flower!=null&&flower.Ready&&flower.ArtInput==FlowerArtInput.External)
-                flower.SetBrainMetrics(attention,relaxation);
         }
         void AnimateSliders(Vector2 target)
         {
@@ -90,15 +109,17 @@ namespace MindState
         }
         void SelectArtState(int state)
         {
-            if(BrainLinkOwnsInput||flower==null) return;
+            if(flower==null) return;
+            if(brainLink!=null) brainLink.NoteManualInteraction();
             if(!flower.ArtActive||flower.ArtInput!=FlowerArtInput.External) flower.WaitForArtBrain();
             AnimateSliders(ArtTargets[state]);
             sliderOwnsBrain=true;
             flower.BrainBaselineFrozen=true; flower.ResetBrainBaseline();
         }
-        void InjectArtCorner(int state)
+        public void InjectArtCorner(int state)
         {
-            if(BrainLinkOwnsInput||flower==null) return;
+            if(flower==null) return;
+            if(brainLink!=null) brainLink.NoteManualInteraction();
             animatingSliders=false;
             var corner=StateCorners[state];
             attention=corner.x; relaxation=corner.y;
@@ -130,12 +151,15 @@ namespace MindState
             small=new GUIStyle(text) { fontSize=12,normal={textColor=new Color(.64f,.65f,.77f)} };
             button=new GUIStyle(GUI.skin.button) { font=font,fontSize=14 };
             fpsLabel=new GUIStyle(text) { alignment=TextAnchor.LowerRight,normal={textColor=new Color(.78f,.8f,.9f)} };
+            barText=new GUIStyle(small) { fontSize=24 };
+            barValue=new GUIStyle(barText) { alignment=TextAnchor.MiddleRight };
         }
         bool Button(float x,float y,float w,string s)=>GUI.Button(new Rect(x,y,w,38),s,button);
         void OnGUI()
         {
             if(title==null) Styles(); var saved=GUI.matrix; GUI.matrix=Matrix4x4.Scale(new Vector3(Screen.width/1920f,Screen.height/1080f,1));
             if(showFps) GUI.Label(new Rect(1676,1026,220,30),Mathf.RoundToInt(fps)+" FPS",fpsLabel);
+            DrawBrainBar();
             if(flower==null||!flower.Ready) { GUI.matrix=saved; return; }
             DrawPetalLabels();
             if(brainLink!=null) brainLink.DrawDiagnostics(text);
@@ -146,44 +170,69 @@ namespace MindState
             GUI.Label(new Rect(46,183,230,30),"P E A R L   P E O N Y",small);
             GUI.Label(new Rect(46,249,230,100),"一重珍珠，一重浅紫。\n让柔软的弧缘，\n在时间中缓缓舒展。",text);
             GUI.Label(new Rect(46,380,230,32),flower.ArtStatus,small);
-            bool controlsEnabled=GUI.enabled; GUI.enabled=controlsEnabled&&!BrainLinkOwnsInput;
             if(Button(46,425,108,"澄明")) SelectArtState(0);
             if(Button(168,425,108,"凝聚")) SelectArtState(1);
             if(Button(46,475,108,"漫游")) SelectArtState(2);
             if(Button(168,475,108,"幽微")) SelectArtState(3);
-            if(Button(46,535,108,"开合重播")) { animatingSliders=false; sliderOwnsBrain=false; flower.PlayBloom(); }
-            GUI.enabled=controlsEnabled;
+            if(Button(46,535,108,"开合重播")) { animatingSliders=false; flower.PlayBloom(); }
             if(Button(168,535,108,flower.frozen?"继续":"冻结")) flower.SetFrozen(!flower.frozen);
             float shown=flower.bloomProgress;
             GUI.Label(new Rect(46,598,54,24),"开合",text);
-            GUI.enabled=controlsEnabled&&!BrainLinkOwnsInput;
             float manual=GUI.HorizontalSlider(new Rect(108,603,140,20),shown,0,1);
-            if(!BrainLinkOwnsInput&&GUI.changed&&Mathf.Abs(manual-flower.bloomProgress)>.0005f) { animatingSliders=false; sliderOwnsBrain=false; flower.SetBloomProgress(manual); }
-            GUI.enabled=controlsEnabled;
+            if(GUI.changed&&Mathf.Abs(manual-flower.bloomProgress)>.0005f) { animatingSliders=false; flower.SetBloomProgress(manual); }
             shown=flower.bloomProgress;
             GUI.Label(new Rect(254,598,46,24),Mathf.RoundToInt(shown*100)+"%",small);
             GUI.Label(new Rect(46,650,230,30),"02   观察 / VIEW",small);
             if(Button(46,699,108,"正面")) SetView(0,90);
             if(Button(168,699,108,"3/4")) SetView(22,55);
             if(Button(46,752,108,"侧面")) SetView(22,8);
-            if(Button(168,752,108,"重置")) { SetView(22,55); if(!BrainLinkOwnsInput) { flower.ResetArt(); SelectArtState(0); } }
-            Vector4 target=flower.ArtInput==FlowerArtInput.External?flower.DisplayWeights:FlowerAssembler.BrainArtWeights(attention,relaxation);
-            int dominant=0; for(int i=1;i<4;i++) if(target[i]>target[dominant]) dominant=i;
-            string hint=BrainLinkOwnsInput?"BrainLink 接管":sliderOwnsBrain?"目标 · "+artStateNames[dominant]+" "+Mathf.RoundToInt(target[dominant]*100)+"%":"拖动校准";
+            if(Button(168,752,108,"重置")) { SetView(22,55); flower.ResetArt(); SelectArtState(0); }
+            string hint;
+            if(BrainLinkOwnsInput) hint="脑电跟随中";
+            else if(brainLink!=null&&brainLink.isActiveAndEnabled&&brainLink.ManualWindowActive)
+                hint="手动优先 · "+Mathf.CeilToInt(brainLink.ManualWindowRemaining)+"s";
+            else if(sliderOwnsBrain) hint="手动 · 等待脑电";
+            else hint="拖动校准";
             GUI.Label(new Rect(46,794,130,24),"03   脑电 / SIGNAL",small);
             GUI.Label(new Rect(176,794,120,24),hint,small);
-            GUI.enabled=controlsEnabled&&!BrainLinkOwnsInput;
             GUI.Label(new Rect(46,820,54,24),"专注",text);
             float attentionNow=GUI.HorizontalSlider(new Rect(108,825,140,20),attention,0,1);
-            if(!Mathf.Approximately(attentionNow,attention)) { animatingSliders=false; attention=attentionNow; sliderOwnsBrain=true; flower.BrainBaselineFrozen=true; flower.ResetBrainBaseline(); flower.SetBrainMetrics(attention,relaxation); }
+            if(!Mathf.Approximately(attentionNow,attention)) { animatingSliders=false; attention=attentionNow; sliderOwnsBrain=true; if(brainLink!=null) brainLink.NoteManualInteraction(); flower.BrainBaselineFrozen=true; flower.ResetBrainBaseline(); flower.SetBrainMetrics(attention,relaxation); }
             GUI.Label(new Rect(254,820,46,24),Mathf.RoundToInt(attention*100)+"%",small);
             GUI.Label(new Rect(46,850,54,24),"放松",text);
             float relaxationNow=GUI.HorizontalSlider(new Rect(108,855,140,20),relaxation,0,1);
-            if(!Mathf.Approximately(relaxationNow,relaxation)) { animatingSliders=false; relaxation=relaxationNow; sliderOwnsBrain=true; flower.BrainBaselineFrozen=true; flower.ResetBrainBaseline(); flower.SetBrainMetrics(attention,relaxation); }
+            if(!Mathf.Approximately(relaxationNow,relaxation)) { animatingSliders=false; relaxation=relaxationNow; sliderOwnsBrain=true; if(brainLink!=null) brainLink.NoteManualInteraction(); flower.BrainBaselineFrozen=true; flower.ResetBrainBaseline(); flower.SetBrainMetrics(attention,relaxation); }
             GUI.Label(new Rect(254,850,46,24),Mathf.RoundToInt(relaxation*100)+"%",small);
-            GUI.enabled=controlsEnabled;
-            GUI.Label(new Rect(46,879,230,65),"拖动环绕 · 滚轮缩放\nR 重播 · 空格冻结 · H 隐藏\nN 花瓣编号 · F9 BrainLink 数值",small);
+            GUI.Label(new Rect(46,879,230,80),"拖动环绕 · 滚轮缩放\nR 重播 · 空格冻结 · H 隐藏\nN 花瓣编号 · F9 BrainLink 数值\n手动后 5 秒自动回脑电",small);
             GUI.matrix=saved;
+        }
+        void DrawBrainBar()
+        {
+            float x=showInterface?328:24;
+            GUI.DrawTexture(new Rect(x,928,744,128),panel);
+            var s=brainLink!=null?brainLink.ReadSnapshot():default;
+            bool live=brainLink!=null&&brainLink.isActiveAndEnabled&&s.Usable;
+            Color gray=new Color(.45f,.47f,.55f);
+            DrawMetricBar(x,956,"专注度",s,live?new Color(.94f,.89f,.96f):gray);
+            DrawMetricBar(x,1012,"放松度",s,live?new Color(1f,.72f,.82f):gray);
+        }
+        void DrawMetricBar(float x,float y,string label,BrainLinkSnapshot s,Color fill)
+        {
+            GUI.Label(new Rect(x+36,y-12,152,40),label,barText);
+            GUI.color=new Color(.16f,.18f,.26f);
+            GUI.DrawTexture(new Rect(x+196,y,400,20),Texture2D.whiteTexture);
+            if(s.HasSample)
+            {
+                int value=label=="专注度"?s.Attention:s.Meditation;
+                if(value>0) { GUI.color=fill; GUI.DrawTexture(new Rect(x+196,y,400*Mathf.Clamp01(value/100f),20),Texture2D.whiteTexture); }
+                GUI.color=Color.white;
+                GUI.Label(new Rect(x+612,y-12,96,40),value.ToString(),barValue);
+            }
+            else
+            {
+                GUI.color=Color.white;
+                GUI.Label(new Rect(x+612,y-12,96,40),"--",barValue);
+            }
         }
         void OnDestroy() { if(panel!=null) Destroy(panel); if(font!=null) Destroy(font); }
     }

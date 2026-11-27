@@ -10,15 +10,20 @@ namespace MindState.BCI.BrainLink
         public BrainLinkSettings settings = new BrainLinkSettings();
         public BrainLinkClient Client { get; private set; }
         public bool ShowDiagnostics { get; private set; }
+        public bool ManualWindowActive => Time.unscaledTime < manualUntil;
+        public float ManualWindowRemaining => Mathf.Max(0, manualUntil - Time.unscaledTime);
         long appliedRevision;
-        bool enteredExternal;
+        float manualUntil;
+        bool wasManual;
         float nextLog;
         string previousState, error;
+
+        public void NoteManualInteraction() => manualUntil = Time.unscaledTime + 5;
 
         void OnEnable()
         {
             if (!Application.isPlaying) return;
-            appliedRevision = 0; enteredExternal = false; nextLog = 0;
+            appliedRevision = 0; manualUntil = 0; wasManual = false; nextLog = 0;
             previousState = error = null;
             try
             {
@@ -32,17 +37,16 @@ namespace MindState.BCI.BrainLink
         void Update()
         {
             var sample = ReadSnapshot();
-            if (flower != null && flower.Ready)
+            bool manual = ManualWindowActive;
+            // Without usable data the flower stays on the gallery's manual loop; never force a waiting state.
+            if (flower != null && flower.Ready && !manual && sample.Usable
+                && (sample.Revision != appliedRevision || wasManual))
             {
-                if (!enteredExternal)
-                { flower.WaitForArtBrain(); enteredExternal = true; }
-                // Apply each callback once: polling an old value must not refresh the flower's timeout.
-                if (sample.Usable && sample.Revision != appliedRevision)
-                {
-                    flower.SetBrainMetrics(sample.Attention / 100f, sample.Meditation / 100f);
-                    appliedRevision = sample.Revision;
-                }
+                if (flower.ArtInput != FlowerArtInput.External) flower.WaitForArtBrain();
+                flower.SetBrainMetrics(sample.Attention / 100f, sample.Meditation / 100f);
+                appliedRevision = sample.Revision;
             }
+            wasManual = manual;
             string state = sample.State + ":" + sample.Mode + ":" + sample.Signal;
             if (Time.unscaledTime >= nextLog || state != previousState)
             {
@@ -78,10 +82,6 @@ namespace MindState.BCI.BrainLink
         void OnDisable()
         {
             Client?.Dispose(); Client = null;
-            if (enteredExternal && flower != null && flower.Ready)
-                flower.WaitForArtBrain();
-            if (enteredExternal) Debug.Log("[BrainLink] Disabled; connection released; sliders resume control.", this);
-            enteredExternal = false;
         }
         void OnDestroy() => OnDisable();
     }

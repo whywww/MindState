@@ -33,7 +33,7 @@ namespace MindState.BCI.BrainLink.Tests
                 VerifyStream(); VerifySocket();
                 EditorSceneManager.OpenScene("Assets/Flower/Scenes/FlowerGallery.unity");
                 var input=Camera.main.GetComponent<BrainLinkFlowerInput>();
-                Check(input!=null && !input.enabled && input.flower!=null, "Scene reference and disabled default");
+                Check(input!=null && !input.enabled && input.flower!=null, "Scene reference and serialized off default (runtime auto-enables)");
                 Check(!input.ShowDiagnostics, "Diagnostics hidden initially");
                 input.ToggleDiagnostics(); Check(input.ShowDiagnostics, "Diagnostics toggle while disabled");
                 input.ToggleDiagnostics(); Check(!input.ShowDiagnostics, "Diagnostics toggle back");

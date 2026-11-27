@@ -5,7 +5,7 @@ namespace MindState
 {
     public sealed partial class FlowerGallery
     {
-        bool showPetalLabels=true;
+        bool showPetalLabels;
         readonly List<FlowerAssembler.PetalLabelAnchor> labelAnchors=new List<FlowerAssembler.PetalLabelAnchor>(18);
         readonly List<Rect> labelRects=new List<Rect>(18);
         GUIStyle petalLabelStyle;

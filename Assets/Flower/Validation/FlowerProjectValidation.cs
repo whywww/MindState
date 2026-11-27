@@ -46,6 +46,8 @@ public sealed class FlowerProjectValidation : MonoBehaviour {
  IEnumerator RunChecks(){
   var f=FindObjectOfType<FlowerAssembler>();Check(f!=null&&f.Ready&&f.PetalCount==18,"Current flower initialized: 18 petals");f.enabled=false;
   var gallery=FindObjectOfType<FlowerGallery>();gallery.showInterface=false;
+  // Live brain data must not fight the direct SetBrainMetrics assertions below.
+  var brainLink=gallery.GetComponent<BCI.BrainLink.BrainLinkFlowerInput>();if(brainLink!=null)brainLink.enabled=false;
   for(int i=0;i<=100;i++){f.SetBloomProgress(i/100f);Check(f.RootAnchorError()<1e-5f,"Standard roots at "+i+"%");}
   for(int i=0;i<=64;i++){f.SetBloomProgress(i/64f);Check(f.RootAnchorError()<1e-5f,"Cache node/midpoint roots "+i+"/64");}
   f.SetBloomProgress(.5f);int uploads=f.MeshUpdates;f.SetBloomProgress(.5f);Check(f.MeshUpdates==uploads,"Repeated progress does not upload base meshes");
